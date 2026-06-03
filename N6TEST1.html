@@ -402,7 +402,12 @@ function choose(oi){
     fl.textContent="\u274C Ce n\u2019est pas \u00e7a. Regarde la bonne réponse en vert.";fl.className="feedline bad";
   }
   updateHud();
-  setTimeout(nextQuestion,1200);
+  // délai de lecture proportionnel à la longueur de la bonne réponse
+  var len=q.options[q.ans].length;
+  var delay=1600 + len*55;              // ~1,6 s + 55 ms par caractère
+  if(delay>5000) delay=5000;            // plafond 5 s
+  if(oi!==q.ans) delay+=600;            // un peu plus si erreur (pour bien voir la correction)
+  setTimeout(nextQuestion,delay);
 }
 
 function nextQuestion(){
