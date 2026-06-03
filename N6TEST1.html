@@ -41,7 +41,9 @@ body{
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
 
 .start-screen{text-align:center;padding:2rem 1rem 1rem;}
-.start-screen .logo-badge{margin-bottom:2rem;}
+.start-screen .logo-badge{margin-bottom:.9rem;}
+.gp-week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--day-color);margin-bottom:1.6rem;}
 .gp-title{
   font-family:'Orbitron',sans-serif;font-weight:900;line-height:.98;
   font-size:clamp(2.4rem,9vw,5.2rem);letter-spacing:.01em;
@@ -185,8 +187,9 @@ body{
   <section class="screen active" id="screen-start">
     <div class="start-screen">
       <div class="logo-badge"><span class="logo-dot"></span> Pazapa &middot; Maths &middot; 6e</div>
+      <div class="gp-week">Semaine 1 — Jour 1</div>
       <div class="gp-title">Grand Prix<br>des grands nombres</div>
-      <div class="gp-sub">Lis, écris et place les chiffres pour franchir la ligne d’arrivée.</div>
+      <div class="gp-sub">Lis et écris les grands nombres&nbsp;: choisis la bonne réponse à chaque virage pour faire avancer ta voiture jusqu’à la ligne d’arrivée.</div>
       <div class="gp-pill"><span class="gp-flag">&#127937;</span> 13 questions &middot; Lire et écrire les grands nombres</div>
       <div>
         <button class="btn-start" onclick="startCountdown()"><span class="btn-bolt">&#9889;</span> Commencer</button>
