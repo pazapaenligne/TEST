@@ -333,14 +333,14 @@ var QUESTIONS=[
    options:["2","5","1","3"], ans:1},
   {label:"Dans 83 251 601 230", prompt:"Chiffre des unités de milliards\u00a0?", small:true,
    options:["8","2","3","0"], ans:2},
-  // Ex3 : écrire en lettres (QCM)
+  // Ex3 : nombre affiché en chiffres -> cliquer sur l'écriture en LETTRES
   {label:"Quelle est la bonne écriture\u00a0?", prompt:"4 325", small:false,
-   options:["quatre mille trois cent vingt-cinq","quatre mille trois cents vingt-cinq","quarante-trois mille vingt-cinq","quatre mille trois cent vingt cinq mille"], ans:0},
+   options:["quatre mille trois cent vingt-cinq","quatre mille trois cents vingt-cinq","quarante-trois mille vingt-cinq","quatre mille trois cent vingt-cinq mille"], ans:0},
   {label:"Quelle est la bonne écriture\u00a0?", prompt:"265 200", small:false,
-   options:["deux cent soixante-cinq mille deux cent","deux cent soixante-cinq mille deux cents","deux cents soixante-cinq mille deux cents","deux cent soixante-cinq mille deux"], ans:1},
-  {label:"Quelle est la bonne écriture\u00a0?", prompt:"3 650 321", small:true,
-   options:["trois millions six cent cinquante mille trois cent vingt et un","trois millions six cent cinquante mille trois cent vingt-et-un","trois millions six cents cinquante mille trois cent vingt et un","trois million six cent cinquante mille trois cent vingt et un"], ans:0},
-  {label:"Quelle est la bonne écriture\u00a0?", prompt:"23 105 004", small:true,
+   options:["deux cent soixante-cinq mille deux cents","deux cent soixante-cinq mille deux cent","deux cents soixante-cinq mille deux cents","deux cent soixante-cinq mille deux"], ans:0},
+  {label:"Quelle est la bonne écriture\u00a0?", prompt:"3 650 321", small:false,
+   options:["trois millions six cent cinquante mille trois cent vingt et un","trois millions six cents cinquante mille trois cent vingt et un","trois million six cent cinquante mille trois cent vingt et un","trois millions six cent cinquante mille trois cents vingt et un"], ans:0},
+  {label:"Quelle est la bonne écriture\u00a0?", prompt:"23 105 004", small:false,
    options:["vingt-trois millions cent cinq mille quatre","vingt-trois millions mille cinq cent quatre","vingt-trois millions cent cinquante mille quatre","vingt-trois millions cent cinq mille quarante"], ans:0},
   {label:"Quelle est la bonne écriture\u00a0?", prompt:"12 385 420 280", small:true,
    options:["douze milliards trois cent quatre-vingt-cinq millions quatre cent vingt mille deux cent quatre-vingts","douze milliards trois cent quatre-vingt-cinq millions quatre cent vingt mille deux cent quatre-vingt","douze millions trois cent quatre-vingt-cinq mille quatre cent vingt","douze milliards trois cent quatre-vingts millions quatre cent vingt mille deux cent quatre-vingts"], ans:0},
@@ -350,7 +350,9 @@ var QUESTIONS=[
 
 var TOTAL=QUESTIONS.length;
 var cur=0, okCount=0, koCount=0, locked=false;
-var timerSec=0, timerInt=null;
+var totalSec=0, totalInt=null;      // temps total écoulé (pour le bilan)
+var qLeft=30, qInt=null;            // compte à rebours de la question (30 s)
+var Q_TIME=30;
 var KEYS=["A","B","C","D"];
 
 function fmtTime(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
@@ -407,16 +409,50 @@ function startCountdown(){
 
 function beginRace(){
   cur=0;okCount=0;koCount=0;
-  timerSec=0;
+  totalSec=0;
   show("screen-game");
   $("car").innerHTML=carSVG();
   $("track").classList.remove("paused");
-  clearInterval(timerInt);
-  timerInt=setInterval(function(){timerSec++;$("q-timer").textContent=fmtTime(timerSec);},1000);
-  $("q-timer").textContent="0:00";
+  clearInterval(totalInt);
+  totalInt=setInterval(function(){totalSec++;},1000);
   renderQuestion();
   updateHud();
   placeCar();
+}
+
+/* rebours 30 s de la question courante */
+function startQTimer(){
+  clearInterval(qInt);
+  qLeft=Q_TIME;
+  showQTimer();
+  qInt=setInterval(function(){
+    qLeft--;
+    showQTimer();
+    if(qLeft<=0){
+      clearInterval(qInt);
+      timeUp();
+    }
+  },1000);
+}
+function stopQTimer(){ clearInterval(qInt); }
+function showQTimer(){
+  var el=$("q-timer");
+  el.textContent="0:"+(qLeft<10?"0":"")+qLeft;
+  el.style.color = qLeft<=5 ? "var(--race-red)" : "var(--text)";
+}
+function timeUp(){
+  if(locked)return;locked=true;
+  var q=QUESTIONS[cur];
+  if("speechSynthesis" in window){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  $("listen-btn").style.display="none";
+  var btns=$("options").children;
+  for(var i=0;i<btns.length;i++){ btns[i].classList.add("locked"); if(q._order[i]===q.ans)btns[i].classList.add("good"); }
+  koCount++;
+  soundBad();
+  var fl=$("feedline");
+  fl.textContent="\u23F1 Temps écoulé\u00a0! La bonne réponse est en vert.";fl.className="feedline bad";
+  updateHud();
+  setTimeout(nextQuestion,1800);
 }
 
 function placeCar(){
@@ -446,22 +482,29 @@ function renderQuestion(){
   }
   $("feedline").textContent="\u00a0";$("feedline").className="feedline";
   var box=$("options");box.innerHTML="";
-  q.options.forEach(function(opt,oi){
+  // mélange aléatoire des options (Fisher-Yates) ; on retient où est la bonne réponse
+  var order=q.options.map(function(_,i){return i;});
+  for(var s=order.length-1;s>0;s--){var r=Math.floor(Math.random()*(s+1));var tmp=order[s];order[s]=order[r];order[r]=tmp;}
+  q._order=order;
+  order.forEach(function(origIdx,pos){
     var b=document.createElement("button");b.className="opt";b.type="button";
-    b.innerHTML='<span class="opt-key">'+KEYS[oi]+'</span><span>'+opt+'</span>';
-    b.onclick=function(){choose(oi);};
+    b.innerHTML='<span class="opt-key">'+KEYS[pos]+'</span><span>'+q.options[origIdx]+'</span>';
+    b.onclick=function(){choose(origIdx);};
     box.appendChild(b);
   });
+  startQTimer();
 }
 
 function choose(oi){
   if(locked)return;locked=true;
+  stopQTimer();
   var q=QUESTIONS[cur];
   var btns=$("options").children;
   for(var i=0;i<btns.length;i++){
+    var orig=q._order[i];
     btns[i].classList.add("locked");
-    if(i===q.ans)btns[i].classList.add("good");
-    if(i===oi && oi!==q.ans)btns[i].classList.add("bad");
+    if(orig===q.ans)btns[i].classList.add("good");
+    if(orig===oi && oi!==q.ans)btns[i].classList.add("bad");
   }
   var fl=$("feedline");
   if("speechSynthesis" in window){ try{ window.speechSynthesis.cancel(); }catch(e){} }
@@ -497,12 +540,13 @@ function updateHud(){
 }
 
 function endRace(){
-  clearInterval(timerInt);
+  clearInterval(totalInt);
+  stopQTimer();
   $("track").classList.add("paused");
   var ratio=okCount/TOTAL;
   var stars=okCount>=TOTAL?5:ratio>=.8?4:ratio>=.6?3:ratio>=.4?2:okCount>0?1:0;
   $("win-score").textContent=okCount+" / "+TOTAL;
-  $("win-time").textContent=fmtTime(timerSec);
+  $("win-time").textContent=fmtTime(totalSec);
   $("win-stars").textContent="\u2B50".repeat(stars)+"\u2606".repeat(5-stars);
   var title,badge;
   if(okCount===TOTAL){title="Victoire\u00a0!";badge="\u26A1 Sans-faute";}
@@ -511,15 +555,15 @@ function endRace(){
   else if(ratio>=.4){title="Arrivée\u00a0!";badge="Continue l\u2019entra\u00eenement";}
   else{title="Arrivée\u00a0!";badge="On reprend un tour\u00a0?";}
   $("win-title").textContent=title;
-  $("win-sub").textContent="Tu as bouclé la course en "+fmtTime(timerSec)+".";
+  $("win-sub").textContent="Tu as bouclé la course en "+fmtTime(totalSec)+".";
   $("win-badge").textContent=badge;
   show("screen-win");
   soundWin();
 }
 
 function resetGame(){
-  clearInterval(timerInt);
-  cur=0;okCount=0;koCount=0;timerSec=0;locked=false;
+  clearInterval(totalInt);stopQTimer();
+  cur=0;okCount=0;koCount=0;totalSec=0;locked=false;
   show("screen-start");
 }
 </script>
