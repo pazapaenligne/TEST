@@ -121,6 +121,17 @@ body{
   padding-bottom:1rem;border-bottom:1px solid var(--line);margin-bottom:1.3rem;}
 .q-count{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.78rem,2.4vw,.95rem);color:var(--race-red);letter-spacing:.05em;}
 .q-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.05rem,3.5vw,1.5rem);color:var(--text);letter-spacing:.12em;font-variant-numeric:tabular-nums;}
+.sound-btn{background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;
+  font-size:1.1rem;line-height:1;padding:.35rem .55rem;min-height:40px;color:var(--text);transition:border-color .15s;}
+.sound-btn:hover{border-color:var(--day-color);}
+.sound-btn.off{opacity:.45;}
+.listen-btn{display:inline-flex;align-items:center;gap:.5rem;margin:0 auto 1.4rem;
+  background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#1a1d23;
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.92rem;letter-spacing:.05em;
+  border:none;border-radius:var(--radius-sm);padding:.7rem 1.6rem;cursor:pointer;
+  box-shadow:var(--glow-o);min-height:46px;transition:transform .12s;}
+.listen-btn:active{transform:scale(.96);}
+.q-prompt.audio-icon{font-size:clamp(2.6rem,9vw,4rem);}
 .q-prompt-label{font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem;}
 .q-prompt{font-family:'Orbitron',sans-serif;font-weight:900;
   font-size:clamp(1.4rem,5vw,2.4rem);text-align:center;color:#fff;
@@ -221,10 +232,14 @@ body{
       <div class="panel">
         <div class="panel-top">
           <span class="q-count" id="q-count">Question 1 / 13</span>
-          <span class="q-timer" id="q-timer">0:00</span>
+          <div style="display:flex;align-items:center;gap:.8rem;">
+            <span class="q-timer" id="q-timer">0:00</span>
+            <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Activer/couper le son">&#128266;</button>
+          </div>
         </div>
         <div class="q-prompt-label" id="q-label">Lis ce nombre</div>
         <div class="q-prompt" id="q-prompt">&nbsp;</div>
+        <button class="listen-btn" id="listen-btn" onclick="sayCurrent()" style="display:none;">&#128266; Réécouter</button>
         <div class="options" id="options"></div>
         <div class="feedline" id="feedline">&nbsp;</div>
         <div class="hud">
@@ -257,17 +272,60 @@ body{
 <script>
 function $(id){return document.getElementById(id);}
 
+/* ====== SON (Web Audio, sans fichier externe) ====== */
+var soundOn=true, audioCtx=null;
+function ac(){ if(!audioCtx){ try{ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ audioCtx=null; } } return audioCtx; }
+function beep(freq,start,dur,type,vol){
+  var c=ac(); if(!c)return;
+  var o=c.createOscillator(), g=c.createGain();
+  o.type=type||"triangle"; o.frequency.value=freq;
+  o.connect(g); g.connect(c.destination);
+  var t=c.currentTime+start;
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol||0.2, t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.start(t); o.stop(t+dur+0.02);
+}
+function soundGood(){ if(!soundOn)return; beep(660,0,0.12,"triangle",0.22); beep(880,0.1,0.14,"triangle",0.22); beep(1175,0.22,0.18,"triangle",0.22); }
+function soundBad(){ if(!soundOn)return; beep(330,0,0.18,"sawtooth",0.16); beep(196,0.16,0.26,"sawtooth",0.16); }
+function soundWin(){ if(!soundOn)return; var n=[523,659,784,1047]; n.forEach(function(f,i){ beep(f,i*0.14,0.2,"triangle",0.22); }); }
+function soundCount(){ if(!soundOn)return; beep(440,0,0.18,"square",0.18); }
+function soundGo(){ if(!soundOn)return; beep(880,0,0.45,"square",0.24); beep(1320,0.04,0.4,"triangle",0.16); }
+function toggleSound(){
+  soundOn=!soundOn;
+  var b=$("sound-btn");
+  b.innerHTML = soundOn ? "&#128266;" : "&#128263;";
+  b.classList.toggle("off",!soundOn);
+  if(soundOn && ac() && audioCtx.state==="suspended") audioCtx.resume();
+}
+
+/* ====== VOIX (synthèse vocale FR) ====== */
+function sayText(txt){
+  if(!soundOn)return;
+  if(!("speechSynthesis" in window))return;
+  try{
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(txt);
+    u.lang="fr-FR"; u.rate=0.92; u.pitch=1;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function sayCurrent(){
+  var q=QUESTIONS[cur];
+  if(q && q.audio && q.say) sayText(q.say);
+}
+
 /* ====== QUESTIONS (issues du défi grands nombres, vérifiées) ====== */
 var QUESTIONS=[
-  // Ex1 : lecture
-  {label:"Lis ce nombre", prompt:"15 862", small:false,
-   options:["quinze mille huit cent soixante-deux","cent cinquante-huit mille soixante-deux","quinze mille huit cent soixante-douze","cent cinquante-huit mille six cent deux"], ans:0},
-  {label:"Lis ce nombre", prompt:"189 000 621", small:false,
-   options:["cent quatre-vingt-neuf mille six cent vingt et un","cent quatre-vingt-neuf millions six cent vingt et un","cent quatre-vingt-neuf millions soixante-deux","cent quatre-vingt-neuf milliards six cent vingt et un"], ans:1},
-  {label:"Lis ce nombre", prompt:"45 052 694 003", small:true,
-   options:["quarante-cinq millions cinquante-deux mille six cent quatre-vingt-quatorze","quarante-cinq milliards cinquante-deux millions six cent quatre-vingt-quatorze mille trois","quarante-cinq milliards cinq cent vingt millions six cent quatre-vingt-quatorze","quarante-cinq milliards cinquante-deux mille six cent quatre-vingt-quatorze"], ans:1},
-  {label:"Lis ce nombre", prompt:"28 001 100 999", small:true,
-   options:["vingt-huit milliards un million cent mille neuf cent quatre-vingt-dix-neuf","vingt-huit millions un mille cent neuf cent quatre-vingt-dix-neuf","vingt-huit milliards onze mille cent neuf cent quatre-vingt-dix-neuf","vingt-huit milliards un million mille neuf cent quatre-vingt-dix-neuf"], ans:0},
+  // Ex1 : lecture audio -> cliquer sur l'écriture en chiffres
+  {label:"Écoute et clique sur le bon nombre", audio:true, say:"quinze mille huit cent soixante-deux", small:false,
+   options:["15 862","158 062","15 872","150 862"], ans:0},
+  {label:"Écoute et clique sur le bon nombre", audio:true, say:"cent quatre-vingt-neuf millions six cent vingt et un", small:false,
+   options:["189 000 621","189 000 062","189 621","189 000 000 621"], ans:0},
+  {label:"Écoute et clique sur le bon nombre", audio:true, say:"quarante-cinq milliards cinquante-deux millions six cent quatre-vingt-quatorze mille trois", small:false,
+   options:["45 052 694 003","45 052 694","45 520 694 003","45 052 694 030"], ans:0},
+  {label:"Écoute et clique sur le bon nombre", audio:true, say:"vingt-huit milliards un million cent mille neuf cent quatre-vingt-dix-neuf", small:false,
+   options:["28 001 100 999","28 001 100 099","28 010 100 999","28 100 100 999"], ans:0},
   // Ex2 : rang des chiffres dans 83 251 601 230
   {label:"Dans 83 251 601 230", prompt:"Chiffre des centaines de mille\u00a0?", small:true,
    options:["6","0","1","2"], ans:0},
@@ -322,21 +380,25 @@ function show(id){
 
 /* feux de départ 3-2-1-GO */
 function startCountdown(){
+  var c=ac(); if(c && c.state==="suspended") c.resume();
   show("screen-lights");
   var lights=$("lights").children;
   for(var i=0;i<lights.length;i++){lights[i].className="light";}
   var cd=$("countdown");cd.className="countdown";
   var seq=[3,2,1];var step=0;
   cd.textContent=seq[0];
+  soundCount();
   for(var k=0;k<3;k++){lights[k].classList.add("on");} // allume progressivement
   var t=setInterval(function(){
     step++;
     if(step<seq.length){
       cd.textContent=seq[step];
+      soundCount();
       for(var j=0;j<lights.length;j++){lights[j].classList.add("on");}
     }else{
       clearInterval(t);
       cd.textContent="GO\u00a0!";cd.classList.add("go");
+      soundGo();
       for(var m=0;m<lights.length;m++){lights[m].className="light go";}
       setTimeout(beginRace,650);
     }
@@ -372,7 +434,16 @@ function renderQuestion(){
   var q=QUESTIONS[cur];
   $("q-count").textContent="Question "+(cur+1)+" / "+TOTAL;
   $("q-label").textContent=q.label;
-  var p=$("q-prompt");p.textContent=q.prompt;p.className="q-prompt"+(q.small?" small":"");
+  var p=$("q-prompt");
+  var listen=$("listen-btn");
+  if(q.audio){
+    p.innerHTML="&#128266;";p.className="q-prompt audio-icon";
+    listen.style.display="inline-flex";
+    setTimeout(sayCurrent,350);
+  }else{
+    p.textContent=q.prompt;p.className="q-prompt"+(q.small?" small":"");
+    listen.style.display="none";
+  }
   $("feedline").textContent="\u00a0";$("feedline").className="feedline";
   var box=$("options");box.innerHTML="";
   q.options.forEach(function(opt,oi){
@@ -393,12 +464,16 @@ function choose(oi){
     if(i===oi && oi!==q.ans)btns[i].classList.add("bad");
   }
   var fl=$("feedline");
+  if("speechSynthesis" in window){ try{ window.speechSynthesis.cancel(); }catch(e){} }
+  $("listen-btn").style.display="none";
   if(oi===q.ans){
     okCount++;
+    soundGood();
     fl.textContent="\u2705 Bonne réponse\u00a0! La voiture avance.";fl.className="feedline good";
     placeCar();
   }else{
     koCount++;
+    soundBad();
     fl.textContent="\u274C Ce n\u2019est pas \u00e7a. Regarde la bonne réponse en vert.";fl.className="feedline bad";
   }
   updateHud();
@@ -439,6 +514,7 @@ function endRace(){
   $("win-sub").textContent="Tu as bouclé la course en "+fmtTime(timerSec)+".";
   $("win-badge").textContent=badge;
   show("screen-win");
+  soundWin();
 }
 
 function resetGame(){
