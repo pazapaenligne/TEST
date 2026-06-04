@@ -305,8 +305,13 @@ function sayText(txt){
   if(!("speechSynthesis" in window))return;
   try{
     window.speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance(txt);
-    u.lang="fr-FR"; u.rate=0.92; u.pitch=1;
+    // pauses naturelles avant chaque classe pour une lecture plus claire
+    var spoken=txt
+      .replace(/ (milliards?)/g,", $1,")
+      .replace(/ (millions?)/g,", $1,")
+      .replace(/ (mille)/g,", $1,");
+    var u=new SpeechSynthesisUtterance(spoken);
+    u.lang="fr-FR"; u.rate=0.72; u.pitch=1;
     window.speechSynthesis.speak(u);
   }catch(e){}
 }
