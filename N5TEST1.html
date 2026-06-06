@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Pazapa Maths – Les fragments du code secret – S1 J2</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --day-color:#b94040; --day-dark:#7a1f1f; --day-light:#f7eded; --day-border:#e0a9a9;
+  --gold:#e8b54a; --gold-d:#b8862a;
+  --bg:#0e0c0d; --panel:#171314; --panel2:#1f1819;
+  --line:#2c2426; --text:#f3ebe9; --muted:#a3938f;
+  --green:#3fb56a;
+  --radius:16px; --radius-sm:11px;
+  --glow:0 0 16px rgba(185,64,64,.5), 0 0 40px rgba(185,64,64,.22);
+  --glow-gold:0 0 16px rgba(232,181,74,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:radial-gradient(circle at 50% -10%, #241516 0%, var(--bg) 60%);color:var(--text);
+  font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:1.4rem 1rem 3rem;position:relative;overflow-x:hidden;line-height:1.7;}
+.wrap{width:100%;max-width:1040px;position:relative;z-index:1;}
+header{text-align:center;margin-bottom:1.2rem;}
+.logo-badge{display:inline-flex;align-items:center;gap:.45rem;background:linear-gradient(135deg,var(--day-dark),var(--day-color));
+  color:#fff;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  padding:.3rem 1rem;border-radius:99px;margin-bottom:.7rem;box-shadow:var(--glow);}
+.logo-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.week{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--day-color);margin-bottom:.8rem;}
+.title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.4rem,5.5vw,2.4rem);line-height:1.1;margin-bottom:.4rem;}
+.title .lock{color:var(--gold);text-shadow:var(--glow-gold);}
+.subtitle{color:var(--muted);font-size:clamp(.8rem,2.4vw,.9rem);}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:1.4rem;align-items:start;}
+@media(max-width:740px){.layout{grid-template-columns:1fr;}}
+.vault-col{position:sticky;top:1rem;}
+@media(max-width:740px){.vault-col{position:static;}}
+.vault{background:linear-gradient(160deg,#1d1718,#120e0f);border:2px solid var(--gold-d);border-radius:var(--radius);
+  padding:1.4rem 1.2rem;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 0 30px rgba(232,181,74,.06);position:relative;overflow:hidden;}
+.vault-door{position:relative;width:150px;height:150px;margin:0 auto .8rem;border-radius:14px;
+  background:radial-gradient(circle at 50% 40%,#2a2122,#171213);border:3px solid var(--gold-d);
+  display:flex;align-items:center;justify-content:center;}
+.vault-dial{width:64px;height:64px;border-radius:50%;border:4px solid var(--gold);background:#120e0f;
+  display:flex;align-items:center;justify-content:center;font-size:1.8rem;box-shadow:var(--glow-gold);transition:transform .8s;}
+.vault.open .vault-dial{transform:rotate(220deg);}
+.vault-keys{display:flex;justify-content:center;gap:.5rem;margin:.9rem 0 .4rem;}
+.keyslot{width:2.4rem;height:2.9rem;border-radius:8px;background:#120e0f;border:1.5px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.2rem;color:#4a3f40;transition:all .45s;}
+.keyslot.got{background:rgba(232,181,74,.16);border-color:var(--gold);color:var(--gold);text-shadow:var(--glow-gold);transform:translateY(-3px) scale(1.05);}
+.vault-status{font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.06em;color:var(--muted);margin-top:.5rem;}
+.vault.open .vault-status{color:var(--gold);}
+.vault-code{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.4rem;letter-spacing:.25em;color:var(--gold);margin-top:.6rem;min-height:1.4rem;text-shadow:var(--glow-gold);}
+.progress-txt{font-size:.72rem;color:var(--muted);margin-top:.5rem;}
+.mission{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--radius-sm);
+  padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.8rem,2.3vw,.88rem);color:#cbbdba;line-height:1.65;}
+.mission b{color:var(--gold);}
+.lock-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:1.1rem;overflow:hidden;box-shadow:0 6px 22px rgba(0,0,0,.3);}
+.lock-card.locked-step{opacity:.5;filter:grayscale(.4);}
+.lock-head{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:#120e0f;border-bottom:1px solid var(--line);}
+.lock-ico{font-size:1.6rem;flex-shrink:0;transition:transform .4s;}
+.lock-card.solved .lock-ico{transform:rotate(-12deg) scale(1.1);}
+.lock-meta{flex:1;min-width:0;}
+.lock-step{font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.lock-name{font-family:'Orbitron',sans-serif;font-weight:700;font-size:clamp(.88rem,2.6vw,1.05rem);}
+.timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.3rem);letter-spacing:.08em;
+  font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap;}
+.timer.low{color:var(--day-color);}
+.lock-body{padding:1.2rem;}
+.method{background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--day-color);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;margin-bottom:1.1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#bdaeab;line-height:1.75;}
+.method b{color:var(--day-light);}
+.ex{margin-bottom:.9rem;}
+.ex-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;}
+.ex-lbl{font-family:'Orbitron',sans-serif;font-weight:700;color:var(--gold);flex-shrink:0;}
+.ex-expr{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:clamp(.84rem,2.4vw,.95rem);}
+.ex-in{margin-left:auto;width:115px;background:#120e0f;border:2px solid var(--line);border-radius:8px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-weight:600;font-size:.95rem;text-align:center;padding:.5rem;outline:none;min-height:44px;transition:border-color .2s;}
+.ex-in:focus{border-color:var(--gold);}
+.ex-in.ok{border-color:var(--green);background:rgba(63,181,106,.12);color:#9ff0bd;}
+.ex-in.ko{border-color:var(--day-color);background:rgba(185,64,64,.12);color:#ffb3ad;}
+.ex-in:disabled{cursor:default;}
+.qcm{margin-bottom:1rem;}
+.qcm-q{font-size:clamp(.82rem,2.4vw,.92rem);margin-bottom:.55rem;line-height:1.5;}
+.opts{display:flex;flex-direction:column;gap:.45rem;}
+.opt{display:flex;align-items:center;gap:.7rem;text-align:left;width:100%;background:var(--panel2);border:1.5px solid var(--line);
+  border-radius:var(--radius-sm);padding:.65rem .95rem;cursor:pointer;color:var(--text);font-family:'JetBrains Mono',monospace;
+  font-size:clamp(.8rem,2.3vw,.9rem);font-weight:600;min-height:44px;line-height:1.4;transition:border-color .15s,background .15s;}
+.opt:hover:not(.locked){border-color:var(--gold);background:#231a14;}
+.opt.sel{border-color:var(--gold);background:rgba(232,181,74,.12);}
+.opt.locked{cursor:default;}
+.opt.good{border-color:var(--green);background:rgba(63,181,106,.14);color:#9ff0bd;}
+.opt.bad{border-color:var(--day-color);background:rgba(185,64,64,.14);color:#ffb3ad;}
+.opt .k{font-family:'Orbitron',sans-serif;font-weight:900;color:var(--gold);width:1.4rem;text-align:center;flex-shrink:0;}
+.opt.good .k{color:var(--green);}.opt.bad .k{color:var(--day-color);}
+.tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1.3rem;border-radius:var(--radius-sm);
+  font-family:'Orbitron',sans-serif;font-size:clamp(.7rem,2.2vw,.78rem);font-weight:700;letter-spacing:.05em;cursor:pointer;border:none;min-height:44px;transition:transform .12s;}
+.btn:active:not(:disabled){transform:scale(.96);}
+.btn:disabled{opacity:.35;cursor:default;}
+.btn-try{background:linear-gradient(135deg,var(--gold-d),var(--gold));color:#1a1208;box-shadow:var(--glow-gold);}
+.btn-retry{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;box-shadow:var(--glow);}
+.btn-hint{background:transparent;color:var(--muted);border:1.5px solid var(--line);}
+.btn-hint:hover:not(:disabled){border-color:var(--gold);color:var(--text);}
+.hint{margin-top:.8rem;background:#1c1509;border:1.5px dashed var(--gold-d);border-radius:var(--radius-sm);
+  padding:.7rem 1rem;font-size:clamp(.74rem,2.2vw,.8rem);color:#d8c08a;display:none;line-height:1.7;}
+.hint.show{display:block;}
+.fb{margin-top:.9rem;padding:.7rem 1rem;border-radius:var(--radius-sm);font-size:clamp(.8rem,2.3vw,.88rem);display:none;align-items:flex-start;gap:.6rem;line-height:1.55;}
+.fb.show{display:flex;}
+.fb.ok{background:rgba(63,181,106,.12);border:1.5px solid var(--green);color:#9ff0bd;}
+.fb.ko{background:rgba(185,64,64,.12);border:1.5px solid var(--day-color);color:#ffb3ad;}
+.fb.warn{background:rgba(232,181,74,.1);border:1.5px solid var(--gold-d);color:#e8c98a;}
+.sound-btn{position:fixed;top:12px;right:12px;z-index:20;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:1.1rem;padding:.4rem .55rem;min-height:42px;color:var(--text);}
+.sound-btn.off{opacity:.45;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.shake{animation:shake .35s;}
+.btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;box-shadow:var(--glow);
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.05em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;margin-top:1rem;}
+</style>
+</head>
+<body>
+<button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+<div class="wrap">
+  <header>
+    <div class="logo-badge">
+      <span class="logo-dot" style="background:#f5c518"></span>
+      <span class="logo-dot" style="background:#8dc63f"></span>
+      <span class="logo-dot" style="background:#3ab5d8"></span>
+      Pazapa &middot; Maths &middot; 5e
+    </div>
+    <div class="week">Semaine 1 — Jour 2</div>
+    <div class="title">Les fragments du <span class="lock">code secret</span> &#128274;</div>
+    <div class="subtitle">Enchaîner des opérations avec parenthèses</div>
+  </header>
+  <div class="layout">
+    <div class="vault-col">
+      <div class="vault" id="vault">
+        <div class="vault-door"><div class="vault-dial" id="vault-dial">&#128274;</div></div>
+        <div class="vault-keys">
+          <div class="keyslot" id="key-0">?</div>
+          <div class="keyslot" id="key-1">?</div>
+          <div class="keyslot" id="key-2">?</div>
+          <div class="keyslot" id="key-3">?</div>
+        </div>
+        <div class="vault-status" id="vault-status">Coffre verrouillé</div>
+        <div class="vault-code" id="vault-code"></div>
+        <div class="progress-txt" id="progress-txt">0 / 4 clés obtenues</div>
+      </div>
+    </div>
+    <div class="epreuves">
+      <div class="mission"><b>&#127919; Mission&nbsp;:</b> ouvre les 4 serrures dans le temps imparti pour récupérer les 4 clés et déverrouiller le coffre.</div>
+      <div id="locks"></div>
+      <div style="text-align:center;"><button class="btn-restart" onclick="restartAll()">&#8635; Recommencer le casse</button></div>
+    </div>
+  </div>
+</div>
+<script>
+function $(id){return document.getElementById(id);}
+var soundOn=true, audioCtx=null;
+function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
+function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
+function sUnlock(){if(!soundOn)return;beep(523,0,0.1,"triangle",0.2);beep(784,0.09,0.12,"triangle",0.2);beep(1047,0.2,0.18,"triangle",0.22);}
+function sBad(){if(!soundOn)return;beep(300,0,0.16,"sawtooth",0.14);beep(180,0.15,0.22,"sawtooth",0.14);}
+function sTime(){if(!soundOn)return;beep(220,0,0.3,"sawtooth",0.16);}
+function sVault(){if(!soundOn)return;[523,659,784,1047,1319].forEach(function(f,i){beep(f,i*0.13,0.22,"triangle",0.22);});}
+function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+function normNum(s){var n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
+function valOk(t,v){var n=normNum(v);return n!==null&&Math.abs(n-t)<1e-9;}
+function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
+var LOCKS=[
+  {ico:"&#128290;",step:"Serrure 1",name:"Estimer le code",type:"qcm",time:120,key:"3",
+   method:"<b>D\u00e9marche\u00a0:</b> rep\u00e8re les parenth\u00e8ses, arrondis les nombres, calcule d\u2019abord l\u2019int\u00e9rieur des parenth\u00e8ses, puis trouve l\u2019ordre de grandeur.",
+   questions:[
+     {q:"A = 9,3 \u00d7 (69,28 \u2212 20,8)",opts:["environ 500","environ 50","environ 5 000","environ 90"],ans:0},
+     {q:"B = (102,85 + 383) : 49,2",opts:["environ 10","environ 100","environ 1","environ 50"],ans:0},
+     {q:"C = 140,03 : (0,95 \u00d7 53,6)",opts:["environ 3","environ 30","environ 0,3","environ 14"],ans:0},
+     {q:"D = (9 195 + 72,8) \u00d7 (17,4 \u2212 16,52)",opts:["environ 9 200","environ 920","environ 92 000","environ 18 000"],ans:0}
+   ],
+   hint:"Arrondis chaque nombre au plus simple avant de calculer l\u2019int\u00e9rieur des parenth\u00e8ses."},
+  {ico:"&#10133;",step:"Serrure 2",name:"Les premiers indices",type:"fill",time:90,key:"7",
+   method:"<b>D\u00e9marche\u00a0:</b> fais d\u2019abord les multiplications et divisions, puis, s\u2019il n\u2019y a que des additions et soustractions, calcule de gauche \u00e0 droite.",
+   items:[{lbl:"A =",expr:"18 \u2212 8 \u2212 5 + 2",ans:7},{lbl:"B =",expr:"86 \u2212 36 + 3 \u00d7 12 \u2212 12",ans:74}],
+   hint:"Dans B, calcule 3 \u00d7 12 en premier, puis effectue le reste de gauche \u00e0 droite."},
+  {ico:"&#128273;",step:"Serrure 3",name:"D\u00e9bloquer les parenth\u00e8ses",type:"fill",time:90,key:"4",
+   method:"<b>D\u00e9marche\u00a0:</b> calcule d\u2019abord l\u2019int\u00e9rieur des parenth\u00e8ses, remplace-les par leur r\u00e9sultat, fais les multiplications ou divisions, puis termine par les additions ou soustractions.",
+   items:[{lbl:"C =",expr:"40 \u2212 12 \u00d7 (2 + 1)",ans:4},{lbl:"D =",expr:"12 + (28 : 4) \u2212 4",ans:15}],
+   hint:"Commence toujours par ce qui est entre parenth\u00e8ses, puis applique les priorit\u00e9s (\u00d7 et : avant + et \u2212)."},
+  {ico:"&#128274;",step:"Serrure 4",name:"Le cadenas final",type:"qcm",time:120,key:"E",
+   method:"<b>D\u00e9marche\u00a0:</b> sans parenth\u00e8ses, 5 \u00d7 14 \u2212 8 : 2 = 66. Place une paire de parenth\u00e8ses au bon endroit pour obtenir chaque r\u00e9sultat demand\u00e9.",
+   questions:[
+     {q:"Quel placement donne 50&nbsp;?",opts:["5 \u00d7 (14 \u2212 8 : 2)","(5 \u00d7 14 \u2212 8) : 2","5 \u00d7 ((14 \u2212 8) : 2)","(5 \u00d7 14) \u2212 8 : 2"],ans:0},
+     {q:"Quel placement donne 15&nbsp;?",opts:["5 \u00d7 ((14 \u2212 8) : 2)","5 \u00d7 (14 \u2212 8 : 2)","(5 \u00d7 14 \u2212 8) : 2","5 \u00d7 14 \u2212 (8 : 2)"],ans:0},
+     {q:"Quel placement donne 31&nbsp;?",opts:["(5 \u00d7 14 \u2212 8) : 2","5 \u00d7 ((14 \u2212 8) : 2)","5 \u00d7 (14 \u2212 8 : 2)","(5 \u00d7 14) \u2212 8 : 2"],ans:0}
+   ],
+   hint:"Teste chaque placement\u00a0: calcule d\u2019abord la parenth\u00e8se, puis applique les priorit\u00e9s. Compare au r\u00e9sultat demand\u00e9."}
+];
+var solved=new Array(LOCKS.length).fill(false);
+var active=0;var qcmSel={};
+var tInt=null, tLeft=0, tExpired=new Array(LOCKS.length).fill(false);
+function build(){
+  var host=$("locks");host.innerHTML="";
+  LOCKS.forEach(function(L,li){
+    var card=document.createElement("div");card.className="lock-card"+(li===active||solved[li]?"":" locked-step");card.id="lock-"+li;
+    if(solved[li])card.className+=" solved";
+    var h='<div class="lock-head">'
+      +'<span class="lock-ico" id="ico-'+li+'">'+(solved[li]?"&#128275;":L.ico)+'</span>'
+      +'<div class="lock-meta"><div class="lock-step">'+L.step+'</div><div class="lock-name">'+L.name+'</div></div>'
+      +'<span class="timer" id="timer-'+li+'">'+fmt(L.time)+'</span>'
+      +'</div><div class="lock-body" id="body-'+li+'">';
+    if(li===active||solved[li]){
+      h+='<div class="method">'+L.method+'</div><div id="zone-'+li+'"></div>'
+        +'<div class="tools">'
+        +'<button class="btn btn-hint" id="hint-btn-'+li+'" onclick="toggleHint('+li+')">? Indice</button>'
+        +'<button class="btn btn-try" id="try-'+li+'" onclick="tryLock('+li+')">&#128273; Tester la serrure</button>'
+        +'<button class="btn btn-retry" id="retry-'+li+'" onclick="retryLock('+li+')" style="display:none;">&#8635; R\u00e9essayer</button>'
+        +'</div>'
+        +'<div class="hint" id="hint-'+li+'">'+L.hint+'</div>'
+        +'<div class="fb" id="fb-'+li+'"><span id="fbi-'+li+'"></span><div id="fbm-'+li+'"></div></div>';
+    }else{
+      h+='<div style="color:var(--muted);font-size:.82rem;text-align:center;padding:.6rem;">&#128274; R\u00e9ussis la serrure pr\u00e9c\u00e9dente pour d\u00e9bloquer cette \u00e9preuve.</div>';
+    }
+    h+='</div>';
+    card.innerHTML=h;host.appendChild(card);
+    if(li===active||solved[li])renderZone(li);
+  });
+  updateVault();
+}
+function renderZone(li){
+  var L=LOCKS[li],z=$("zone-"+li);if(!z)return;z.innerHTML="";
+  if(L.type==="fill"){
+    L.items.forEach(function(it,i){
+      var row=document.createElement("div");row.className="ex";
+      row.innerHTML='<div class="ex-row"><span class="ex-lbl">'+it.lbl+'</span><span class="ex-expr">'+it.expr+'</span>'
+        +'<input class="ex-in" id="in-'+li+'-'+i+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off"></div>';
+      z.appendChild(row);
+      var el=row.querySelector("input");
+      if(solved[li]){el.value=it._v||"";el.disabled=true;el.className="ex-in ok";}
+      else if(tExpired[li]){el.disabled=true;}
+    });
+  }else{
+    var KEYS=["A","B","C","D"];
+    L.questions.forEach(function(Q,qi){
+      var block=document.createElement("div");block.className="qcm";
+      block.innerHTML='<div class="qcm-q">'+Q.q+'</div><div class="opts" id="opts-'+li+'-'+qi+'"></div>';
+      z.appendChild(block);
+      var order=Q.opts.map(function(_,i){return i;});
+      for(var s=order.length-1;s>0;s--){var r=Math.floor(Math.random()*(s+1));var t=order[s];order[s]=order[r];order[r]=t;}
+      Q._order=order;
+      var box=block.querySelector(".opts"),key=li+"-"+qi;
+      order.forEach(function(orig,pos){
+        var b=document.createElement("button");b.className="opt";b.type="button";
+        b.innerHTML='<span class="k">'+KEYS[pos]+'</span><span>'+Q.opts[orig]+'</span>';
+        if(solved[li]){b.classList.add("locked");if(orig===Q.ans)b.classList.add("good");}
+        else if(tExpired[li]){b.classList.add("locked");}
+        else{
+          if(qcmSel[key]===orig)b.classList.add("sel");
+          b.onclick=function(){qcmSel[key]=orig;box.querySelectorAll(".opt").forEach(function(x){x.classList.remove("sel");});this.classList.add("sel");};
+        }
+        box.appendChild(b);
+      });
+    });
+  }
+}
+function startTimer(li){
+  clearInterval(tInt);tLeft=LOCKS[li].time;showTimer(li);
+  tInt=setInterval(function(){tLeft--;showTimer(li);if(tLeft<=0){clearInterval(tInt);timeOut(li);}},1000);
+}
+function showTimer(li){var el=$("timer-"+li);if(!el)return;el.textContent=fmt(Math.max(tLeft,0));el.classList.toggle("low",tLeft<=10);}
+function stopTimer(){clearInterval(tInt);}
+function timeOut(li){
+  if(solved[li])return;
+  tExpired[li]=true;sTime();
+  $("lock-"+li).classList.add("shake");setTimeout(function(){$("lock-"+li).classList.remove("shake");},400);
+  renderZone(li);
+  var tb=$("try-"+li);if(tb){tb.disabled=true;tb.style.display="none";}
+  var hb=$("hint-btn-"+li);if(hb)hb.disabled=true;
+  $("hint-"+li).classList.remove("show");
+  var rb=$("retry-"+li);if(rb)rb.style.display="inline-flex";
+  var fb=$("fb-"+li);fb.className="fb show warn";$("fbi-"+li).textContent="\u23F1";
+  $("fbm-"+li).textContent="Temps \u00e9coul\u00e9\u00a0! L\u2019\u00e9preuve est bloqu\u00e9e. Appuie sur R\u00e9essayer pour relancer le chrono.";
+}
+function retryLock(li){
+  tExpired[li]=false;
+  if(LOCKS[li].type==="fill"){LOCKS[li].items.forEach(function(it){delete it._v;});}
+  else{LOCKS[li].questions.forEach(function(Q,qi){delete qcmSel[li+"-"+qi];});}
+  var tb=$("try-"+li);if(tb){tb.disabled=false;tb.style.display="inline-flex";}
+  var hb=$("hint-btn-"+li);if(hb)hb.disabled=false;
+  var rb=$("retry-"+li);if(rb)rb.style.display="none";
+  $("fb-"+li).className="fb";
+  renderZone(li);startTimer(li);
+}
+function toggleHint(li){if(solved[li]||tExpired[li])return;$("hint-"+li).classList.toggle("show");}
+function tryLock(li){
+  if(solved[li]||tExpired[li])return;
+  var L=LOCKS[li],allFilled=true,allOk=true;
+  if(L.type==="fill"){
+    L.items.forEach(function(it,i){var el=$("in-"+li+"-"+i);var v=el?el.value.trim():"";it._v=v;if(v==="")allFilled=false;if(!valOk(it.ans,v))allOk=false;});
+  }else{
+    L.questions.forEach(function(Q,qi){var key=li+"-"+qi;if(qcmSel[key]===undefined)allFilled=false;if(qcmSel[key]!==Q.ans)allOk=false;});
+  }
+  if(!allFilled){var fb=$("fb-"+li);fb.className="fb show warn";$("fbi-"+li).textContent="\u26A0";$("fbm-"+li).textContent="Compl\u00e8te toutes les r\u00e9ponses avant de tester la serrure.";return;}
+  if(allOk){
+    solved[li]=true;stopTimer();sUnlock();
+    $("lock-"+li).classList.add("solved");$("ico-"+li).innerHTML="&#128275;";
+    var tb=$("try-"+li);if(tb){tb.disabled=true;tb.style.display="none";}
+    var hb=$("hint-btn-"+li);if(hb)hb.disabled=true;
+    $("hint-"+li).classList.remove("show");
+    var fb=$("fb-"+li);fb.className="fb show ok";$("fbi-"+li).textContent="\u2705";
+    $("fbm-"+li).innerHTML="Serrure ouverte\u00a0! Cl\u00e9 <b style='color:var(--gold)'>"+L.key+"</b> r\u00e9cup\u00e9r\u00e9e.";
+    renderZone(li);updateVault();
+    if(active<LOCKS.length-1){active++;setTimeout(function(){build();startTimer(active);var el=$("lock-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},900);}
+  }else{
+    sBad();$("lock-"+li).classList.add("shake");setTimeout(function(){$("lock-"+li).classList.remove("shake");},400);
+    var fb=$("fb-"+li);fb.className="fb show ko";$("fbi-"+li).textContent="\u274C";
+    $("fbm-"+li).textContent="La serrure r\u00e9siste\u2026 corrige les r\u00e9ponses fausses et r\u00e9essaie (le chrono continue).";
+  }
+}
+function updateVault(){
+  var got=0;
+  LOCKS.forEach(function(L,li){var k=$("key-"+li);if(solved[li]){k.textContent=L.key;k.classList.add("got");got++;}else{k.textContent="?";k.classList.remove("got");}});
+  $("progress-txt").textContent=got+" / "+LOCKS.length+" cl\u00e9s obtenues";
+  if(solved.every(Boolean)){
+    var code=LOCKS.map(function(L){return L.key;}).join(" ");
+    $("vault").classList.add("open");$("vault-dial").innerHTML="&#128275;";
+    $("vault-status").textContent="Coffre ouvert\u00a0!";$("vault-code").textContent=code;sVault();
+  }else{
+    $("vault").classList.remove("open");$("vault-dial").innerHTML="&#128274;";
+    $("vault-status").textContent="Coffre verrouill\u00e9";$("vault-code").textContent="";
+  }
+}
+function restartAll(){
+  stopTimer();
+  solved=new Array(LOCKS.length).fill(false);
+  tExpired=new Array(LOCKS.length).fill(false);
+  qcmSel={};active=0;
+  LOCKS.forEach(function(L){if(L.items)L.items.forEach(function(it){delete it._v;});});
+  build();startTimer(0);
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+build();startTimer(0);
+</script>
+</body>
+</html>
