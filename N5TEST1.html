@@ -49,6 +49,7 @@ header{text-align:center;margin-bottom:1.2rem;}
 .vault-status{font-family:'Orbitron',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.06em;color:var(--muted);margin-top:.5rem;}
 .vault.open .vault-status{color:var(--gold);}
 .vault-code{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.4rem;letter-spacing:.25em;color:var(--gold);margin-top:.6rem;min-height:1.4rem;text-shadow:var(--glow-gold);}
+.vault-time{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.92rem;color:var(--green);margin-top:.5rem;min-height:1rem;}
 .progress-txt{font-size:.72rem;color:var(--muted);margin-top:.5rem;}
 .mission{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:var(--radius-sm);
   padding:.9rem 1.1rem;margin-bottom:1.1rem;font-size:clamp(.8rem,2.3vw,.88rem);color:#cbbdba;line-height:1.65;}
@@ -114,10 +115,76 @@ header{text-align:center;margin-bottom:1.2rem;}
 .shake{animation:shake .35s;}
 .btn-restart{background:linear-gradient(135deg,var(--day-dark),var(--day-color));color:#fff;box-shadow:var(--glow);
   font-family:'Orbitron',sans-serif;font-weight:700;font-size:.82rem;letter-spacing:.05em;padding:.7rem 1.6rem;border:none;border-radius:var(--radius-sm);cursor:pointer;min-height:44px;margin-top:1rem;}
+
+/* ÉCRAN DE DÉPART */
+.start-screen{text-align:center;padding:1rem 1rem 2rem;animation:fadeIn .4s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.start-vault{font-size:4.5rem;margin-bottom:1rem;filter:drop-shadow(var(--glow-gold));}
+.start-mission{max-width:560px;margin:0 auto 1.8rem;background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--gold);border-radius:var(--radius-sm);padding:1rem 1.3rem;font-size:clamp(.84rem,2.4vw,.94rem);color:#cbbdba;line-height:1.7;text-align:left;}
+.start-mission b{color:var(--gold);}
+.btn-start{display:inline-flex;align-items:center;gap:.6rem;background:linear-gradient(135deg,var(--gold-d),var(--gold));
+  color:#1a1208;font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1rem,3.2vw,1.3rem);letter-spacing:.06em;
+  padding:1rem 2.6rem;border:none;border-radius:var(--radius);cursor:pointer;box-shadow:var(--glow-gold);min-height:54px;transition:transform .12s;}
+.btn-start:hover{transform:translateY(-2px);}
+.btn-start:active{transform:scale(.97);}
+
+/* BARRE FIXE HUD */
+.hud-bar{position:fixed;top:0;left:0;right:0;z-index:18;display:none;align-items:center;justify-content:center;gap:1rem;
+  background:rgba(18,14,15,.92);backdrop-filter:blur(10px);border-bottom:1.5px solid var(--gold-d);
+  padding:.5rem 1rem;box-shadow:0 4px 18px rgba(0,0,0,.4);}
+.hud-bar.show{display:flex;}
+.hud-dial{font-size:1.3rem;}
+.hud-keys{display:flex;gap:.35rem;}
+.hud-key{width:1.7rem;height:2rem;border-radius:6px;background:#0e0a0b;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:900;font-size:.85rem;color:#4a3f40;transition:all .4s;}
+.hud-key.got{background:rgba(232,181,74,.16);border-color:var(--gold);color:var(--gold);}
+.hud-timer{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.15rem;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:var(--text);min-width:3.2rem;text-align:center;}
+.hud-timer.low{color:var(--day-color);}
+
+/* AMBIANCE caméra de surveillance */
+.cctv-overlay{position:fixed;inset:0;z-index:16;pointer-events:none;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 50% 50%, transparent 55%, rgba(0,0,0,.5) 100%);
+  mix-blend-mode:multiply;opacity:.5;animation:cctv-flicker 5s infinite;}
+@keyframes cctv-flicker{0%,100%{opacity:.5;}48%{opacity:.5;}49%{opacity:.62;}50%{opacity:.46;}51%{opacity:.58;}}
+.alarm-flash{position:fixed;inset:0;z-index:17;pointer-events:none;background:rgba(185,64,64,.32);opacity:0;transition:opacity .15s;}
+.alarm-flash.on{animation:alarm-blink .9s ease-in-out infinite;}
+@keyframes alarm-blink{0%,100%{opacity:0;}50%{opacity:1;}}
+.agent-msg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.9);z-index:30;
+  background:rgba(18,14,15,.96);border:1.5px solid var(--gold);border-radius:var(--radius);
+  padding:1.2rem 1.8rem;max-width:90%;text-align:center;font-family:'JetBrains Mono',monospace;
+  font-size:clamp(.9rem,2.8vw,1.1rem);color:var(--gold);box-shadow:var(--glow-gold);
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;}
+.agent-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.agent-msg .tag{display:block;font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;}
+/* étincelles à l'ouverture du coffre */
+@keyframes sparkle{0%{opacity:0;transform:scale(0);}50%{opacity:1;}100%{opacity:0;transform:scale(1.6);}}
+.vault.open .vault-door::after{content:'\2728';position:absolute;top:-10px;right:-10px;font-size:1.6rem;animation:sparkle 1.2s ease 2;}
 </style>
 </head>
 <body>
 <button class="sound-btn" id="sound-btn" onclick="toggleSound()" title="Son">&#128266;</button>
+
+<!-- AMBIANCE : overlay caméra de surveillance + flash alarme -->
+<div class="cctv-overlay"></div>
+<div class="alarm-flash" id="alarm-flash"></div>
+
+<div class="agent-msg" id="agent-msg"></div>
+
+<!-- BARRE FIXE (HUD) : visible au défilement une fois le casse lancé -->
+<div class="hud-bar" id="hud-bar">
+  <span class="hud-dial" id="hud-dial">&#128274;</span>
+  <div class="hud-keys">
+    <span class="hud-key" id="hud-key-0">?</span>
+    <span class="hud-key" id="hud-key-1">?</span>
+    <span class="hud-key" id="hud-key-2">?</span>
+    <span class="hud-key" id="hud-key-3">?</span>
+  </div>
+  <span class="hud-timer" id="hud-timer">--:--</span>
+</div>
+
 <div class="wrap">
   <header>
     <div class="logo-badge">
@@ -130,7 +197,15 @@ header{text-align:center;margin-bottom:1.2rem;}
     <div class="title">Les fragments du <span class="lock">code secret</span> &#128274;</div>
     <div class="subtitle">Enchaîner des opérations avec parenthèses</div>
   </header>
-  <div class="layout">
+
+  <!-- ÉCRAN DE DÉPART -->
+  <div class="start-screen" id="start-screen">
+    <div class="start-vault">&#128274;</div>
+    <div class="start-mission"><b>&#127919; Briefing&nbsp;:</b> agent, tu t’infiltres dans la salle des coffres. Quatre serrures, chacune sous surveillance et limitée en temps. Résous les calculs pour forcer chaque verrou, récupère les 4 clés et ouvre le coffre avant la fin du temps. Le chrono se déclenche dès l’infiltration… Reste discret. Bonne chance.</div>
+    <button class="btn-start" onclick="beginHeist()">&#128273; Lancer l’infiltration</button>
+  </div>
+
+  <div class="layout" id="game-layout" style="display:none;">
     <div class="vault-col">
       <div class="vault" id="vault">
         <div class="vault-door"><div class="vault-dial" id="vault-dial">&#128274;</div></div>
@@ -142,6 +217,7 @@ header{text-align:center;margin-bottom:1.2rem;}
         </div>
         <div class="vault-status" id="vault-status">Coffre verrouillé</div>
         <div class="vault-code" id="vault-code"></div>
+        <div class="vault-time" id="vault-time"></div>
         <div class="progress-txt" id="progress-txt">0 / 4 clés obtenues</div>
       </div>
     </div>
@@ -157,11 +233,38 @@ function $(id){return document.getElementById(id);}
 var soundOn=true, audioCtx=null;
 function ac(){if(!audioCtx){try{audioCtx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){audioCtx=null;}}return audioCtx;}
 function beep(f,s,d,t,v){var c=ac();if(!c)return;var o=c.createOscillator(),g=c.createGain();o.type=t||"triangle";o.frequency.value=f;o.connect(g);g.connect(c.destination);var n=c.currentTime+s;g.gain.setValueAtTime(0.0001,n);g.gain.exponentialRampToValueAtTime(v||0.2,n+0.02);g.gain.exponentialRampToValueAtTime(0.0001,n+d);o.start(n);o.stop(n+d+0.02);}
-function sUnlock(){if(!soundOn)return;beep(523,0,0.1,"triangle",0.2);beep(784,0.09,0.12,"triangle",0.2);beep(1047,0.2,0.18,"triangle",0.22);}
-function sBad(){if(!soundOn)return;beep(300,0,0.16,"sawtooth",0.14);beep(180,0.15,0.22,"sawtooth",0.14);}
-function sTime(){if(!soundOn)return;beep(220,0,0.3,"sawtooth",0.16);}
+function sUnlock(){if(!soundOn)return;beep(523,0,0.1,"triangle",0.24);beep(784,0.08,0.12,"triangle",0.24);beep(1047,0.18,0.16,"triangle",0.26);beep(1568,0.3,0.22,"triangle",0.24);}
+function sBad(){if(!soundOn)return;beep(200,0,0.12,"sawtooth",0.2);beep(140,0.1,0.22,"square",0.2);}
+function sTime(){if(!soundOn)return;beep(220,0,0.3,"sawtooth",0.18);beep(160,0.28,0.4,"sawtooth",0.18);}
+function sAlarm(){if(!soundOn)return;beep(990,0,0.1,"square",0.18);beep(740,0.12,0.12,"square",0.18);}
+function sKeyIn(){if(!soundOn)return;beep(440,0,0.05,"square",0.12);beep(880,0.05,0.1,"triangle",0.16);}
+function sHeart(strong){if(!soundOn)return;var v=strong?0.16:0.11;beep(70,0,0.12,"sine",v);beep(55,0.14,0.16,"sine",v);}
 function sVault(){if(!soundOn)return;[523,659,784,1047,1319].forEach(function(f,i){beep(f,i*0.13,0.22,"triangle",0.22);});}
 function toggleSound(){soundOn=!soundOn;var b=$("sound-btn");b.innerHTML=soundOn?"&#128266;":"&#128263;";b.classList.toggle("off",!soundOn);if(soundOn&&ac()&&audioCtx.state==="suspended")audioCtx.resume();}
+var AGENT_MSG=[
+  "Serrure 1 forc\u00e9e. Les estimations sont bonnes, agent. Direction la serrure 2\u2026",
+  "Serrure 2 ouverte. Tu gardes ton sang-froid. Encore deux verrous\u2026",
+  "Serrure 3 c\u00e9d\u00e9e. Plus qu\u2019un cadenas avant le coffre\u2026"
+];
+var amTimer=null;
+function sayAgent(txt){
+  if(!soundOn)return;
+  if(!("speechSynthesis" in window))return;
+  try{
+    window.speechSynthesis.cancel();
+    var u=new SpeechSynthesisUtterance(txt);
+    u.lang="fr-FR";u.rate=0.9;u.pitch=0.7;u.volume=1;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+function showAgent(txt,speak){
+  var el=$("agent-msg");
+  el.innerHTML="<span class='tag'>&#128274; Transmission</span>"+txt;
+  el.classList.add("show");
+  if(speak)sayAgent(txt);
+  clearTimeout(amTimer);
+  amTimer=setTimeout(function(){el.classList.remove("show");},2500);
+}
 function normNum(s){var n=parseFloat(String(s).trim().replace(/\u202f/g,'').replace(/\s/g,'').replace(',','.'));return isNaN(n)?null:n;}
 function valOk(t,v){var n=normNum(v);return n!==null&&Math.abs(n-t)<1e-9;}
 function fmt(s){var m=Math.floor(s/60),r=s%60;return m+":"+(r<10?"0":"")+r;}
@@ -195,6 +298,8 @@ var LOCKS=[
 var solved=new Array(LOCKS.length).fill(false);
 var active=0;var qcmSel={};
 var tInt=null, tLeft=0, tExpired=new Array(LOCKS.length).fill(false);
+var heartInt=null;
+var totalSec=0, totalInt=null;   // temps total de l'infiltration
 function build(){
   var host=$("locks");host.innerHTML="";
   LOCKS.forEach(function(L,li){
@@ -260,11 +365,31 @@ function renderZone(li){
   }
 }
 function startTimer(li){
-  clearInterval(tInt);tLeft=LOCKS[li].time;showTimer(li);
-  tInt=setInterval(function(){tLeft--;showTimer(li);if(tLeft<=0){clearInterval(tInt);timeOut(li);}},1000);
+  clearInterval(tInt);clearInterval(heartInt);tLeft=LOCKS[li].time;showTimer(li);
+  var af=$("alarm-flash");if(af)af.classList.remove("on");
+  scheduleHeart(li);
+  tInt=setInterval(function(){
+    tLeft--;showTimer(li);
+    scheduleHeart(li);
+    if(tLeft<=5 && tLeft>0){ sAlarm(); $("alarm-flash").classList.add("on"); var c=$("lock-"+li); if(c){c.classList.add("shake");setTimeout(function(){c.classList.remove("shake");},300);} }
+    if(tLeft<=0){clearInterval(tInt);clearInterval(heartInt);$("alarm-flash").classList.remove("on");timeOut(li);}
+  },1000);
 }
-function showTimer(li){var el=$("timer-"+li);if(!el)return;el.textContent=fmt(Math.max(tLeft,0));el.classList.toggle("low",tLeft<=10);}
-function stopTimer(){clearInterval(tInt);}
+function scheduleHeart(li){
+  clearInterval(heartInt);
+  if(solved[li]||tExpired[li]||tLeft<=0)return;
+  // intervalle du battement : lent au début, rapide quand le temps baisse
+  var period = tLeft>30 ? 1600 : tLeft>15 ? 1000 : tLeft>5 ? 650 : 420;
+  var strong = tLeft<=15;
+  sHeart(strong);
+  heartInt=setInterval(function(){
+    if(solved[li]||tExpired[li]||tLeft<=0){clearInterval(heartInt);return;}
+    sHeart(tLeft<=15);
+  },period);
+}
+function showTimer(li){var el=$("timer-"+li);if(el){el.textContent=fmt(Math.max(tLeft,0));el.classList.toggle("low",tLeft<=10);}
+  var h=$("hud-timer");if(h){h.textContent=fmt(Math.max(tLeft,0));h.classList.toggle("low",tLeft<=10);}}
+function stopTimer(){clearInterval(tInt);clearInterval(heartInt);var af=$("alarm-flash");if(af)af.classList.remove("on");}
 function timeOut(li){
   if(solved[li])return;
   tExpired[li]=true;sTime();
@@ -306,7 +431,19 @@ function tryLock(li){
     var fb=$("fb-"+li);fb.className="fb show ok";$("fbi-"+li).textContent="\u2705";
     $("fbm-"+li).innerHTML="Serrure ouverte\u00a0! Cl\u00e9 <b style='color:var(--gold)'>"+L.key+"</b> r\u00e9cup\u00e9r\u00e9e.";
     renderZone(li);updateVault();
-    if(active<LOCKS.length-1){active++;setTimeout(function(){build();startTimer(active);var el=$("lock-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},900);}
+    if(active<LOCKS.length-1){
+      sKeyIn();
+      var hasMsg=!!AGENT_MSG[li];
+      if(hasMsg)showAgent(AGENT_MSG[li],true);
+      active++;
+      setTimeout(function(){
+        build();
+        var el=$("lock-"+active);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});
+        // le chrono de l'étape suivante ne démarre qu'après la fin du message
+        var delay = hasMsg ? 1700 : 0; // 900ms (affichage) + 1700 ≈ 2,6s ≈ fin du message
+        setTimeout(function(){ startTimer(active); }, delay);
+      },900);
+    }
   }else{
     sBad();$("lock-"+li).classList.add("shake");setTimeout(function(){$("lock-"+li).classList.remove("shake");},400);
     var fb=$("fb-"+li);fb.className="fb show ko";$("fbi-"+li).textContent="\u274C";
@@ -315,27 +452,64 @@ function tryLock(li){
 }
 function updateVault(){
   var got=0;
-  LOCKS.forEach(function(L,li){var k=$("key-"+li);if(solved[li]){k.textContent=L.key;k.classList.add("got");got++;}else{k.textContent="?";k.classList.remove("got");}});
+  LOCKS.forEach(function(L,li){
+    var k=$("key-"+li),hk=$("hud-key-"+li);
+    if(solved[li]){if(k){k.textContent=L.key;k.classList.add("got");}if(hk){hk.textContent=L.key;hk.classList.add("got");}got++;}
+    else{if(k){k.textContent="?";k.classList.remove("got");}if(hk){hk.textContent="?";hk.classList.remove("got");}}
+  });
   $("progress-txt").textContent=got+" / "+LOCKS.length+" cl\u00e9s obtenues";
   if(solved.every(Boolean)){
+    clearInterval(totalInt);
     var code=LOCKS.map(function(L){return L.key;}).join(" ");
-    $("vault").classList.add("open");$("vault-dial").innerHTML="&#128275;";
-    $("vault-status").textContent="Coffre ouvert\u00a0!";$("vault-code").textContent=code;sVault();
+    var temps=fmt(totalSec);
+    $("hud-dial").innerHTML="&#128275;";$("hud-timer").textContent="\u2713";
+    sKeyIn();
+    showAgent("Code accept\u00e9\u2026 d\u00e9verrouillage du coffre en cours\u2026",true);
+    var seq=["3\u2026","2\u2026","1\u2026"],k=0;
+    var openInt=setInterval(function(){
+      if(k<seq.length){ showAgent("Ouverture dans "+seq[k]); sAlarm(); k++; }
+      else{
+        clearInterval(openInt);
+        $("vault").classList.add("open");$("vault-dial").innerHTML="&#128275;";
+        $("vault-status").textContent="Coffre ouvert\u00a0!";
+        $("vault-code").textContent=code;
+        $("vault-time").textContent="\u23F1 Coffre ouvert en "+temps;
+        sVault();
+        showAgent("Coffre ouvert en "+temps+"\u00a0! Mission accomplie, agent. Code\u00a0: "+code,true);
+      }
+    },900);
   }else{
     $("vault").classList.remove("open");$("vault-dial").innerHTML="&#128274;";
     $("vault-status").textContent="Coffre verrouill\u00e9";$("vault-code").textContent="";
+    $("hud-dial").innerHTML="&#128274;";
   }
 }
 function restartAll(){
-  stopTimer();
+  stopTimer();clearInterval(totalInt);totalSec=0;
   solved=new Array(LOCKS.length).fill(false);
   tExpired=new Array(LOCKS.length).fill(false);
   qcmSel={};active=0;
   LOCKS.forEach(function(L){if(L.items)L.items.forEach(function(it){delete it._v;});});
-  build();startTimer(0);
+  $("hud-bar").classList.remove("show");
+  $("game-layout").style.display="none";
+  $("start-screen").style.display="";
+  $("hud-timer").textContent="--:--";
+  var vt=$("vault-time");if(vt)vt.textContent="";
+  for(var i=0;i<LOCKS.length;i++){var hk=$("hud-key-"+i);if(hk){hk.textContent="?";hk.classList.remove("got");}}
+  $("hud-dial").innerHTML="&#128274;";
   window.scrollTo({top:0,behavior:"smooth"});
 }
-build();startTimer(0);
+function beginHeist(){
+  var c=ac(); if(c && c.state==="suspended") c.resume();
+  $("start-screen").style.display="none";
+  $("game-layout").style.display="";
+  $("hud-bar").classList.add("show");
+  totalSec=0;clearInterval(totalInt);
+  totalInt=setInterval(function(){totalSec++;},1000);
+  sayAgent("Agent, tu t\u2019infiltres dans la salle des coffres. Quatre serrures te s\u00e9parent du tr\u00e9sor. R\u00e9sous les calculs, r\u00e9cup\u00e8re les cl\u00e9s, et reste discret. Bonne chance.");
+  build();
+  startTimer(0);
+}
 </script>
 </body>
 </html>
