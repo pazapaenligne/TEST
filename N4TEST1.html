@@ -144,6 +144,7 @@ body::before{
 .btn:active{ transform:scale(.96); }
 .btn-valider{ background:var(--vert); color:#13230b; }
 .btn-indice{ background:transparent; color:var(--jour-pale); border:1.5px solid var(--jour-pale); }
+.btn-brouillon{ background:transparent; color:var(--jour-pale); border:1.5px solid rgba(217,184,120,.5); }
 .btn:disabled{ background:#48413a !important; color:#8a8073 !important; cursor:not-allowed; box-shadow:none !important; border-color:#48413a !important; }
 .indice-box{ display:none; margin-top:13px; padding:13px 16px; background:rgba(200,132,43,.1); border-left:4px solid var(--jour-pale); border-radius:9px; font-size:.9rem; color:var(--jour-pale); line-height:1.55; }
 .indice-box.show{ display:block; }
@@ -280,50 +281,50 @@ var MISSIONS = [
     enonce:"Le registre note le passage de <b>4 caravanes</b>. Le stock se calcule avec "
          + "<span class='expr'>150 + 25 × n</span> où n est le nombre de caravanes.",
     question:"Quel est le stock après 4 caravanes ?",
-    indice:"Remplace n par 4 : 150 + 25 \u00d7 4. (Pour t'entra\u00eener, 3 caravanes donneraient 225.)",
+    indice:"La lettre n repr\u00e9sente le nombre de caravanes. Commence par remplacer n par la valeur indiqu\u00e9e.",
     frag:"FRAGMENT I", fragVal:"stock = 250" },
   { badge:"RÉDUIRE", type:'qcm',
     enonce:"Sur une même étagère, le libraire range <b>2 lots de n manuscrits</b> le matin, "
          + "puis <b>3 lots de n manuscrits</b> le soir, soit <span class='expr'>2n + 3n</span>.",
     question:"Quelle est la forme réduite ?",
     choices:["6n","5n","5n²","Impossible à réduire"], correct:1,
-    indice:"2n et 3n sont des termes SEMBLABLES (m\u00eame lettre n). On additionne les coefficients : 2 + 3.",
+    indice:"Peux-tu regrouper les termes qui poss\u00e8dent la m\u00eame lettre ?",
     frag:"FRAGMENT II", fragVal:"5n" },
   { badge:"CARRÉ", type:'input', answer:36, unit:"cases",
     enonce:"Une étagère <b>carrée</b> a c cases de côté, soit <span class='expr'>c × c = c²</span> "
          + "cases. Ici le côté mesure <b>c = 6</b> cases.",
     question:"Combien de cases compte cette étagère carrée ?",
-    indice:"c² = c \u00d7 c = 6 \u00d7 6. (Attention : c² n'est PAS 2 \u00d7 c, qui ferait 12.)",
+    indice:"Le carr\u00e9 d'un nombre correspond \u00e0 ce nombre multipli\u00e9 par lui-m\u00eame.",
     frag:"FRAGMENT III", fragVal:"c² = 36" },
   { badge:"EXPRESSION", type:'input', answer:36, unit:"manuscrits",
     enonce:"Un rayon range <span class='expr'>c² + 5c</span> manuscrits, où c est le nombre de "
          + "cases d'un côté. Le registre indique <b>c = 4</b>.",
     question:"Combien de manuscrits ce rayon contient-il ?",
-    indice:"Terme par terme : c² = 4 \u00d7 4 = 16, puis 5c = 5 \u00d7 4 = 20, puis additionne.",
+    indice:"Calcule chaque partie de l'expression s\u00e9par\u00e9ment avant d'additionner.",
     frag:"FRAGMENT IV", fragVal:"36" },
   { badge:"CUBE", type:'input', answer:71, unit:"caisses",
     enonce:"Les manuscrits voyagent dans des <b>caisses cubiques</b> de côté a. La capacité d'un "
          + "entrepôt vaut <span class='expr'>9 × a³ − 1</span>, avec <b>a = 2</b>.",
     question:"Quelle est la capacité de l'entrepôt ?",
-    indice:"D'abord a³ = 2 \u00d7 2 \u00d7 2 = 8 (PAS 3 \u00d7 2 = 6). Puis 9 \u00d7 8, puis \u2212 1.",
+    indice:"Le cube d'un nombre correspond \u00e0 ce nombre multipli\u00e9 trois fois par lui-m\u00eame.",
     frag:"FRAGMENT V", fragVal:"71" },
   { badge:"PARENTHÈSES", type:'input', answer:21, unit:"manuscrits",
     enonce:"Chaque caravane apporte <b>(m + 2)</b> manuscrits, et <b>3 caravanes</b> passent : "
          + "<span class='expr'>3 × (m + 2)</span>, avec <b>m = 5</b>.",
     question:"Combien de manuscrits au total ?",
-    indice:"Calcule d'abord la parenth\u00e8se : m + 2 = 5 + 2 = 7. Puis multiplie par 3.",
+    indice:"Dans une expression avec des parenth\u00e8ses, commence par calculer ce qu'elles contiennent.",
     frag:"FRAGMENT VI", fragVal:"21" },
   { badge:"PRIORITÉS", type:'input', answer:18, unit:"manuscrits",
     enonce:"Sur un rayon de 50 cases, le libraire retire <b>8 manuscrits par caravane</b> : "
          + "<span class='expr'>50 − 8 × c</span>, avec <b>c = 4</b> caravanes.",
     question:"Combien de manuscrits restent sur le rayon ?",
-    indice:"Priorit\u00e9 \u00e0 la multiplication : 8 \u00d7 4 = 32, puis 50 \u2212 32. (Ne fais PAS (50\u22128)\u00d74.)",
+    indice:"Pense \u00e0 la priorit\u00e9 des op\u00e9rations : que faut-il calculer en premier ?",
     frag:"FRAGMENT VII", fragVal:"18" },
   { badge:"RÉDUIRE (PIÈGE)", type:'qcm',
     enonce:"Un fragment porte l'expression mélangée <span class='expr'>3n + 6 + 7n² + 6n²</span>.",
     question:"Quelle est la forme réduite ?",
     choices:["22n²","13n² + 9n","13n² + 3n + 6","3n³ + 13n² + 6"], correct:2,
-    indice:"On n'additionne QUE les termes de M\u00caME partie litt\u00e9rale : 7n² + 6n² = 13n². Le 3n et le 6 restent seuls.",
+    indice:"On ne peut regrouper que les termes ayant exactement la m\u00eame partie litt\u00e9rale.",
     frag:"FRAGMENT VIII", fragVal:"13n² + 3n + 6" },
   { badge:"VÉRIFIER", type:'qcm',
     enonce:"Deux libraires comptent leur stock pour <b>n = 5</b> caravanes. Le premier : "
@@ -331,7 +332,7 @@ var MISSIONS = [
     question:"L'égalité 150 + 25n = 175 + 20n est-elle vraie pour n = 5 ?",
     choices:["Vraie : les deux valent 275","Vraie : les deux valent 300","Fausse : 275 ≠ 300","On ne peut pas savoir"],
     correct:0,
-    indice:"Calcule chaque membre s\u00e9par\u00e9ment pour n = 5. Gauche : 150 + 25\u00d75. Droite : 175 + 20\u00d75.",
+    indice:"Calcule chaque membre s\u00e9par\u00e9ment, puis compare les deux r\u00e9sultats.",
     frag:"FRAGMENT IX", fragVal:"275 = 275" },
   { badge:"ÉNIGME", type:'qcm', enigme:true,
     enonce:"Le dernier fragment décrit le programme du libraire : « partir de <b>150 "
@@ -339,7 +340,7 @@ var MISSIONS = [
          + "le nombre de caravanes.",
     question:"Quelle expression traduit ce programme ?",
     choices:["150 × 25 + x","150 + 25 × x","(150 + 25) × x","25 + 150 × x"], correct:1,
-    indice:"On PART de 150 (fixe), puis on AJOUTE 25 pour chaque caravane, donc 25 multipli\u00e9 par x.",
+    indice:"Rep\u00e8re la quantit\u00e9 fixe et celle qui d\u00e9pend du nombre de caravanes.",
     frag:"CLÉ DU REGISTRE", fragVal:"150 + 25x" }
 ];
 
@@ -456,6 +457,7 @@ $('carte-box').addEventListener('click', function(e){
   if(etat[i].done) return;
   if(i !== unlocked) return;   // itinéraire ordonné : seule l'étape courante est jouable
   playDigSoft();
+  playParchment();
   ouvrirScanPuisMission(i);
 });
 
@@ -493,6 +495,7 @@ function ouvrirMission(i){
   html += '<div class="btns">'
         +   '<button class="btn btn-valider" id="btn-valider" disabled>✓ VALIDER</button>'
         +   '<button class="btn btn-indice" id="btn-indice">? INDICE</button>'
+        +   '<button class="btn btn-brouillon" id="btn-brouillon" type="button">🧮 BROUILLON</button>'
         + '</div>'
         + '<div class="indice-box" id="indice-box"></div>'
         + '<div class="feedback" id="feedback"></div>'
@@ -519,6 +522,7 @@ function ouvrirMission(i){
   }
   $('btn-valider').addEventListener('click', function(){ valider(i); });
   $('btn-indice').addEventListener('click', function(){ montrerIndice(i); });
+  $('btn-brouillon').addEventListener('click', function(){ if(window.openBrouillon) window.openBrouillon(); });
   $('btn-fermer').addEventListener('click', fermerMission);
 }
 
@@ -557,6 +561,7 @@ function valider(i){
   fb.innerHTML = bon ? '✅ Fragment dégagé !' : '❌ Pas tout à fait. Fragment perdu.';
   if(bon){
     solved++;
+    playSuccess();
     playDig();
     var fp = $('frag-pop');
     fp.classList.add('show');
@@ -622,13 +627,15 @@ $('btn-rec-bas').addEventListener('click', recommencer);
 /* =========================================================
    SON DE FOUILLES — Web Audio API (100% autonome)
    ========================================================= */
-var audioCtx = null, soundOn = false, ambientNodes = null;
+var audioCtx = null, soundOn = false, ambientNodes = null, pageTimer = null;
 function ensureCtx(){
   if(!audioCtx){
     try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
     catch(e){ audioCtx = null; }
   }
-  if(audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume(); }
+  if(audioCtx && audioCtx.state !== 'running'){
+    try { audioCtx.resume(); } catch(e){}
+  }
   return audioCtx;
 }
 function makeNoiseBuffer(dur){
@@ -642,37 +649,145 @@ function makeNoiseBuffer(dur){
 function playDig(){
   if(!soundOn) return;
   var ctx = ensureCtx(); if(!ctx) return;
+  if(ctx.state !== 'running' && ctx.resume){ try { ctx.resume(); } catch(e){} }
   var t = ctx.currentTime;
-  var src = ctx.createBufferSource(); src.buffer = makeNoiseBuffer(0.25);
-  var bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=420; bp.Q.value=0.8;
-  var g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.5,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
-  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.25);
-  var osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.setValueAtTime(120,t); osc.frequency.exponentialRampToValueAtTime(55,t+0.18);
-  var go = ctx.createGain();
-  go.gain.setValueAtTime(0.0001,t); go.gain.exponentialRampToValueAtTime(0.35,t+0.02); go.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
-  osc.connect(go); go.connect(ctx.destination); osc.start(t); osc.stop(t+0.32);
+  // pierres qui se retournent : plusieurs petits chocs sourds et granuleux, espacés au hasard
+  var nb = 5 + Math.floor(Math.random()*3);
+  for(var s=0; s<nb; s++){
+    var dt = s * (0.05 + Math.random()*0.06);
+    stoneTap(t + dt, 0.55 + Math.random()*0.45);
+  }
+  // léger frottement granuleux de fond (gravier qui glisse)
+  gravelRub(t, 0.5);
 }
 function playDigSoft(){
   if(!soundOn) return;
   var ctx = ensureCtx(); if(!ctx) return;
+  if(ctx.state !== 'running' && ctx.resume){ try { ctx.resume(); } catch(e){} }
   var t = ctx.currentTime;
-  var src = ctx.createBufferSource(); src.buffer = makeNoiseBuffer(0.15);
-  var bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=300; bp.Q.value=0.7;
-  var g = ctx.createGain();
-  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);
-  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.15);
+  // une ou deux pierres qui bougent : version courte
+  stoneTap(t, 0.5);
+  if(Math.random() < 0.6) stoneTap(t + 0.06 + Math.random()*0.05, 0.4);
+  gravelRub(t, 0.28);
 }
+/* un choc de pierre : bruit filtré très court + résonance basse mate */
+function stoneTap(t, vol){
+  var ctx = audioCtx;
+  // composante "choc" : bruit passe-bas court (mat, sans métal)
+  var src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(0.12);
+  var lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value = 700 + Math.random()*500;
+  var g = ctx.createGain();
+  var dur = 0.08 + Math.random()*0.05;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.32*vol, t+0.005);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  src.connect(lp); lp.connect(g); g.connect(ctx.destination);
+  src.start(t); src.stop(t+dur+0.02);
+  // résonance basse mate (la masse de la pierre qui retombe)
+  var osc = ctx.createOscillator();
+  osc.type = 'sine';
+  var f0 = 70 + Math.random()*50;
+  osc.frequency.setValueAtTime(f0, t);
+  osc.frequency.exponentialRampToValueAtTime(f0*0.6, t+0.1);
+  var go = ctx.createGain();
+  go.gain.setValueAtTime(0.0001, t);
+  go.gain.exponentialRampToValueAtTime(0.18*vol, t+0.01);
+  go.gain.exponentialRampToValueAtTime(0.0001, t+0.16);
+  osc.connect(go); go.connect(ctx.destination);
+  osc.start(t); osc.stop(t+0.18);
+}
+/* frottement de gravier : bruit passe-bande qui monte puis s'éteint */
+function gravelRub(t, dur){
+  var ctx = audioCtx;
+  var src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(dur);
+  var bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=900; bp.Q.value=0.6;
+  var g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(0.08, t+dur*0.4);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+  src.start(t); src.stop(t+dur+0.02);
+}
+/* bruit de parchemin : « chhhh » doux d'un manuscrit qu'on ouvre */
+function parchment(t, dur, vol){
+  var ctx = audioCtx;
+  var src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(dur);
+  var hp = ctx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=1800;
+  var lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=5500;
+  var g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(0.07*vol, t+dur*0.35);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  src.connect(hp); hp.connect(lp); lp.connect(g); g.connect(ctx.destination);
+  src.start(t); src.stop(t+dur+0.02);
+}
+function playParchment(){
+  if(!soundOn) return;
+  var ctx = ensureCtx(); if(!ctx) return;
+  if(ctx.state !== 'running' && ctx.resume){ try { ctx.resume(); } catch(e){} }
+  parchment(ctx.currentTime, 0.4, 1);
+}
+/* petite note orientale (gamme évocatrice, sur triangle doux) */
+function orientalNote(t){
+  var ctx = audioCtx;
+  var o = ctx.createOscillator(); o.type='triangle';
+  o.frequency.setValueAtTime(587, t);          // ré
+  o.frequency.setValueAtTime(698, t+0.10);     // fa
+  o.frequency.setValueAtTime(880, t+0.20);     // la
+  var g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.12, t+0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+0.4);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t); o.stop(t+0.42);
+}
+/* succès immersif : pierre déplacée + parchemin + petite note orientale */
+function playSuccess(){
+  if(!soundOn) return;
+  var ctx = ensureCtx(); if(!ctx) return;
+  if(ctx.state !== 'running' && ctx.resume){ try { ctx.resume(); } catch(e){} }
+  var t = ctx.currentTime;
+  stoneTap(t, 0.7);                 // 1. pierre déplacée
+  parchment(t+0.12, 0.45, 1);       // 2. bruit de parchemin
+  orientalNote(t+0.22);             // 3. petite note orientale
+}
+/* ambiance désert permanente : vent léger + bruissements de pages rares (gain ~0.03) */
 function startAmbient(){
   var ctx = ensureCtx(); if(!ctx) return;
   if(ambientNodes) return;
-  var src = ctx.createBufferSource(); src.buffer = makeNoiseBuffer(2.0); src.loop = true;
-  var lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=600;
-  var g = ctx.createGain(); g.gain.value=0.05;
-  src.connect(lp); lp.connect(g); g.connect(ctx.destination); src.start();
-  ambientNodes = { src:src, g:g };
+  // vent : bruit passe-bas très doux, lentement modulé
+  var src = ctx.createBufferSource();
+  src.buffer = makeNoiseBuffer(3.0); src.loop = true;
+  var lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=480;
+  var g = ctx.createGain(); g.gain.value=0.03;
+  // légère respiration du vent via un LFO sur le gain
+  var lfo = ctx.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.08;
+  var lfoGain = ctx.createGain(); lfoGain.gain.value=0.012;
+  lfo.connect(lfoGain); lfoGain.connect(g.gain);
+  src.connect(lp); lp.connect(g); g.connect(ctx.destination);
+  src.start(); lfo.start();
+  ambientNodes = { src:src, g:g, lfo:lfo };
+  // pages qui bruissent très rarement (toutes les 12 à 28 s)
+  function schedulePage(){
+    var delay = 12000 + Math.random()*16000;
+    pageTimer = setTimeout(function(){
+      if(soundOn && audioCtx){ parchment(audioCtx.currentTime, 0.5, 0.5); }
+      schedulePage();
+    }, delay);
+  }
+  schedulePage();
 }
-function stopAmbient(){ if(ambientNodes){ try { ambientNodes.src.stop(); } catch(e){} ambientNodes = null; } }
+function stopAmbient(){
+  if(ambientNodes){
+    try { ambientNodes.src.stop(); } catch(e){}
+    try { ambientNodes.lfo.stop(); } catch(e){}
+    ambientNodes = null;
+  }
+  if(pageTimer){ clearTimeout(pageTimer); pageTimer = null; }
+}
 function playFanfare(){
   if(!soundOn) return;
   var ctx = ensureCtx(); if(!ctx) return;
@@ -688,8 +803,20 @@ function playFanfare(){
 $('sound-btn').addEventListener('click', function(){
   soundOn = !soundOn;
   var btn = $('sound-btn');
-  if(soundOn){ ensureCtx(); btn.classList.add('on'); btn.textContent='🔊 SON'; startAmbient(); playDig(); }
-  else { btn.classList.remove('on'); btn.textContent='🔇 SON'; stopAmbient(); }
+  if(soundOn){
+    btn.classList.add('on'); btn.textContent='🔊 SON';
+    var ctx = ensureCtx();
+    if(ctx && ctx.state !== 'running' && ctx.resume){
+      var p = ctx.resume();
+      if(p && p.then){ p.then(function(){ startAmbient(); playDig(); }); }
+      else { setTimeout(function(){ startAmbient(); playDig(); }, 60); }
+    } else {
+      startAmbient(); playDig();
+    }
+  } else {
+    btn.classList.remove('on'); btn.textContent='🔇 SON';
+    stopAmbient();
+  }
 });
 
 /* ============== INIT ============== */
@@ -697,5 +824,222 @@ buildCarte();
 startTimer();
 updateProgress();
 </script>
+<!-- ===== BROUILLON DE CALCUL (déplaçable, isolé) ===== -->
+<style>
+#br-trigger{
+  position:fixed; right:14px; bottom:14px; z-index:9998;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; user-select:none; transition:transform .15s ease;
+}
+#br-trigger:hover{ transform:translateY(-2px) scale(1.03); }
+#br-trigger.br-hidden{ display:none; }
+#br-trigger .br-ico{
+  width:54px; height:54px; border-radius:14px;
+  background:linear-gradient(135deg,#c8842b,#6b4423);
+  border:2px solid #e8d3a8; display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem; box-shadow:0 4px 12px rgba(0,0,0,.35);
+}
+#br-trigger .br-label{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.6rem; letter-spacing:.5px;
+  padding:3px 9px; border-radius:10px; background:#2e2113; color:#f0e3cb;
+  box-shadow:0 2px 6px rgba(0,0,0,.3);
+}
+#br-panel{
+  position:fixed; right:14px; bottom:14px; z-index:9999;
+  width:280px; max-width:calc(100vw - 20px);
+  background:#2e2113; border-radius:14px;
+  box-shadow:0 12px 36px rgba(0,0,0,.5);
+  font-family:'JetBrains Mono','Courier New',monospace;
+  display:none; flex-direction:column; border:2px solid #c8842b;
+}
+#br-panel.br-open{ display:flex; }
+.br-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; border-radius:12px 12px 0 0;
+  background:#c8842b; color:#2a1c0a; font-size:.74rem; font-weight:700;
+  cursor:move; touch-action:none; user-select:none;
+  font-family:'Orbitron',sans-serif; letter-spacing:.5px;
+}
+.br-bar .br-close{
+  width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center;
+  background:rgba(42,28,10,.2); border:none; border-radius:6px; color:#2a1c0a;
+  font-size:.95rem; cursor:pointer; font-family:inherit;
+}
+.br-bar .br-close:hover{ background:rgba(42,28,10,.35); }
+.br-bar .br-title{ pointer-events:none; }
+.br-note{
+  padding:6px 12px; background:#38291a; color:#d9b878;
+  font-size:.62rem; line-height:1.4; border-bottom:1px solid #1c150d;
+  font-family:'JetBrains Mono',monospace;
+}
+.br-screen{
+  margin:10px; padding:10px 12px; background:#e8d3a8; color:#2a1c0a;
+  border:2px solid #6b4423; border-radius:6px; min-height:54px;
+  display:flex; flex-direction:column; justify-content:space-between;
+}
+.br-expr{ font-size:.82rem; color:#5a3a18; text-align:right; min-height:1.2em; overflow-x:auto; white-space:nowrap; }
+.br-result{ font-size:1.3rem; font-weight:700; text-align:right; overflow-x:auto; white-space:nowrap; }
+.br-pad{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:0 10px 12px; }
+.br-key{
+  font-family:'JetBrains Mono',monospace; font-size:1rem; font-weight:700;
+  padding:12px 4px; border:none; border-radius:8px;
+  background:#4d3a22; color:#f0e3cb; cursor:pointer; transition:transform .08s, background .15s;
+  min-height:44px;
+}
+.br-key:hover{ background:#5e4830; }
+.br-key:active{ transform:scale(.94); }
+.br-key.br-op{ background:#6b4423; }
+.br-key.br-eq{ background:#7bbf5a; color:#13230b; }
+.br-key.br-eq:hover{ background:#8fce6e; }
+.br-key.br-del{ background:#8a5226; font-size:.85rem; }
+.br-key.br-ac{ background:#a84a2e; font-size:.9rem; }
+</style>
+
+<div id="br-trigger" aria-label="Ouvrir le brouillon de calcul">
+  <div class="br-ico">🧮</div>
+  <span class="br-label">Brouillon</span>
+</div>
+
+<div id="br-panel" aria-label="Brouillon de calcul">
+  <div class="br-bar" id="br-bar">
+    <span class="br-title">🧮 Brouillon · glisse pour déplacer</span>
+    <button class="br-close" id="br-close" title="Fermer">✕</button>
+  </div>
+  <div class="br-note">Pose ton calcul toi-même. Ce brouillon ne résout pas l'exercice.</div>
+  <div class="br-screen">
+    <div class="br-expr" id="br-expr"></div>
+    <div class="br-result" id="br-result">0</div>
+  </div>
+  <div class="br-pad" id="br-pad">
+    <button class="br-key" data-k="7">7</button>
+    <button class="br-key" data-k="8">8</button>
+    <button class="br-key" data-k="9">9</button>
+    <button class="br-key br-op" data-k="÷">÷</button>
+
+    <button class="br-key" data-k="4">4</button>
+    <button class="br-key" data-k="5">5</button>
+    <button class="br-key" data-k="6">6</button>
+    <button class="br-key br-op" data-k="×">×</button>
+
+    <button class="br-key" data-k="1">1</button>
+    <button class="br-key" data-k="2">2</button>
+    <button class="br-key" data-k="3">3</button>
+    <button class="br-key br-op" data-k="−">−</button>
+
+    <button class="br-key" data-k="0">0</button>
+    <button class="br-key br-op" data-k="(">(</button>
+    <button class="br-key br-op" data-k=")">)</button>
+    <button class="br-key br-op" data-k="+">+</button>
+
+    <button class="br-key br-op" data-k="²">x²</button>
+    <button class="br-key br-op" data-k="³">x³</button>
+    <button class="br-key br-del" data-k="DEL">⌫</button>
+    <button class="br-key br-ac" data-k="AC">C</button>
+
+    <button class="br-key br-eq" data-k="=" style="grid-column:1 / -1;">=</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  function isInt(x){ return Number.isFinite(x) && Math.floor(x)===x; }
+  function evalBrouillon(src){
+    var s = String(src).replace(/\s+/g,'')
+      .replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-')
+      .replace(/,/g,'.').replace(/²/g,'^2').replace(/³/g,'^3');
+    var i=0;
+    function peek(){ return s[i]; }
+    function isD(c){ return c>='0'&&c<='9'; }
+    function num(){ var st=i; while(i<s.length&&(isD(s[i])||s[i]==='.'))i++; return parseFloat(s.substring(st,i)); }
+    function factor(){
+      if(peek()==='+'){ i++; return factor(); }
+      if(peek()==='-'){ i++; return -factor(); }
+      if(peek()==='('){ i++; var v=expr(); if(peek()!==')') throw 0; i++; return v; }
+      if(isD(peek())||peek()==='.') return num();
+      throw 0;
+    }
+    function pw(){ var b=factor(); if(peek()==='^'){ i++; var e=pw(); return Math.pow(b,e);} return b; }
+    function term(){ var v=pw(); while(peek()==='*'||peek()==='/'){ var op=s[i++]; var r=pw(); if(op==='*')v*=r; else { if(r===0) throw 0; v/=r; } } return v; }
+    function expr(){ var v=term(); while(peek()==='+'||peek()==='-'){ var op=s[i++]; var r=term(); if(op==='+')v+=r; else v-=r; } return v; }
+    var res = expr();
+    if(i!==s.length) throw 0;
+    return res;
+  }
+  function calc(e){
+    e = e.trim(); if(e==='') return '0';
+    try {
+      var r = evalBrouillon(e);
+      if(!Number.isFinite(r)) return 'Erreur';
+      if(isInt(r)) return String(r);
+      return String(Math.round(r*1e6)/1e6).replace('.', ',');
+    } catch(err){ return 'Erreur'; }
+  }
+
+  var trigger=document.getElementById('br-trigger');
+  var panel=document.getElementById('br-panel');
+  var bar=document.getElementById('br-bar');
+  var closeBtn=document.getElementById('br-close');
+  var exprEl=document.getElementById('br-expr');
+  var resEl=document.getElementById('br-result');
+  var pad=document.getElementById('br-pad');
+
+  var cur='', last=null, resetNext=false;
+
+  function open(){ trigger.classList.add('br-hidden'); panel.classList.add('br-open'); }
+  function close(){ panel.classList.remove('br-open'); trigger.classList.remove('br-hidden'); }
+  trigger.addEventListener('click', open);
+  closeBtn.addEventListener('click', function(e){ e.stopPropagation(); close(); });
+  // expose pour le bouton dans les missions
+  window.openBrouillon = open;
+
+  function refresh(){
+    exprEl.textContent = cur;
+    resEl.textContent = (last!==null) ? last : (cur===''?'0':cur);
+  }
+  function smartDel(){ if(cur==='') return; cur = cur.slice(0,-1); }
+
+  pad.addEventListener('click', function(e){
+    var t=e.target.closest('.br-key'); if(!t) return;
+    var k=t.dataset.k; if(!k) return;
+    if(k==='AC'){ cur=''; last=null; resetNext=false; }
+    else if(k==='DEL'){ if(resetNext){ last=null; resetNext=false; } smartDel(); }
+    else if(k==='='){ if(cur===''){ return; } last=calc(cur); resetNext=true; }
+    else {
+      if(resetNext){
+        var chain=['+','−','×','÷','²','³'];
+        if(chain.indexOf(k)!==-1 && last && last!=='Erreur'){ cur=String(last).replace(',', '.')+k; }
+        else { cur=k; }
+        last=null; resetNext=false;
+      } else { cur+=k; }
+    }
+    refresh();
+  });
+
+  // drag (pointer events)
+  var dragging=false, sx=0, sy=0, sl=0, st=0, conv=false;
+  bar.addEventListener('pointerdown', function(e){
+    if(e.target.classList && e.target.classList.contains('br-close')) return;
+    dragging=true; bar.setPointerCapture(e.pointerId);
+    if(!conv){ var r=panel.getBoundingClientRect(); panel.style.right=''; panel.style.bottom=''; panel.style.left=r.left+'px'; panel.style.top=r.top+'px'; conv=true; }
+    sx=e.clientX; sy=e.clientY; sl=parseFloat(panel.style.left)||0; st=parseFloat(panel.style.top)||0;
+    e.preventDefault();
+  });
+  bar.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    var nl=sl+(e.clientX-sx), nt=st+(e.clientY-sy);
+    var w=panel.offsetWidth, h=panel.offsetHeight;
+    var maxL=window.innerWidth-w-4, maxT=window.innerHeight-h-4;
+    if(nl<4)nl=4; if(nt<4)nt=4; if(nl>maxL)nl=maxL; if(nt>maxT)nt=maxT;
+    panel.style.left=nl+'px'; panel.style.top=nt+'px';
+  });
+  function endDrag(e){ if(dragging){ dragging=false; try{ bar.releasePointerCapture(e.pointerId); }catch(_){} } }
+  bar.addEventListener('pointerup', endDrag);
+  bar.addEventListener('pointercancel', endDrag);
+
+  refresh();
+})();
+</script>
+<!-- ===== FIN BROUILLON ===== -->
 </body>
 </html>
