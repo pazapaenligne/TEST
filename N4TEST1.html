@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le grand registre de Tombouctou · Pazapa 4e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   4e · Semaine 1 · Jour 1 — « Le grand registre de Tombouctou »
+   Interface : CARTE D'EXPLORATION du désert + piste de caravane
+   Itinéraire ORDONNÉ (chaque fragment débloque le suivant)
+   Notion : calcul littéral contextualisé (libraire 150 + 25n)
+   Couleur du jour : ocre #c8842b / sépia #6b4423 / sable #e8d3a8
+   ============================================================ */
+:root{
+  --jour:#c8842b; --jour-fonce:#6b4423; --jour-clair:#f4e4c1; --jour-pale:#d9b878;
+  --bg:#1c150d; --panel:#2e2113; --panel-2:#38291a;
+  --vert:#7bbf5a; --vert-neon:#a6e07f; --rouge:#d8704a;
+  --txt:#f0e3cb; --gris:#b59a72;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:'JetBrains Mono','Courier New',monospace;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(200,132,43,.10), transparent 42%),
+    radial-gradient(circle at 82% 78%, rgba(107,68,35,.22), transparent 48%),
+    var(--bg);
+  color:var(--txt); min-height:100vh; overflow-x:hidden; position:relative; padding:0 0 60px;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background-image:
+    radial-gradient(rgba(217,184,120,.05) 1px, transparent 1px),
+    radial-gradient(rgba(217,184,120,.04) 1px, transparent 1px);
+  background-size:26px 26px, 17px 17px; background-position:0 0, 9px 11px;
+}
+.wrap{ position:relative; z-index:2; max-width:700px; margin:0 auto; padding:0 16px; }
+
+/* ============== HUD + CHRONO ============== */
+.hud{
+  position:sticky; top:0; z-index:30;
+  background:linear-gradient(180deg, rgba(28,21,13,.97), rgba(28,21,13,.82));
+  backdrop-filter:blur(6px); border-bottom:1px solid rgba(200,132,43,.35);
+  padding:10px 16px; margin-bottom:18px;
+}
+.hud-inner{ max-width:700px; margin:0 auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--jour); color:#2a1c0a;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.68rem; letter-spacing:1.5px;
+  padding:6px 13px; border-radius:18px; box-shadow:0 0 14px rgba(200,132,43,.5);
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; display:block; }
+.logo-badge .dots i:nth-child(1){ background:#2a1c0a; }
+.logo-badge .dots i:nth-child(2){ background:#8a5a28; }
+.logo-badge .dots i:nth-child(3){ background:#e8d3a8; }
+.sound-btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:1px;
+  padding:7px 12px; border-radius:14px; border:1px solid var(--jour-pale);
+  background:transparent; color:var(--jour-pale); cursor:pointer; transition:.18s; white-space:nowrap; min-height:32px;
+}
+.sound-btn:hover{ background:rgba(200,132,43,.15); }
+.sound-btn.on{ background:var(--jour); color:#2a1c0a; border-color:var(--jour); }
+.chrono{
+  margin-left:auto; display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(135deg, rgba(107,68,35,.55), rgba(46,33,19,.85));
+  border:1px solid rgba(217,184,120,.45); border-radius:14px; padding:6px 12px;
+  box-shadow:inset 0 0 10px rgba(0,0,0,.4);
+}
+.chrono .sablier{ font-size:1rem; animation:tilt 3s ease-in-out infinite; display:inline-block; }
+@keyframes tilt{ 0%,100%{ transform:rotate(0);} 25%{ transform:rotate(-12deg);} 75%{ transform:rotate(12deg);} }
+.chrono .chrono-lbl{ font-family:'Orbitron',sans-serif; font-size:.56rem; letter-spacing:1px; color:var(--jour-pale); line-height:1.1; }
+.chrono .chrono-time{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1rem; color:var(--txt); letter-spacing:1px; line-height:1.1; text-shadow:0 0 8px rgba(200,132,43,.5); }
+.prog-wrap{ max-width:700px; margin:8px auto 0; }
+.prog-bar{ height:7px; background:rgba(217,184,120,.18); border-radius:6px; overflow:hidden; }
+.prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--jour-fonce), var(--jour), var(--jour-pale)); border-radius:6px; transition:width .6s cubic-bezier(.22,1,.36,1); box-shadow:0 0 10px rgba(200,132,43,.6); }
+.prog-count{ text-align:center; margin-top:5px; font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:1.5px; color:var(--gris); }
+
+/* ============== INTRO ============== */
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.8rem; line-height:1.15; text-align:center; color:var(--txt); margin:6px 0 4px; text-shadow:0 2px 14px rgba(200,132,43,.4); }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:.66rem; letter-spacing:2px; color:var(--gris); text-align:center; margin-bottom:16px; }
+.depart{
+  background:linear-gradient(160deg, var(--panel), var(--panel-2));
+  border:1px solid rgba(200,132,43,.35); border-left:4px solid var(--jour);
+  border-radius:14px; padding:18px 20px; margin-bottom:18px;
+  font-size:.93rem; line-height:1.65; box-shadow:0 6px 24px rgba(0,0,0,.35);
+}
+.depart .dep-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:2px; color:var(--jour-pale); margin-bottom:10px; }
+.depart b{ color:var(--jour-pale); }
+.depart .dep-final{ margin-top:10px; font-style:italic; color:var(--jour-pale); }
+
+/* ============== CARTE ============== */
+.carte-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.7rem; letter-spacing:2px; color:var(--jour-pale); text-align:center; margin:4px 0 10px; }
+.carte-box{
+  border:1px solid rgba(200,132,43,.35); border-radius:16px; overflow:hidden;
+  box-shadow:0 6px 24px rgba(0,0,0,.35); margin-bottom:22px; background:#6b4423;
+}
+.carte-box svg{ display:block; width:100%; height:auto; }
+/* étapes interactives */
+.etape{ cursor:pointer; }
+.etape.lock{ cursor:not-allowed; }
+.etape .halo{ opacity:0; transition:opacity .3s; }
+.etape.current .halo{ opacity:1; animation:halo 1.6s ease-in-out infinite; }
+@keyframes halo{ 0%,100%{ opacity:.35; r:24px; } 50%{ opacity:.7; r:28px; } }
+.etape .pin-num{ font-family:'Orbitron',sans-serif; font-weight:900; }
+
+/* ============== PANNEAU MISSION (modale) ============== */
+.overlay{ position:fixed; inset:0; z-index:60; display:none; align-items:flex-start; justify-content:center; background:rgba(16,11,5,.85); backdrop-filter:blur(4px); padding:24px 14px; overflow-y:auto; }
+.overlay.show{ display:flex; animation:fadein .25s ease; }
+@keyframes fadein{ from{opacity:0;} to{opacity:1;} }
+.mission-card{ width:100%; max-width:560px; margin:auto 0; background:linear-gradient(160deg, var(--panel), var(--panel-2)); border:1.5px solid var(--jour); border-radius:18px; padding:22px 22px 24px; box-shadow:0 0 36px rgba(200,132,43,.3); animation:pop .35s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{ transform:scale(.85); opacity:0;} 100%{ transform:scale(1); opacity:1;} }
+.mission-card.enigme{ border-width:2px; box-shadow:0 0 44px rgba(200,132,43,.45); }
+.m-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+.m-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1rem; letter-spacing:1px; color:var(--jour); }
+.m-badge{ font-family:'Orbitron',sans-serif; font-size:.56rem; font-weight:700; letter-spacing:1.5px; padding:5px 11px; border-radius:13px; background:rgba(200,132,43,.16); color:var(--jour-pale); border:1px solid rgba(200,132,43,.4); white-space:nowrap; }
+.m-enonce{ background:rgba(28,21,13,.55); border:1px dashed rgba(217,184,120,.4); border-radius:11px; padding:14px 16px; margin-bottom:14px; font-size:.94rem; line-height:1.6; }
+.m-enonce b{ color:var(--jour-pale); }
+.m-enonce .expr{ display:block; text-align:center; margin:10px 0 4px; font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.25rem; color:var(--jour); letter-spacing:1px; }
+.m-question{ font-weight:700; font-size:.98rem; margin-bottom:13px; }
+.choix{ display:flex; flex-direction:column; gap:10px; }
+.choix-btn{ text-align:left; font-family:'JetBrains Mono',monospace; font-size:1rem; font-weight:500; padding:14px 16px; border:2px solid rgba(217,184,120,.3); background:rgba(28,21,13,.4); border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt); display:flex; align-items:center; gap:12px; min-height:44px; }
+.choix-btn .lettre{ flex-shrink:0; width:28px; height:28px; border-radius:50%; background:rgba(200,132,43,.18); color:var(--jour-pale); font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem; display:flex; align-items:center; justify-content:center; border:1px solid rgba(200,132,43,.45); }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:rgba(200,132,43,.12); }
+.choix-btn.selected{ border-color:var(--jour); background:rgba(200,132,43,.15); box-shadow:0 0 0 3px rgba(200,132,43,.22); }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{ border-color:var(--vert); background:rgba(123,191,90,.16); }
+.choix-btn.good .lettre{ background:var(--vert); color:#13230b; }
+.choix-btn.bad{ border-color:var(--rouge); background:rgba(216,112,74,.16); }
+.choix-btn.bad .lettre{ background:var(--rouge); color:#2a0f06; }
+.m-input-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.m-input{ flex:1; min-width:120px; font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; padding:13px 15px; border-radius:11px; border:2px solid rgba(217,184,120,.4); background:rgba(28,21,13,.5); color:var(--txt); text-align:center; letter-spacing:1px; }
+.m-input:focus{ outline:none; border-color:var(--jour); box-shadow:0 0 0 3px rgba(200,132,43,.22); }
+.m-input.good{ border-color:var(--vert); }
+.m-input.bad{ border-color:var(--rouge); }
+.m-unit{ color:var(--gris); font-size:.85rem; }
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.btn{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.78rem; letter-spacing:1px; padding:12px 18px; border:none; border-radius:11px; cursor:pointer; transition:transform .12s, box-shadow .2s; color:#fff; min-height:44px; }
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); color:#13230b; }
+.btn-indice{ background:transparent; color:var(--jour-pale); border:1.5px solid var(--jour-pale); }
+.btn:disabled{ background:#48413a !important; color:#8a8073 !important; cursor:not-allowed; box-shadow:none !important; border-color:#48413a !important; }
+.indice-box{ display:none; margin-top:13px; padding:13px 16px; background:rgba(200,132,43,.1); border-left:4px solid var(--jour-pale); border-radius:9px; font-size:.9rem; color:var(--jour-pale); line-height:1.55; }
+.indice-box.show{ display:block; }
+.feedback{ display:none; margin-top:13px; padding:12px 15px; border-radius:10px; font-weight:700; font-size:.95rem; }
+.feedback.show{ display:block; animation:pop .35s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:rgba(123,191,90,.16); color:var(--vert-neon); border:1px solid rgba(123,191,90,.5); }
+.feedback.ko{ background:rgba(216,112,74,.16); color:#f0a98c; border:1px solid rgba(216,112,74,.5); }
+.frag-pop{ display:none; margin-top:13px; padding:13px 16px; background:linear-gradient(135deg, rgba(200,132,43,.22), rgba(107,68,35,.3)); border:1px solid var(--jour); border-radius:11px; font-family:'Orbitron',sans-serif; font-size:.8rem; font-weight:700; letter-spacing:1px; color:var(--jour-pale); text-align:center; }
+.frag-pop.show{ display:block; animation:pop .45s cubic-bezier(.18,.89,.32,1.6); }
+.frag-pop .frag-val{ color:var(--txt); font-size:1.05rem; }
+.btn-fermer{ display:block; width:100%; margin-top:16px; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem; letter-spacing:1px; padding:12px; border:none; border-radius:11px; background:var(--jour); color:#2a1c0a; cursor:pointer; min-height:44px; }
+.btn-fermer:active{ transform:scale(.97); }
+
+/* ============== SCAN ============== */
+.scan{ position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; background:rgba(20,14,7,.92); backdrop-filter:blur(3px); }
+.scan.show{ display:flex; animation:fadein .25s ease; }
+.scan-box{ text-align:center; padding:24px; }
+.scan-ico{ font-size:2.6rem; margin-bottom:14px; animation:sweep 1.1s ease-in-out infinite; }
+@keyframes sweep{ 0%,100%{ transform:translateX(-10px) rotate(-8deg);} 50%{ transform:translateX(10px) rotate(8deg);} }
+.scan-txt{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.92rem; letter-spacing:2px; color:var(--jour-pale); margin-bottom:18px; }
+.scan-track{ width:220px; height:8px; margin:0 auto; background:rgba(217,184,120,.2); border-radius:6px; overflow:hidden; }
+.scan-prog{ height:100%; width:0%; background:linear-gradient(90deg,var(--jour),var(--jour-pale)); box-shadow:0 0 12px var(--jour); }
+
+/* ============== ÉCRAN FINAL ============== */
+.fin{ display:none; background:linear-gradient(160deg, var(--panel), #1f1509); border:1.5px solid var(--jour); border-radius:18px; padding:30px 24px; text-align:center; box-shadow:0 0 40px rgba(200,132,43,.3); }
+.fin.show{ display:block; animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+.fin .trophy{ font-size:3rem; margin-bottom:10px; }
+.fin .fin-titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem; color:var(--jour); letter-spacing:1px; margin-bottom:6px; }
+.fin .fin-score{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; color:var(--jour-pale); margin:6px 0; text-shadow:0 0 16px rgba(200,132,43,.5); }
+.fin .fin-temps{ font-family:'Orbitron',sans-serif; font-size:.82rem; color:var(--gris); letter-spacing:1px; margin-bottom:4px; }
+.fin .fin-grade{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; color:var(--vert-neon); letter-spacing:1px; margin-bottom:16px; }
+.arrivee{ background:rgba(28,21,13,.55); border:1px dashed var(--jour-pale); border-radius:12px; padding:18px; margin:0 0 22px; text-align:left; font-size:.93rem; line-height:1.65; }
+.arrivee .arr-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:2px; color:var(--jour-pale); margin-bottom:10px; text-align:center; }
+.arrivee b{ color:var(--jour-pale); }
+.arrivee .arr-expr{ display:block; text-align:center; margin:10px 0; font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.3rem; color:var(--jour); }
+.btn-recommencer{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.95rem; letter-spacing:1.5px; padding:14px 30px; border:none; border-radius:13px; background:var(--jour); color:#2a1c0a; cursor:pointer; box-shadow:0 0 18px rgba(200,132,43,.5); transition:transform .12s; min-height:44px; }
+.btn-recommencer:active{ transform:scale(.96); }
+.replay-zone{ text-align:center; margin:10px 0 0; display:none; }
+.replay-zone.show{ display:block; }
+
+@media (max-width:1024px){ .wrap{ max-width:100%; } }
+@media (max-width:520px){ .titre{ font-size:1.45rem; } .chrono{ padding:5px 10px; } }
+</style>
+</head>
+<body>
+
+<!-- ============== HUD ============== -->
+<div class="hud">
+  <div class="hud-inner">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 4E
+    </div>
+    <button class="sound-btn" id="sound-btn">🔇 SON</button>
+    <div class="chrono">
+      <span class="sablier">⌛</span>
+      <span>
+        <span class="chrono-lbl">FOUILLE EN COURS</span><br>
+        <span class="chrono-time" id="timer">00:00</span>
+      </span>
+    </div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-count" id="prog-count">0 / 10 FRAGMENTS RETROUVÉS</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <h1 class="titre">Le grand registre de <span class="accent">Tombouctou</span></h1>
+  <div class="sous-titre">SEMAINE 1 · JOUR 1 — CALCUL LITTÉRAL</div>
+
+  <div class="depart">
+    <div class="dep-titre">📜 LE GRAND REGISTRE DE TOMBOUCTOU</div>
+    Au cœur des anciennes bibliothèques de Tombouctou, un registre du XIVe siècle vient
+    d'être découvert sous une pile de manuscrits oubliés. Ce document appartenait à un
+    célèbre libraire : son stock de départ est de <b>150 manuscrits</b> et chaque caravane
+    lui apporte exactement <b>25 nouveaux ouvrages</b>.<br><br>
+    Mais le temps a effacé plusieurs passages du registre. Suivez la <b>piste des caravanes</b>
+    pour retrouver les <b>10 fragments</b> dispersés et reconstituer les calculs du libraire.
+    <div class="dep-final">Saurez-vous faire revivre le grand registre de Tombouctou ?</div>
+  </div>
+
+  <div class="carte-titre">🐫 SUIS LA PISTE DES CARAVANES</div>
+  <div class="carte-box" id="carte-box"></div>
+
+  <!-- écran final -->
+  <div class="fin" id="fin">
+    <div class="trophy">🏺</div>
+    <div class="fin-titre">REGISTRE RECONSTITUÉ</div>
+    <div class="fin-score" id="fin-score">0 / 10</div>
+    <div class="fin-temps">Temps de fouille : <span id="fin-temps">00:00</span></div>
+    <div class="fin-grade" id="fin-grade"></div>
+    <div class="arrivee">
+      <div class="arr-titre">📖 CE QUE TU AS DÉCOUVERT</div>
+      Le registre repose sur une idée centrale : remplacer une <b>lettre</b> par une valeur
+      pour prévoir une quantité. Le stock du libraire s'écrit
+      <span class="arr-expr">stock = 150 + 25 × n</span>
+      où <b>150</b> est le départ, <b>25</b> l'apport d'une caravane, <b>n</b> le nombre de
+      caravanes. Tu as aussi vu que <b>réduire</b> regroupe les termes semblables, qu'un
+      <b>carré</b> ou un <b>cube</b> ne se confond pas avec un produit, et que <b>vérifier une
+      égalité</b>, c'est calculer chaque membre séparément. C'est tout l'art du <b>calcul
+      littéral</b>.
+    </div>
+    <button class="btn-recommencer" id="btn-rec-fin">↻ RECOMMENCER</button>
+  </div>
+
+  <div class="replay-zone" id="replay-zone">
+    <button class="btn-recommencer" id="btn-rec-bas">↻ RECOMMENCER</button>
+  </div>
+
+</div>
+
+<!-- ============== OVERLAYS ============== -->
+<div class="overlay" id="overlay"><div class="mission-card" id="mission-card"></div></div>
+<div class="scan" id="scan">
+  <div class="scan-box">
+    <div class="scan-ico">🔦</div>
+    <div class="scan-txt">ANALYSE DU MANUSCRIT…</div>
+    <div class="scan-track"><div class="scan-prog" id="scan-prog"></div></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* =========================================================
+   10 MISSIONS — calcul littéral contextualisé Tombouctou
+   Réponses vérifiées sous Python.
+   ========================================================= */
+var MISSIONS = [
+  { badge:"SUBSTITUER", type:'input', answer:250, unit:"manuscrits",
+    enonce:"Le registre note le passage de <b>4 caravanes</b>. Le stock se calcule avec "
+         + "<span class='expr'>150 + 25 × n</span> où n est le nombre de caravanes.",
+    question:"Quel est le stock après 4 caravanes ?",
+    indice:"Remplace n par 4 : 150 + 25 \u00d7 4. (Pour t'entra\u00eener, 3 caravanes donneraient 225.)",
+    frag:"FRAGMENT I", fragVal:"stock = 250" },
+  { badge:"RÉDUIRE", type:'qcm',
+    enonce:"Sur une même étagère, le libraire range <b>2 lots de n manuscrits</b> le matin, "
+         + "puis <b>3 lots de n manuscrits</b> le soir, soit <span class='expr'>2n + 3n</span>.",
+    question:"Quelle est la forme réduite ?",
+    choices:["6n","5n","5n²","Impossible à réduire"], correct:1,
+    indice:"2n et 3n sont des termes SEMBLABLES (m\u00eame lettre n). On additionne les coefficients : 2 + 3.",
+    frag:"FRAGMENT II", fragVal:"5n" },
+  { badge:"CARRÉ", type:'input', answer:36, unit:"cases",
+    enonce:"Une étagère <b>carrée</b> a c cases de côté, soit <span class='expr'>c × c = c²</span> "
+         + "cases. Ici le côté mesure <b>c = 6</b> cases.",
+    question:"Combien de cases compte cette étagère carrée ?",
+    indice:"c² = c \u00d7 c = 6 \u00d7 6. (Attention : c² n'est PAS 2 \u00d7 c, qui ferait 12.)",
+    frag:"FRAGMENT III", fragVal:"c² = 36" },
+  { badge:"EXPRESSION", type:'input', answer:36, unit:"manuscrits",
+    enonce:"Un rayon range <span class='expr'>c² + 5c</span> manuscrits, où c est le nombre de "
+         + "cases d'un côté. Le registre indique <b>c = 4</b>.",
+    question:"Combien de manuscrits ce rayon contient-il ?",
+    indice:"Terme par terme : c² = 4 \u00d7 4 = 16, puis 5c = 5 \u00d7 4 = 20, puis additionne.",
+    frag:"FRAGMENT IV", fragVal:"36" },
+  { badge:"CUBE", type:'input', answer:71, unit:"caisses",
+    enonce:"Les manuscrits voyagent dans des <b>caisses cubiques</b> de côté a. La capacité d'un "
+         + "entrepôt vaut <span class='expr'>9 × a³ − 1</span>, avec <b>a = 2</b>.",
+    question:"Quelle est la capacité de l'entrepôt ?",
+    indice:"D'abord a³ = 2 \u00d7 2 \u00d7 2 = 8 (PAS 3 \u00d7 2 = 6). Puis 9 \u00d7 8, puis \u2212 1.",
+    frag:"FRAGMENT V", fragVal:"71" },
+  { badge:"PARENTHÈSES", type:'input', answer:21, unit:"manuscrits",
+    enonce:"Chaque caravane apporte <b>(m + 2)</b> manuscrits, et <b>3 caravanes</b> passent : "
+         + "<span class='expr'>3 × (m + 2)</span>, avec <b>m = 5</b>.",
+    question:"Combien de manuscrits au total ?",
+    indice:"Calcule d'abord la parenth\u00e8se : m + 2 = 5 + 2 = 7. Puis multiplie par 3.",
+    frag:"FRAGMENT VI", fragVal:"21" },
+  { badge:"PRIORITÉS", type:'input', answer:18, unit:"manuscrits",
+    enonce:"Sur un rayon de 50 cases, le libraire retire <b>8 manuscrits par caravane</b> : "
+         + "<span class='expr'>50 − 8 × c</span>, avec <b>c = 4</b> caravanes.",
+    question:"Combien de manuscrits restent sur le rayon ?",
+    indice:"Priorit\u00e9 \u00e0 la multiplication : 8 \u00d7 4 = 32, puis 50 \u2212 32. (Ne fais PAS (50\u22128)\u00d74.)",
+    frag:"FRAGMENT VII", fragVal:"18" },
+  { badge:"RÉDUIRE (PIÈGE)", type:'qcm',
+    enonce:"Un fragment porte l'expression mélangée <span class='expr'>3n + 6 + 7n² + 6n²</span>.",
+    question:"Quelle est la forme réduite ?",
+    choices:["22n²","13n² + 9n","13n² + 3n + 6","3n³ + 13n² + 6"], correct:2,
+    indice:"On n'additionne QUE les termes de M\u00caME partie litt\u00e9rale : 7n² + 6n² = 13n². Le 3n et le 6 restent seuls.",
+    frag:"FRAGMENT VIII", fragVal:"13n² + 3n + 6" },
+  { badge:"VÉRIFIER", type:'qcm',
+    enonce:"Deux libraires comptent leur stock pour <b>n = 5</b> caravanes. Le premier : "
+         + "<b>150 + 25n</b>. Le second : <b>175 + 20n</b>.",
+    question:"L'égalité 150 + 25n = 175 + 20n est-elle vraie pour n = 5 ?",
+    choices:["Vraie : les deux valent 275","Vraie : les deux valent 300","Fausse : 275 ≠ 300","On ne peut pas savoir"],
+    correct:0,
+    indice:"Calcule chaque membre s\u00e9par\u00e9ment pour n = 5. Gauche : 150 + 25\u00d75. Droite : 175 + 20\u00d75.",
+    frag:"FRAGMENT IX", fragVal:"275 = 275" },
+  { badge:"ÉNIGME", type:'qcm', enigme:true,
+    enonce:"Le dernier fragment décrit le programme du libraire : « partir de <b>150 "
+         + "manuscrits</b>, puis ajouter <b>25 manuscrits</b> par caravane ». On note <b>x</b> "
+         + "le nombre de caravanes.",
+    question:"Quelle expression traduit ce programme ?",
+    choices:["150 × 25 + x","150 + 25 × x","(150 + 25) × x","25 + 150 × x"], correct:1,
+    indice:"On PART de 150 (fixe), puis on AJOUTE 25 pour chaque caravane, donc 25 multipli\u00e9 par x.",
+    frag:"CLÉ DU REGISTRE", fragVal:"150 + 25x" }
+];
+
+var TOTAL = MISSIONS.length;
+var LETTRES = ['A','B','C','D'];
+var $ = function(id){ return document.getElementById(id); };
+
+/* positions des 10 étapes sur la carte (coordonnées SVG, viewBox 0..700 / 0..380) */
+var POS = [
+  {x:60,  y:200}, {x:160, y:160}, {x:175, y:250}, {x:240, y:290}, {x:300, y:210},
+  {x:340, y:150}, {x:375, y:215}, {x:455, y:270}, {x:525, y:195}, {x:625, y:120}
+];
+/* tracé de la piste passant par les 10 points (chemin sinueux) */
+var PISTE = "M60 200 Q120 130 160 160 Q210 195 175 250 Q150 300 240 290 Q320 285 300 210 "
+          + "Q288 150 340 150 Q390 150 375 215 Q365 280 455 270 Q545 262 525 195 "
+          + "Q510 140 625 120";
+
+var etat = MISSIONS.map(function(){ return { done:false, picked:null }; });
+var solved = 0;
+var unlocked = 0;   /* index de la prochaine étape jouable (itinéraire ordonné) */
+var openIdx = null;
+
+/* ============== CHRONO ============== */
+var startTime = Date.now(), timerInt = null;
+function fmt(s){ var m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
+function tick(){ $('timer').textContent = fmt(Math.floor((Date.now()-startTime)/1000)); }
+function startTimer(){ if(timerInt) clearInterval(timerInt); startTime=Date.now(); tick(); timerInt=setInterval(tick,1000); }
+function stopTimer(){ if(timerInt){ clearInterval(timerInt); timerInt=null; } }
+
+/* ============== CONSTRUCTION DE LA CARTE SVG ============== */
+function buildCarte(){
+  var svg = '';
+  svg += '<svg viewBox="0 0 700 380" role="img" aria-label="Carte de la piste des caravanes" xmlns="http://www.w3.org/2000/svg">';
+  svg += '<defs><linearGradient id="sable" x1="0" y1="0" x2="0" y2="1">'
+       + '<stop offset="0%" stop-color="#e8d3a8"/><stop offset="100%" stop-color="#d9b878"/></linearGradient></defs>';
+  // fond
+  svg += '<rect x="0" y="0" width="700" height="380" fill="#6b4423"/>';
+  svg += '<rect x="9" y="9" width="682" height="362" rx="10" fill="url(#sable)"/>';
+  svg += '<rect x="9" y="9" width="682" height="362" rx="10" fill="none" stroke="#6b4423" stroke-width="3" stroke-dasharray="1 6" opacity="0.55"/>';
+  // dunes
+  svg += '<g opacity="0.4" fill="none" stroke="#c0a063" stroke-width="2">'
+       + '<path d="M30 80 Q90 60 150 82 T270 80"/><path d="M430 70 Q490 52 550 74 T660 72"/>'
+       + '<path d="M40 320 Q110 300 180 322 T320 320"/><path d="M390 330 Q460 312 530 332 T660 330"/></g>';
+  // touffes
+  svg += '<g opacity="0.5" fill="#b88f4d">'
+       + '<circle cx="80" cy="120" r="3"/><circle cx="120" cy="320" r="2.5"/><circle cx="430" cy="120" r="3"/>'
+       + '<circle cx="600" cy="280" r="2.5"/><circle cx="280" cy="120" r="2.5"/><circle cx="500" cy="320" r="2.5"/></g>';
+  // cité au centre
+  svg += '<rect x="255" y="120" width="180" height="150" rx="8" fill="#cbb079" stroke="#8a5a28" stroke-width="2"/>';
+  svg += '<rect x="255" y="120" width="180" height="150" rx="8" fill="none" stroke="#6b4423" stroke-width="1" stroke-dasharray="4 4"/>';
+  svg += '<text x="345" y="108" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="12" font-weight="700" fill="#5a3a18" letter-spacing="1">CITÉ DE TOMBOUCTOU</text>';
+  svg += '<g fill="#8a5a28"><rect x="268" y="135" width="14" height="14" rx="2"/><rect x="290" y="135" width="14" height="14" rx="2"/>'
+       + '<rect x="312" y="135" width="14" height="14" rx="2"/><rect x="365" y="135" width="14" height="14" rx="2"/>'
+       + '<rect x="388" y="135" width="14" height="14" rx="2"/><rect x="410" y="135" width="14" height="14" rx="2"/></g>';
+  svg += '<text x="345" y="255" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="10" fill="#5a3a18">la grande bibliothèque</text>';
+  // piste complète (fond clair) + portion parcourue (overlay coloré)
+  svg += '<path d="'+PISTE+'" fill="none" stroke="#9c7a45" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round" opacity="0.6"/>';
+  svg += '<path id="piste-fait" d="'+PISTE+'" fill="none" stroke="#c8842b" stroke-width="3.5" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>';
+  // rose des vents
+  svg += '<g transform="translate(635,310)"><circle r="22" fill="none" stroke="#7a4a1e" stroke-width="1.5"/>'
+       + '<path d="M0 -18 L4 0 L0 18 L-4 0 Z" fill="#c8842b"/>'
+       + '<text x="0" y="-26" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="9" font-weight="700" fill="#5a3a18">N</text></g>';
+  // étapes
+  POS.forEach(function(p, i){
+    var enigme = MISSIONS[i].enigme;
+    var label = enigme ? '🗝' : (i+1);
+    svg += '<g class="etape" id="etape-'+i+'" data-i="'+i+'">';
+    svg += '<circle class="halo" cx="'+p.x+'" cy="'+p.y+'" r="24" fill="#c8842b"/>';
+    svg += '<circle class="pin" cx="'+p.x+'" cy="'+p.y+'" r="'+(enigme?18:16)+'" fill="#9c7a45" stroke="#e8d3a8" stroke-width="2"/>';
+    svg += '<text class="pin-num" x="'+p.x+'" y="'+(p.y+5)+'" text-anchor="middle" font-size="'+(enigme?15:13)+'" fill="#3a2410">'+label+'</text>';
+    svg += '</g>';
+  });
+  svg += '</svg>';
+  $('carte-box').innerHTML = svg;
+  refreshCarte();
+}
+
+/* met à jour l'aspect des étapes + la portion de piste parcourue */
+function refreshCarte(){
+  POS.forEach(function(p, i){
+    var g = $('etape-'+i);
+    if(!g) return;
+    var pin = g.querySelector('.pin');
+    var num = g.querySelector('.pin-num');
+    g.classList.remove('current','lock');
+    if(etat[i].done){
+      pin.setAttribute('fill', '#7bbf5a'); pin.setAttribute('stroke', '#fff5e0');
+      num.setAttribute('fill', '#13230b');
+    } else if(i === unlocked){
+      pin.setAttribute('fill', '#c8842b'); pin.setAttribute('stroke', '#fff5e0');
+      num.setAttribute('fill', '#2a1c0a');
+      g.classList.add('current');
+    } else {
+      pin.setAttribute('fill', '#9c7a45'); pin.setAttribute('stroke', '#e8d3a8');
+      num.setAttribute('fill', '#3a2410');
+      g.classList.add('lock');
+    }
+  });
+  // piste parcourue : proportionnelle au nb de fragments faits
+  var fait = etat.filter(function(s){ return s.done; }).length;
+  var pl = $('piste-fait');
+  if(pl){
+    var pct = Math.round((fait/(TOTAL-1))*100);
+    if(fait >= TOTAL) pct = 100;
+    pl.setAttribute('stroke-dasharray', pct + ' 100');
+  }
+}
+
+/* clic sur une étape */
+$('carte-box').addEventListener('click', function(e){
+  var g = e.target.closest('.etape');
+  if(!g) return;
+  var i = parseInt(g.dataset.i,10);
+  if(etat[i].done) return;
+  if(i !== unlocked) return;   // itinéraire ordonné : seule l'étape courante est jouable
+  playDigSoft();
+  ouvrirScanPuisMission(i);
+});
+
+/* ============== SCAN PUIS MISSION ============== */
+function ouvrirScanPuisMission(i){
+  var scan = $('scan'), prog = $('scan-prog');
+  scan.classList.add('show');
+  prog.style.transition='none'; prog.style.width='0%'; void prog.offsetWidth;
+  prog.style.transition='width .7s ease'; prog.style.width='100%';
+  setTimeout(function(){ scan.classList.remove('show'); ouvrirMission(i); }, 800);
+}
+
+/* ============== OUVRIR MISSION ============== */
+function ouvrirMission(i){
+  openIdx = i;
+  var m = MISSIONS[i];
+  var card = $('mission-card');
+  card.className = 'mission-card' + (m.enigme ? ' enigme' : '');
+  var html = '';
+  html += '<div class="m-head">'
+        +   '<div class="m-num">'+(m.enigme ? '🗝️ ÉNIGME FINALE' : '⛏️ FRAGMENT '+(i+1))+'</div>'
+        +   '<div class="m-badge">'+m.badge+'</div>'
+        + '</div>'
+        + '<div class="m-enonce">'+m.enonce+'</div>'
+        + '<div class="m-question">'+m.question+'</div>';
+  if(m.type === 'qcm'){
+    html += '<div class="choix" id="choix-zone">';
+    m.choices.forEach(function(c, ci){
+      html += '<button class="choix-btn" data-ci="'+ci+'"><span class="lettre">'+LETTRES[ci]+'</span><span>'+c+'</span></button>';
+    });
+    html += '</div>';
+  } else {
+    html += '<div class="m-input-row"><input class="m-input" id="m-input" type="text" inputmode="numeric" placeholder="?" autocomplete="off"><span class="m-unit">'+(m.unit||'')+'</span></div>';
+  }
+  html += '<div class="btns">'
+        +   '<button class="btn btn-valider" id="btn-valider" disabled>✓ VALIDER</button>'
+        +   '<button class="btn btn-indice" id="btn-indice">? INDICE</button>'
+        + '</div>'
+        + '<div class="indice-box" id="indice-box"></div>'
+        + '<div class="feedback" id="feedback"></div>'
+        + '<div class="frag-pop" id="frag-pop"></div>'
+        + '<button class="btn-fermer" id="btn-fermer" style="display:none;">↩ RETOUR À LA CARTE</button>';
+  card.innerHTML = html;
+  $('overlay').classList.add('show');
+
+  if(m.type === 'qcm'){
+    card.querySelectorAll('.choix-btn').forEach(function(b){
+      b.addEventListener('click', function(){
+        if(etat[i].done) return;
+        etat[i].picked = parseInt(b.dataset.ci,10);
+        card.querySelectorAll('.choix-btn').forEach(function(x){ x.classList.remove('selected'); });
+        b.classList.add('selected');
+        $('btn-valider').disabled = false;
+      });
+    });
+  } else {
+    var inp = $('m-input');
+    inp.addEventListener('input', function(){ $('btn-valider').disabled = (inp.value.trim()===''); });
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter' && !etat[i].done && inp.value.trim()!==''){ valider(i); } });
+    setTimeout(function(){ inp.focus(); }, 60);
+  }
+  $('btn-valider').addEventListener('click', function(){ valider(i); });
+  $('btn-indice').addEventListener('click', function(){ montrerIndice(i); });
+  $('btn-fermer').addEventListener('click', fermerMission);
+}
+
+function montrerIndice(i){
+  if(etat[i].done) return;
+  var box = $('indice-box');
+  box.classList.add('show');
+  box.innerHTML = '💡 ' + MISSIONS[i].indice;
+  $('btn-indice').disabled = true;
+}
+
+/* ============== VALIDATION ============== */
+function valider(i){
+  if(etat[i].done) return;
+  var m = MISSIONS[i];
+  var bon = false;
+  if(m.type === 'qcm'){
+    if(etat[i].picked == null) return;
+    bon = (etat[i].picked === m.correct);
+    document.querySelectorAll('#choix-zone .choix-btn').forEach(function(b, ci){
+      b.classList.add('locked'); b.disabled = true;
+      if(ci === m.correct) b.classList.add('good');
+      else if(ci === etat[i].picked) b.classList.add('bad');
+    });
+  } else {
+    var inp = $('m-input');
+    var raw = inp.value.trim().replace(/\s/g,'').replace(',', '.');
+    bon = (parseFloat(raw) === m.answer);
+    inp.classList.add(bon ? 'good' : 'bad');
+    inp.disabled = true;
+  }
+  etat[i].done = true;
+
+  var fb = $('feedback');
+  fb.className = 'feedback show ' + (bon ? 'ok' : 'ko');
+  fb.innerHTML = bon ? '✅ Fragment dégagé !' : '❌ Pas tout à fait. Fragment perdu.';
+  if(bon){
+    solved++;
+    playDig();
+    var fp = $('frag-pop');
+    fp.classList.add('show');
+    fp.innerHTML = '🧩 ' + m.frag + ' restauré : <span class="frag-val">' + m.fragVal + '</span>';
+  }
+  $('btn-valider').disabled = true;
+  $('btn-indice').disabled = true;
+  $('btn-fermer').style.display = 'block';
+
+  // itinéraire ordonné : débloquer la suivante (qu'on ait réussi ou non, on avance)
+  if(unlocked < TOTAL) unlocked = i + 1;
+
+  updateProgress();
+}
+
+function fermerMission(){
+  $('overlay').classList.remove('show');
+  openIdx = null;
+  refreshCarte();
+  if(etat.every(function(s){ return s.done; })){ terminer(); }
+}
+
+/* ============== PROGRESSION ============== */
+function updateProgress(){
+  var finis = etat.filter(function(s){ return s.done; }).length;
+  $('prog-fill').style.width = Math.round((finis/TOTAL)*100) + '%';
+  $('prog-count').textContent = solved + ' / ' + TOTAL + ' FRAGMENTS RETROUVÉS';
+}
+
+/* ============== TERMINER ============== */
+function terminer(){
+  stopTimer();
+  $('fin-score').textContent = solved + ' / ' + TOTAL;
+  $('fin-temps').textContent = fmt(Math.floor((Date.now()-startTime)/1000));
+  var grade;
+  if(solved === TOTAL)      grade = '🏅 ARCHÉOLOGUE ÉMÉRITE — sans faute !';
+  else if(solved >= 8)      grade = '🥈 EXPLORATEUR CONFIRMÉ';
+  else if(solved >= 5)      grade = '🥉 APPRENTI FOUILLEUR';
+  else                      grade = '📜 NOVICE — relance la fouille !';
+  $('fin-grade').textContent = grade;
+  $('fin').classList.add('show');
+  $('replay-zone').classList.add('show');
+  $('fin').scrollIntoView({ behavior:'smooth', block:'center' });
+  playFanfare();
+}
+
+/* ============== RECOMMENCER ============== */
+function recommencer(){
+  etat = MISSIONS.map(function(){ return { done:false, picked:null }; });
+  solved = 0; unlocked = 0; openIdx = null;
+  $('overlay').classList.remove('show');
+  $('fin').classList.remove('show');
+  $('replay-zone').classList.remove('show');
+  $('prog-fill').style.width='0%';
+  $('prog-count').textContent = '0 / '+TOTAL+' FRAGMENTS RETROUVÉS';
+  buildCarte();
+  startTimer();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+$('btn-rec-fin').addEventListener('click', recommencer);
+$('btn-rec-bas').addEventListener('click', recommencer);
+
+/* =========================================================
+   SON DE FOUILLES — Web Audio API (100% autonome)
+   ========================================================= */
+var audioCtx = null, soundOn = false, ambientNodes = null;
+function ensureCtx(){
+  if(!audioCtx){
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    catch(e){ audioCtx = null; }
+  }
+  if(audioCtx && audioCtx.state === 'suspended'){ audioCtx.resume(); }
+  return audioCtx;
+}
+function makeNoiseBuffer(dur){
+  var ctx = audioCtx;
+  var len = Math.floor(ctx.sampleRate * dur);
+  var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  var data = buf.getChannelData(0);
+  for(var k=0;k<len;k++){ data[k] = Math.random()*2 - 1; }
+  return buf;
+}
+function playDig(){
+  if(!soundOn) return;
+  var ctx = ensureCtx(); if(!ctx) return;
+  var t = ctx.currentTime;
+  var src = ctx.createBufferSource(); src.buffer = makeNoiseBuffer(0.25);
+  var bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=420; bp.Q.value=0.8;
+  var g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.5,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.22);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.25);
+  var osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.setValueAtTime(120,t); osc.frequency.exponentialRampToValueAtTime(55,t+0.18);
+  var go = ctx.createGain();
+  go.gain.setValueAtTime(0.0001,t); go.gain.exponentialRampToValueAtTime(0.35,t+0.02); go.gain.exponentialRampToValueAtTime(0.0001,t+0.3);
+  osc.connect(go); go.connect(ctx.destination); osc.start(t); osc.stop(t+0.32);
+}
+function playDigSoft(){
+  if(!soundOn) return;
+  var ctx = ensureCtx(); if(!ctx) return;
+  var t = ctx.currentTime;
+  var src = ctx.createBufferSource(); src.buffer = makeNoiseBuffer(0.15);
+  var bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=300; bp.Q.value=0.7;
+  var g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.14);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.15);
+}
+function startAmbient(){
+  var ctx = ensureCtx(); if(!ctx) return;
+  if(ambientNodes) return;
+  var src = ctx.createBufferSource(); src.buffer = makeNoiseBuffer(2.0); src.loop = true;
+  var lp = ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=600;
+  var g = ctx.createGain(); g.gain.value=0.05;
+  src.connect(lp); lp.connect(g); g.connect(ctx.destination); src.start();
+  ambientNodes = { src:src, g:g };
+}
+function stopAmbient(){ if(ambientNodes){ try { ambientNodes.src.stop(); } catch(e){} ambientNodes = null; } }
+function playFanfare(){
+  if(!soundOn) return;
+  var ctx = ensureCtx(); if(!ctx) return;
+  var t0 = ctx.currentTime;
+  [392,523,659].forEach(function(f, k){
+    var t = t0 + k*0.13;
+    var o = ctx.createOscillator(); o.type='triangle'; o.frequency.value=f;
+    var g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.3,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.42);
+  });
+}
+$('sound-btn').addEventListener('click', function(){
+  soundOn = !soundOn;
+  var btn = $('sound-btn');
+  if(soundOn){ ensureCtx(); btn.classList.add('on'); btn.textContent='🔊 SON'; startAmbient(); playDig(); }
+  else { btn.classList.remove('on'); btn.textContent='🔇 SON'; stopAmbient(); }
+});
+
+/* ============== INIT ============== */
+buildCarte();
+startTimer();
+updateProgress();
+</script>
+</body>
+</html>
