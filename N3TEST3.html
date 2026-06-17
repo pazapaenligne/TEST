@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La console des fonctions · Pazapa 3e · S2 J1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   3e · Semaine 2 · Jour 1 — « La console des fonctions »
+   Notion : fonction linéaire — image & antécédent
+   Sans situation narrative · thème sombre néon · couleur du jour : indigo/cyan
+   ============================================================ */
+:root{
+  --jour:#5b8cff;        /* indigo électrique (couleur du jour) */
+  --jour-fonce:#3a5fd9;
+  --jour-clair:#1a2347;
+  --jour-pale:#7da2ff;
+  --accent2:#22d3ee;     /* cyan néon secondaire */
+  --vert:#22c55e;
+  --rouge:#ef4444;
+  --bg:#0b1020;
+  --panel:#121a33;
+  --panel2:#0f1730;
+  --txt:#e8edff;
+  --gris:#8a96bf;
+  --bord:#26305a;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:'JetBrains Mono','Courier New',monospace;
+  background:
+    radial-gradient(circle at 16% 10%, rgba(91,140,255,.16), transparent 44%),
+    radial-gradient(circle at 86% 84%, rgba(34,211,238,.12), transparent 46%),
+    var(--bg);
+  color:var(--txt); min-height:100vh; overflow-x:hidden; position:relative; padding:0 0 60px;
+}
+.wrap{ position:relative; z-index:2; max-width:700px; margin:0 auto; padding:0 16px; }
+
+/* ============== HUD ============== */
+.hud{ position:sticky; top:0; z-index:30; background:linear-gradient(180deg, rgba(11,16,32,.97), rgba(11,16,32,.82)); backdrop-filter:blur(6px); border-bottom:1px solid var(--bord); padding:10px 16px; margin-bottom:18px; }
+.hud-inner{ max-width:700px; margin:0 auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.logo-badge{ display:inline-flex; align-items:center; gap:8px; background:var(--jour); color:#06122e; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.68rem; letter-spacing:1.5px; padding:6px 13px; border-radius:18px; box-shadow:0 3px 12px rgba(91,140,255,.5); }
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; display:block; }
+.logo-badge .dots i:nth-child(1){ background:var(--accent2); }
+.logo-badge .dots i:nth-child(2){ background:#fff; }
+.logo-badge .dots i:nth-child(3){ background:var(--jour-fonce); }
+.sound-btn{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:1px; padding:7px 12px; border-radius:14px; border:1.5px solid var(--jour-pale); background:transparent; color:var(--jour-pale); cursor:pointer; transition:.18s; white-space:nowrap; min-height:32px; }
+.sound-btn.on{ background:var(--jour); color:#06122e; }
+.chrono{ margin-left:auto; display:inline-flex; align-items:center; gap:8px; background:var(--panel); border:1px solid var(--bord); border-radius:14px; padding:6px 12px; box-shadow:0 2px 10px rgba(0,0,0,.35); }
+.chrono .ico{ font-size:1rem; }
+.chrono .chrono-lbl{ font-family:'Orbitron',sans-serif; font-size:.56rem; letter-spacing:1px; color:var(--gris); line-height:1.1; }
+.chrono .chrono-time{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1rem; color:var(--txt); letter-spacing:1px; line-height:1.1; }
+.prog-wrap{ max-width:700px; margin:8px auto 0; }
+.prog-bar{ height:7px; background:rgba(91,140,255,.18); border-radius:6px; overflow:hidden; }
+.prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--jour-fonce), var(--jour), var(--accent2)); border-radius:6px; transition:width .6s cubic-bezier(.22,1,.36,1); }
+.prog-count{ text-align:center; margin-top:5px; font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:1.5px; color:var(--gris); }
+
+/* ============== TITRE ============== */
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.7rem; line-height:1.15; text-align:center; color:var(--txt); margin:6px 0 4px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:.66rem; letter-spacing:2px; color:var(--gris); text-align:center; margin-bottom:16px; }
+
+/* ============== PAGES ============== */
+.page{ display:none; }
+.page.show{ display:block; animation:fadein .4s ease; }
+@keyframes fadein{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+
+/* affiche */
+.affiche{ background:var(--panel); border:2px solid var(--jour); border-radius:18px; padding:22px 22px 24px; margin-bottom:20px; box-shadow:0 6px 26px rgba(91,140,255,.22); }
+.aff-titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.05rem; letter-spacing:1px; color:var(--jour); text-align:center; margin-bottom:14px; }
+.aff-grid{ display:grid; grid-template-columns:150px 1fr; gap:18px; align-items:center; }
+@media (max-width:560px){ .aff-grid{ grid-template-columns:1fr; } .aff-grid .visuel-zone{ order:-1; } }
+.aff-intro{ font-size:.92rem; line-height:1.65; color:#c4cdf0; }
+.aff-intro b{ color:var(--jour-pale); }
+.aff-rappel{ display:flex; flex-direction:column; gap:7px; margin:14px 0; }
+.aff-rap{ display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-weight:500; font-size:.82rem; padding:8px 12px; border-radius:10px; border:1px solid var(--bord); background:var(--panel2); color:#c4cdf0; }
+.aff-rap b{ color:var(--accent2); font-weight:700; }
+.aff-question{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.84rem; color:var(--jour); text-align:center; margin:8px 0 16px; }
+.btn-commencer{ display:block; width:100%; font-family:'Orbitron',sans-serif; font-weight:700; font-size:1.05rem; letter-spacing:1.5px; padding:16px; border:none; border-radius:14px; background:var(--jour); color:#06122e; cursor:pointer; box-shadow:0 4px 18px rgba(91,140,255,.55); transition:transform .12s; min-height:44px; animation:pulse 1.8s ease-in-out infinite; }
+.btn-commencer:active{ transform:scale(.97); }
+@keyframes pulse{ 0%,100%{ box-shadow:0 4px 18px rgba(91,140,255,.55); } 50%{ box-shadow:0 6px 26px rgba(91,140,255,.85); } }
+
+/* ============== PANNEAU VISUEL (console, décoratif) ============== */
+.console{ background:var(--panel2); border:1px solid var(--bord); border-radius:16px; padding:16px 14px; box-shadow:0 4px 18px rgba(0,0,0,.4); }
+.console-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.6rem; letter-spacing:1px; color:var(--gris); text-align:center; margin-bottom:12px; }
+.machine-illus{ display:block; width:100%; max-width:180px; margin:0 auto 12px; }
+@keyframes flux{ 0%{ stroke-dashoffset:40; } 100%{ stroke-dashoffset:0; } }
+.flux-anim{ stroke-dasharray:6 6; animation:flux 1.4s linear infinite; }
+@keyframes blink{ 0%,100%{ opacity:1; } 50%{ opacity:.25; } }
+.led-anim{ animation:blink 1.6s ease-in-out infinite; }
+.console-read{ text-align:center; }
+.console-coef{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem; color:var(--accent2); }
+.console-mode{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.58rem; letter-spacing:1px; margin-top:3px; color:var(--gris); }
+.console-jauge-wrap{ margin-top:14px; }
+.console-jauge-lbl{ font-family:'Orbitron',sans-serif; font-size:.56rem; letter-spacing:1px; color:var(--jour-pale); margin-bottom:5px; text-align:center; }
+.console-jauge{ height:12px; background:#0a1228; border-radius:7px; overflow:hidden; border:1px solid var(--bord); }
+.console-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--jour-fonce), var(--accent2)); border-radius:7px; transition:width .5s ease; }
+
+/* ============== LAYOUT 2 COLONNES ============== */
+.main-layout{ display:grid; grid-template-columns:200px 1fr; gap:20px; align-items:start; }
+.col-gauche{ position:sticky; top:96px; }
+.col-droite{ min-width:0; }
+@media (max-width:900px){ .main-layout{ grid-template-columns:1fr; gap:0; } .col-gauche{ position:static; } }
+
+/* ============== MISSIONS ============== */
+.mission{ background:var(--panel); border:2px solid var(--bord); border-radius:16px; padding:18px 20px 20px; margin-bottom:16px; box-shadow:0 3px 14px rgba(0,0,0,.3); opacity:.4; filter:grayscale(.4); transition:opacity .4s, filter .4s; }
+.mission.active{ opacity:1; filter:none; border-color:var(--jour); box-shadow:0 0 18px rgba(91,140,255,.28); }
+.mission.done{ opacity:.92; filter:none; border-color:var(--vert); background:#0e2018; }
+.mission.enigme.active{ border-color:var(--accent2); box-shadow:0 0 22px rgba(34,211,238,.3); }
+.m-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px; }
+.m-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:.95rem; letter-spacing:.5px; color:var(--jour); }
+.m-badge{ font-family:'Orbitron',sans-serif; font-size:.54rem; font-weight:700; letter-spacing:1px; padding:5px 10px; border-radius:12px; background:var(--jour-clair); color:var(--jour-pale); border:1px solid var(--bord); white-space:nowrap; }
+.m-enonce{ font-size:.92rem; line-height:1.55; margin-bottom:12px; color:#d4dcff; }
+.m-enonce b{ color:var(--jour-pale); }
+.m-calc{ text-align:center; font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.5rem; color:var(--accent2); padding:16px 10px; background:var(--panel2); border:1.5px solid var(--bord); border-radius:10px; margin-bottom:14px; letter-spacing:2px; }
+.m-calc .trou{ color:var(--jour); border-bottom:2px dashed var(--jour); padding:0 12px; }
+.m-question{ font-weight:700; font-size:.92rem; margin-bottom:12px; color:#e8edff; }
+.saisie{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; padding:14px 8px; background:var(--panel2); border-radius:10px; margin-bottom:6px; }
+.saisie .prefix{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; color:var(--jour-pale); }
+.saisie input{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:16px; text-align:center; width:120px; padding:12px; border:2px solid var(--bord); border-radius:8px; background:#0a1228; color:var(--txt); }
+.saisie input:focus{ outline:none; border-color:var(--jour); box-shadow:0 0 0 3px rgba(91,140,255,.3); }
+.saisie input.good{ border-color:var(--vert); background:#0e2018; }
+.saisie input.bad{ border-color:var(--rouge); background:#2a1212; }
+.unit{ font-family:'Orbitron',sans-serif; font-weight:700; color:var(--gris); }
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+.btn{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.78rem; letter-spacing:1px; padding:12px 18px; border:none; border-radius:10px; cursor:pointer; transition:transform .12s; color:#fff; min-height:44px; }
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-valider:not(:disabled){ animation:pulseV 1.6s ease-in-out infinite; }
+@keyframes pulseV{ 0%,100%{ box-shadow:0 0 5px rgba(34,197,94,.4); } 50%{ box-shadow:0 0 14px rgba(34,197,94,.8); } }
+.btn-indice{ background:transparent; color:var(--accent2); border:1.5px solid var(--accent2); }
+.btn-calc{ background:transparent; color:var(--jour-pale); border:1.5px solid var(--bord); }
+.btn:disabled{ background:#2b3457 !important; color:#6f7aa3 !important; cursor:not-allowed; animation:none !important; box-shadow:none !important; border-color:#2b3457 !important; }
+.indice-box{ display:none; margin-top:12px; padding:11px 14px; background:#0c2630; border-left:4px solid var(--accent2); border-radius:8px; font-size:.86rem; color:#a9e8f5; line-height:1.5; }
+.indice-box.show{ display:block; }
+.feedback{ display:none; margin-top:12px; padding:11px 14px; border-radius:9px; font-weight:700; font-size:.9rem; }
+.feedback.show{ display:block; animation:pop .35s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:#0e2c1a; color:#7ff0a6; border:1px solid #1f6b3e; }
+.feedback.ko{ background:#2c1414; color:#ff9b9b; border:1px solid #6b2020; }
+@keyframes pop{ 0%{ transform:scale(.7); opacity:0; } 100%{ transform:scale(1); opacity:1; } }
+.fragment{ display:none; margin-top:12px; padding:11px 14px; background:var(--jour-clair); border:1px solid var(--jour); border-radius:9px; font-family:'Orbitron',sans-serif; font-size:.76rem; font-weight:700; letter-spacing:.5px; color:var(--jour-pale); text-align:center; }
+.fragment.show{ display:block; animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.fragment .frag-val{ color:var(--accent2); font-size:.95rem; }
+
+/* overlay scan */
+.scan{ position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; background:rgba(6,10,24,.85); backdrop-filter:blur(3px); }
+.scan.show{ display:flex; animation:fadein .25s ease; }
+.scan-box{ text-align:center; padding:24px; }
+.scan-ico{ font-size:2.4rem; margin-bottom:14px; }
+.scan-txt{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.86rem; letter-spacing:2px; color:#fff; margin-bottom:18px; }
+.scan-track{ width:220px; height:8px; margin:0 auto; background:rgba(255,255,255,.2); border-radius:6px; overflow:hidden; }
+.scan-prog{ height:100%; width:0%; background:linear-gradient(90deg,var(--jour),var(--accent2)); }
+
+/* écran final */
+.fin{ display:none; background:var(--panel); border:2px solid var(--jour); border-radius:18px; padding:30px 24px; text-align:center; box-shadow:0 8px 32px rgba(91,140,255,.3); }
+.fin.show{ display:block; animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+.fin .trophy{ font-size:3rem; margin-bottom:10px; }
+.fin .fin-titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.3rem; color:var(--jour); letter-spacing:1px; margin-bottom:10px; }
+.bilan{ background:var(--jour-clair); border:2px dashed var(--jour); border-radius:14px; padding:18px; margin:6px auto 16px; max-width:400px; }
+.bilan .bil-titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1rem; color:var(--jour-pale); letter-spacing:1px; margin-bottom:8px; }
+.bilan .bil-txt{ font-size:.9rem; line-height:1.6; color:#c4cdf0; }
+.bilan .bil-txt b{ color:var(--accent2); }
+.fin .fin-temps{ font-family:'Orbitron',sans-serif; font-size:.78rem; color:var(--gris); letter-spacing:1px; margin-bottom:4px; }
+.fin .fin-grade{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.95rem; color:var(--accent2); letter-spacing:.5px; margin-bottom:18px; }
+.btn-recommencer{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.95rem; letter-spacing:1.5px; padding:14px 30px; border:none; border-radius:13px; background:var(--jour); color:#06122e; cursor:pointer; box-shadow:0 4px 18px rgba(91,140,255,.55); transition:transform .12s; min-height:44px; }
+.btn-recommencer:active{ transform:scale(.96); }
+.replay-zone{ text-align:center; margin:10px 0 0; display:none; }
+.replay-zone.show{ display:block; }
+
+.progress-toast{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); background:var(--panel); border:2px solid var(--jour); border-radius:14px; padding:12px 20px; font-size:.88rem; font-weight:bold; color:var(--jour-pale); box-shadow:0 6px 24px rgba(91,140,255,.45); z-index:60; opacity:0; pointer-events:none; max-width:90vw; text-align:center; }
+.progress-toast.show{ animation:toastIn 2.2s ease forwards; }
+@keyframes toastIn{ 0%{ opacity:0; transform:translateX(-50%) translateY(20px); } 12%{ opacity:1; transform:translateX(-50%) translateY(0); } 80%{ opacity:1; transform:translateX(-50%) translateY(0); } 100%{ opacity:0; transform:translateX(-50%) translateY(-12px); } }
+
+/* ============== SÉLECTEUR DE NIVEAU ============== */
+.niveaux{ display:flex; gap:12px; margin:4px 0 16px; flex-wrap:wrap; }
+.niveau-btn{ flex:1; min-width:200px; text-align:left; background:var(--panel2); border:2px solid var(--bord); border-radius:14px; padding:14px 16px; cursor:pointer; transition:transform .12s, border-color .2s, box-shadow .2s; color:var(--txt); font-family:'JetBrains Mono',monospace; }
+.niveau-btn:hover{ border-color:var(--jour); box-shadow:0 0 16px rgba(91,140,255,.25); }
+.niveau-btn:active{ transform:scale(.98); }
+.niveau-btn.sel{ border-color:var(--jour); box-shadow:0 0 18px rgba(91,140,255,.35); background:var(--jour-clair); }
+.niveau-btn .nv-tag{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:.82rem; letter-spacing:1px; color:var(--jour-pale); }
+.niveau-btn.n2 .nv-tag{ color:var(--accent2); }
+.niveau-btn .nv-desc{ font-size:.78rem; color:var(--gris); margin-top:5px; line-height:1.45; }
+.niveau-badge{ display:inline-block; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.56rem; letter-spacing:1.5px; padding:5px 11px; border-radius:12px; margin-top:8px; }
+.niveau-badge.n1{ background:var(--jour-clair); color:var(--jour-pale); border:1px solid var(--jour-fonce); }
+.niveau-badge.n2{ background:#0c2630; color:var(--accent2); border:1px solid var(--accent2); }
+
+@media (max-width:1024px){ .wrap{ max-width:100%; } }
+@media (max-width:520px){ .titre{ font-size:1.4rem; } }
+</style>
+</head>
+<body>
+
+<!-- ============== HUD ============== -->
+<div class="hud">
+  <div class="hud-inner">
+    <div class="logo-badge"><span class="dots"><i></i><i></i><i></i></span> PAZAPA · MATHS · 3E</div>
+    <button class="sound-btn" id="sound-btn">🔇 SON</button>
+    <div class="chrono">
+      <span class="ico">📊</span>
+      <span><span class="chrono-lbl">DÉFI EN COURS</span><br><span class="chrono-time" id="timer">00:00</span></span>
+    </div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-count" id="prog-count">0 / 6 CALCULS RÉUSSIS</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <h1 class="titre">La console des <span class="accent">fonctions</span></h1>
+  <div class="sous-titre">SEMAINE 2 — FONCTION LINÉAIRE · IMAGE &amp; ANTÉCÉDENT</div>
+
+  <!-- ============== PAGE 1 : AFFICHE ============== -->
+  <div class="page show" id="page-affiche">
+    <div class="affiche">
+      <div class="aff-titre">▶ DÉFI : IMAGE &amp; ANTÉCÉDENT</div>
+      <div class="aff-grid">
+        <div class="visuel-zone" id="aff-console-host"></div>
+        <div>
+          <div class="aff-intro">
+            Une fonction linéaire s'écrit <b>f(x) = a · x</b>. Dans ce défi, tu vas l'utiliser
+            dans les <b>deux sens</b> : trouver l'image d'un nombre, et retrouver l'antécédent d'un résultat.
+          </div>
+          <div class="aff-rappel">
+            <div class="aff-rap"><b>IMAGE</b> : on connaît x, on calcule f(x) = a · x</div>
+            <div class="aff-rap"><b>ANTÉCÉDENT</b> : on connaît f(x), on cherche x</div>
+          </div>
+        </div>
+      </div>
+      <div class="niveaux" id="niveaux">
+        <button class="niveau-btn n1 sel" data-niv="1">
+          <div class="nv-tag">◆ NIVEAU 1 · INITIÉ</div>
+          <div class="nv-desc">Coefficients entiers positifs. Images et antécédents simples.</div>
+        </button>
+        <button class="niveau-btn n2" data-niv="2">
+          <div class="nv-tag">◆◆ NIVEAU 2 · EXPERT</div>
+          <div class="nv-desc">Coefficients négatifs et fractionnaires, nombres négatifs, réponses en fractions.</div>
+        </button>
+      </div>
+      <div class="aff-question" id="aff-question">6 calculs à enchaîner. Prêt à lancer la console ?</div>
+      <button class="btn-commencer" id="btn-commencer">▶ LANCER LE DÉFI</button>
+    </div>
+  </div>
+
+  <!-- ============== PAGE 2 : LES MISSIONS ============== -->
+  <div class="page" id="page-jeu">
+  <div class="main-layout">
+    <div class="col-gauche">
+      <div id="console-host"></div>
+    </div>
+    <div class="col-droite">
+      <div id="missions-container"></div>
+
+      <div class="fin" id="fin">
+        <div class="trophy">🏆</div>
+        <div class="fin-titre">DÉFI RÉUSSI</div>
+        <div class="bilan">
+          <div class="bil-titre">📊 CE QUE TU AS RÉINVESTI</div>
+          <div class="bil-txt" id="bil-txt"></div>
+        </div>
+        <div class="fin-temps">🏅 Défi accompli · Temps utilisé : <span id="fin-temps">00:00</span></div>
+        <div class="fin-grade" id="fin-grade"></div>
+        <button class="btn-recommencer" id="btn-rec-fin">↻ RECOMMENCER</button>
+      </div>
+
+      <div class="replay-zone" id="replay-zone">
+        <button class="btn-recommencer" id="btn-rec-bas">↻ RECOMMENCER</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+</div>
+
+<div class="scan" id="scan">
+  <div class="scan-box">
+    <div class="scan-ico">📡</div>
+    <div class="scan-txt">CALCUL EN COURS…</div>
+    <div class="scan-track"><div class="scan-prog" id="scan-prog"></div></div>
+  </div>
+</div>
+
+<div class="progress-toast" id="progress-toast"></div>
+<script>
+'use strict';
+
+/* =========================================================
+   6 CALCULS — fonction linéaire, image & antécédent
+   Énoncés 1 à 5 = repris exactement des fiches fournies.
+   6 = énigme de réinvestissement (aller-retour image↔antécédent).
+   Réponses vérifiées sous Python : [24, 9, 10, 4, 15, 7]
+   ========================================================= */
+var BANKS = {
+  1: [
+  { badge:"IMAGE", mode:"f(x) = 6x", answer:24,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = 6x</b>.",
+    question:"Calcule l'image de 4 par la fonction f.",
+    indice:"L'image d'un nombre par une fonction linéaire s'obtient en appliquant directement f(x) = a·x à ce nombre. (Autre exemple : pour f(x)=7x, l'image de 2 vaut 7×2.)",
+    koMsg:"Pour une image, applique f(x) = a·x au nombre donné.",
+    frag:"CALCUL 1", fragVal:"f(4) = 24" },
+
+  { badge:"ANTÉCÉDENT", mode:"f(x) = 5x", answer:9,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = 5x</b>.",
+    question:"Calcule l'antécédent de 45 par f.",
+    indice:"Chercher un antécédent, c'est résoudre l'équation a·x = (valeur connue) : tu remontes de l'image vers le nombre de départ. (Autre exemple : pour 7x = 56, on cherche x.)",
+    koMsg:"Pour un antécédent, résous l'équation a·x = valeur connue.",
+    frag:"CALCUL 2", fragVal:"x = 9" },
+
+  { badge:"IMAGE", mode:"f(x) = 2x", answer:10,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = 2x</b>.",
+    question:"Calcule l'image de 5 par la fonction f.",
+    indice:"Comme pour le premier calcul, l'image s'obtient en appliquant f(x) = a·x au nombre proposé.",
+    koMsg:"Applique f(x) = a·x au nombre donné.",
+    frag:"CALCUL 3", fragVal:"f(5) = 10" },
+
+  { badge:"ANTÉCÉDENT", mode:"f(x) = 2x", answer:4,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = 2x</b>.",
+    question:"Calcule l'antécédent de 8 par f.",
+    indice:"Reviens à l'équation a·x = image, puis isole x. C'est l'opération inverse de celle qui donne l'image.",
+    koMsg:"Résous a·x = image, puis isole x (opération inverse de l'image).",
+    frag:"CALCUL 4", fragVal:"x = 4" },
+
+  { badge:"IMAGE", mode:"f(x) = 3x", answer:15,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = 3x</b>.",
+    question:"Calcule l'image de 5 par la fonction f.",
+    indice:"Même méthode que pour toute image : f(x) = a·x appliqué au nombre donné.",
+    koMsg:"Image : applique f(x) = a·x au nombre donné.",
+    frag:"CALCUL 5", fragVal:"f(5) = 15" },
+
+  { badge:"ÉNIGME · ALLER-RETOUR", mode:"f(x) = 4x", answer:7, enigme:true,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = 4x</b>. On sait que l'image de 7 est 28. <b>Sans nouvelle donnée</b>, retrouve le nombre dont l'image vaut 28.",
+    question:"Quel est l'antécédent de 28 par f ?",
+    indice:"Image et antécédent sont deux trajets inverses sur la même fonction : si appliquer le coefficient donne l'image, l'opération inverse ramène à l'antécédent.",
+    koMsg:"Antécédent : fais l'opération inverse de celle qui a donné l'image.",
+    frag:"CONCLUSION", fragVal:"x = 7",
+    conclusion:"Pour une fonction linéaire f(x) = a·x : l'<b>image</b> de x s'obtient par a·x, et l'<b>antécédent</b> d'un nombre y se trouve en résolvant a·x = y. Ce sont deux lectures inverses de la même relation." }
+  ],
+  2: [
+  { badge:"IMAGE", mode:"f(x) = −5x", answer:-15,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = −5x</b>.",
+    question:"Calcule l'image de 3 par la fonction f.",
+    indice:"L'image se calcule toujours par a·x. Pense au signe du produit : un coefficient négatif multiplié par un nombre positif donne un résultat dont tu dois déterminer le signe.",
+    koMsg:"Applique a·x, et fais attention au signe du produit.",
+    frag:"CALCUL 1", fragVal:"f(3) = −15" },
+
+  { badge:"ANTÉCÉDENT", mode:"f(x) = −3x", answer:-9,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = −3x</b>.",
+    question:"Calcule l'antécédent de 27 par f.",
+    indice:"Résous l'équation a·x = valeur. Diviser par un coefficient négatif change le signe du résultat : surveille-le.",
+    koMsg:"Résous a·x = valeur ; diviser par un nombre négatif change le signe.",
+    frag:"CALCUL 2", fragVal:"x = −9" },
+
+  { badge:"IMAGE · FRACTION", mode:"f(x) = (5/9)x", answer:{n:-35,d:9},
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = (5/9)·x</b>.",
+    question:"Calcule l'image de −7. (réponse en fraction)",
+    indice:"Multiplier un nombre par une fraction : le nombre multiplie le numérateur, le dénominateur ne change pas. Garde la fraction telle quelle si elle ne se simplifie pas.",
+    koMsg:"Multiplie le nombre par le numérateur ; le dénominateur reste. Donne une fraction.",
+    frag:"CALCUL 3", fragVal:"−35/9" },
+
+  { badge:"ANTÉCÉDENT · FRACTION", mode:"f(x) = (5/9)x", answer:{n:54,d:5},
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = (5/9)·x</b>.",
+    question:"Calcule l'antécédent de 6. (réponse en fraction)",
+    indice:"Résoudre (a/b)·x = y revient à diviser y par la fraction, c'est-à-dire multiplier y par la fraction inversée. Pense à retourner numérateur et dénominateur.",
+    koMsg:"Diviser par une fraction = multiplier par son inverse (la fraction retournée).",
+    frag:"CALCUL 4", fragVal:"54/5" },
+
+  { badge:"IMAGE · FRACTION", mode:"f(x) = (−4/7)x", answer:{n:36,d:7},
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = (−4/7)·x</b>.",
+    question:"Calcule l'image de −9. (réponse en fraction)",
+    indice:"Multiplie le nombre par le numérateur en tenant compte des deux signes ; le dénominateur reste inchangé. Deux facteurs négatifs donnent un signe à déterminer.",
+    koMsg:"Multiplie par le numérateur (attention aux deux signes) ; garde le dénominateur.",
+    frag:"CALCUL 5", fragVal:"36/7" },
+
+  { badge:"ÉNIGME · FRACTION", mode:"f(x) = (−2/3)x", answer:-6, enigme:true,
+    enonce:"On considère la fonction f définie sur ℝ par <b>f(x) = (−2/3)·x</b>. <b>Sans nouvelle donnée</b>, retrouve le nombre dont l'image vaut 4.",
+    question:"Quel est l'antécédent de 4 par f ?",
+    indice:"Antécédent avec un coefficient fractionnaire négatif : multiplie la valeur par la fraction inversée, et détermine le signe du résultat. Ici le résultat tombe sur un entier.",
+    koMsg:"Multiplie par la fraction inversée et surveille le signe ; le résultat est entier.",
+    frag:"CONCLUSION", fragVal:"x = −6",
+    conclusion:"Quel que soit le coefficient — entier, négatif ou fractionnaire — l'<b>image</b> de x est a·x et l'<b>antécédent</b> de y se trouve en résolvant a·x = y. Avec une fraction, diviser revient à multiplier par l'inverse ; avec un négatif, on suit la règle des signes." }
+  ]
+};
+
+var niveau = 1;
+var MISSIONS = BANKS[1];
+var TOTAL = MISSIONS.length;
+var $ = function(id){ return document.getElementById(id); };
+var etat = MISSIONS.map(function(){ return { done:false, correct:false, tries:0 }; });
+var solved = 0;
+var current = 0;
+
+/* ============== CHRONO ============== */
+var startTime = Date.now(), timerInt = null, timerStarted = false;
+function fmt(s){ var m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
+function tick(){ $('timer').textContent = fmt(Math.floor((Date.now()-startTime)/1000)); }
+function startTimer(){ if(timerInt) clearInterval(timerInt); timerStarted=true; startTime=Date.now(); tick(); timerInt=setInterval(tick,1000); }
+function stopTimer(){ if(timerInt){ clearInterval(timerInt); timerInt=null; } }
+
+/* ============== CONSOLE (illustration SVG, décorative) ============== */
+var CONSOLE_SVG =
+    '<svg class="machine-illus" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Machine de fonction : entrée x, coefficient a, sortie f(x)">'
+  +   '<defs>'
+  +     '<linearGradient id="box" x1="0" y1="0" x2="0" y2="1">'
+  +       '<stop offset="0" stop-color="#1c2750"/><stop offset="1" stop-color="#141d3c"/>'
+  +     '</linearGradient>'
+  +   '</defs>'
+  +   '<!-- flux entrant -->'
+  +   '<line class="flux-anim" x1="6" y1="65" x2="58" y2="65" stroke="#22d3ee" stroke-width="3" stroke-linecap="round"/>'
+  +   '<circle cx="14" cy="65" r="9" fill="#0f1730" stroke="#22d3ee" stroke-width="2"/>'
+  +   '<text x="14" y="69" font-family="Orbitron,sans-serif" font-size="9" fill="#22d3ee" text-anchor="middle" font-weight="700">x</text>'
+  +   '<!-- boîte fonction -->'
+  +   '<rect x="58" y="34" width="84" height="62" rx="10" fill="url(#box)" stroke="#5b8cff" stroke-width="2"/>'
+  +   '<circle class="led-anim" cx="70" cy="45" r="3" fill="#22d3ee"/>'
+  +   '<text x="100" y="60" font-family="Orbitron,sans-serif" font-size="11" fill="#7da2ff" text-anchor="middle" font-weight="700">f(x)</text>'
+  +   '<text x="100" y="80" font-family="JetBrains Mono,monospace" font-size="13" fill="#e8edff" text-anchor="middle" font-weight="700">= a·x</text>'
+  +   '<!-- flux sortant -->'
+  +   '<line class="flux-anim" x1="142" y1="65" x2="190" y2="65" stroke="#5b8cff" stroke-width="3" stroke-linecap="round"/>'
+  +   '<circle cx="186" cy="65" r="9" fill="#0f1730" stroke="#5b8cff" stroke-width="2"/>'
+  +   '<text x="186" y="69" font-family="Orbitron,sans-serif" font-size="7.5" fill="#5b8cff" text-anchor="middle" font-weight="700">y</text>'
+  +   '<!-- petites graduations déco -->'
+  +   '<g stroke="#26305a" stroke-width="1.5">'
+  +     '<line x1="66" y1="104" x2="66" y2="110"/><line x1="84" y1="104" x2="84" y2="110"/>'
+  +     '<line x1="102" y1="104" x2="102" y2="110"/><line x1="120" y1="104" x2="120" y2="110"/><line x1="134" y1="104" x2="134" y2="110"/>'
+  +   '</g>'
+  + '</svg>';
+
+var CONSOLE_HTML =
+    '<div class="console">'
+  +   CONSOLE_SVG
+  +   '<div class="console-titre">⚙ MACHINE DE FONCTION</div>'
+  +   '<div class="console-read"><div class="console-coef" id="console-coef">f(x) = a·x</div><div class="console-mode" id="console-mode">EN ATTENTE</div></div>'
+  +   '<div class="console-jauge-wrap">'
+  +     '<div class="console-jauge-lbl">▣ DÉFI COMPLÉTÉ</div>'
+  +     '<div class="console-jauge"><div class="console-fill" id="console-fill"></div></div>'
+  +   '</div>'
+  + '</div>';
+
+$('aff-console-host').innerHTML = CONSOLE_HTML;
+
+function setConsole(m){
+  var c = $('console-coef'); if(c) c.textContent = m.mode;
+  var mo = $('console-mode'); if(mo) mo.textContent = (m.badge.indexOf('IMAGE')!==-1) ? 'MODE : IMAGE' : (m.badge.indexOf('ANT')!==-1 ? 'MODE : ANTÉCÉDENT' : 'MODE : RÉINVEST.');
+}
+
+/* ============== GÉNÉRATION DES MISSIONS (reconstructible selon le niveau) ============== */
+var cont = $('missions-container');
+function buildMissions(){
+  cont.innerHTML = '';
+  MISSIONS.forEach(function(m, i){
+    var card = document.createElement('div');
+    card.className = 'mission' + (m.enigme ? ' enigme' : '') + (i===0 ? ' active' : '');
+    card.id = 'm'+i;
+    var ph = m.answer && typeof m.answer === 'object' ? 'ex : -35/9' : '?';
+    var body = ''
+      + '<div class="m-head">'
+      +   '<div class="m-num">'+(m.enigme ? '🔓 ÉNIGME FINALE' : '▸ CALCUL '+(i+1))+'</div>'
+      +   '<div class="m-badge">'+m.badge+'</div>'
+      + '</div>'
+      + '<div class="m-enonce">'+m.enonce+'</div>'
+      + '<div class="m-question">'+m.question+'</div>'
+      + '<div class="saisie"><span class="prefix">Réponse =</span><input type="text" id="inp-'+i+'" placeholder="'+ph+'" autocomplete="off" inputmode="text"></div>'
+      + '<div class="btns">'
+      +   '<button class="btn btn-valider" data-m="'+i+'" disabled>✓ VALIDER</button>'
+      +   '<button class="btn btn-indice" data-m="'+i+'">? INDICE</button>'
+      +   '<button class="btn btn-calc" type="button" id="calc-'+i+'">🧮 CALCULATRICE</button>'
+      + '</div>'
+      + '<div class="indice-box" id="ind-'+i+'"></div>'
+      + '<div class="feedback" id="fb-'+i+'"></div>'
+      + '<div class="fragment" id="frag-'+i+'"></div>';
+    card.innerHTML = body;
+    cont.appendChild(card);
+  });
+
+  MISSIONS.forEach(function(m, i){
+    var inp = $('inp-'+i);
+    inp.addEventListener('input', function(){
+      inp.classList.remove('bad');
+      var fb = $('fb-'+i); if(fb){ fb.className='feedback'; fb.innerHTML=''; }
+      document.querySelector('.btn-valider[data-m="'+i+'"]').disabled = (inp.value.trim()==='');
+    });
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter' && i===current && !etat[i].done && inp.value.trim()!==''){ valider(i); } });
+    var cb = $('calc-'+i);
+    if(cb) cb.addEventListener('click', function(){ if(window.openCalc) window.openCalc(); });
+  });
+
+  armChronoCalcul1();
+}
+
+/* ============== CHRONO : démarre au 1er clic n'importe où sur le CALCUL 1 ============== */
+function startOnFirstClick(){
+  if(!timerStarted) startTimer();
+  var m0 = $('m0'); if(m0) m0.removeEventListener('pointerdown', startOnFirstClick);
+}
+function armChronoCalcul1(){
+  var m0 = $('m0'); if(!m0) return;
+  m0.removeEventListener('pointerdown', startOnFirstClick);
+  m0.addEventListener('pointerdown', startOnFirstClick);
+}
+
+buildMissions();
+
+document.body.addEventListener('click', function(e){
+  var v = e.target.closest('.btn-valider');
+  if(v){ valider(parseInt(v.dataset.m,10)); return; }
+  var ind = e.target.closest('.btn-indice');
+  if(ind){ montrerIndice(parseInt(ind.dataset.m,10)); return; }
+});
+
+function montrerIndice(i){
+  if(etat[i].done || i!==current) return;
+  if(!timerStarted) startTimer();
+  var box = $('ind-'+i);
+  box.classList.add('show');
+  box.innerHTML = '💡 ' + MISSIONS[i].indice;
+  var btn = document.querySelector('.btn-indice[data-m="'+i+'"]');
+  if(btn) btn.disabled = true;
+}
+
+/* ============== NORMALISATION DES RÉPONSES ============== */
+function normalise(s){
+  return String(s).trim().replace(/\s+/g,'').replace(',', '.').replace(/−/g,'-');
+}
+function pgcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a||1; }
+// renvoie {n,d} réduit (d>0) à partir d'une saisie "a/b", ou null si pas une fraction valide
+function parseFraction(str){
+  var mm = /^([+-]?\d+)\/([+-]?\d+)$/.exec(str);
+  if(!mm) return null;
+  var n = parseInt(mm[1],10), d = parseInt(mm[2],10);
+  if(d===0) return null;
+  if(d<0){ n=-n; d=-d; }
+  var g = pgcd(n,d);
+  return { n:n/g, d:d/g };
+}
+function bonneReponse(val, attendu){
+  var n = normalise(val);
+  // tolère "x=9", "f(4)=24", "x=-35/9"
+  n = n.replace(/^.*=/, '');
+  if(n === '') return false;
+
+  // Cas 1 : réponse attendue fractionnaire { n, d }
+  if(attendu && typeof attendu === 'object'){
+    var cible = parseFraction(String(attendu.n)+'/'+String(attendu.d));
+    // saisie sous forme de fraction
+    var f = parseFraction(n);
+    if(f){ return f.n === cible.n && f.d === cible.d; }
+    // saisie décimale équivalente tolérée
+    var num0 = parseFloat(n);
+    if(!isNaN(num0)){ return Math.abs(num0 - (cible.n/cible.d)) < 1e-9; }
+    return false;
+  }
+
+  // Cas 2 : réponse attendue numérique (entier ou relatif)
+  if(n === String(attendu)) return true;
+  // accepte aussi une fraction qui vaut l'entier (ex : "-18/2" pour -9)
+  var fr = parseFraction(n);
+  if(fr){ return Math.abs(fr.n/fr.d - attendu) < 1e-9; }
+  var num = parseFloat(n);
+  return (!isNaN(num) && Math.abs(num - attendu) < 1e-9);
+}
+
+/* ============== VALIDATION (réessai jusqu'à réussite) ============== */
+function valider(i){
+  if(etat[i].done || i!==current) return;
+  if(!timerStarted) startTimer();
+  var m = MISSIONS[i];
+  var inp = $('inp-'+i);
+  if(inp.value.trim()===''){ inp.focus(); return; }
+  var bon = bonneReponse(inp.value, m.answer);
+  var fb = $('fb-'+i);
+
+  if(!bon){
+    etat[i].tries++;
+    fb.className = 'feedback show ko';
+    fb.innerHTML = '❌ ' + (m.koMsg || 'Pas tout à fait.') + ' <span style="opacity:.85;">Modifie ta réponse et réessaie.</span>';
+    inp.classList.remove('good'); inp.classList.add('bad');
+    playTap();
+    return;
+  }
+
+  etat[i].done = true; etat[i].correct = true; solved++;
+  inp.classList.remove('bad'); inp.classList.add('good'); inp.disabled = true;
+  fb.className = 'feedback show ok';
+  fb.innerHTML = '✅ Exact, calcul validé !';
+  playDing(); playClochette();
+  setConsole(m);
+  majJauge();
+  fireProgress();
+
+  var frag = $('frag-'+i);
+  frag.classList.add('show');
+  var contenu = '🔹 ' + m.frag + ' : <span class="frag-val">' + m.fragVal + '</span>';
+  if(m.conclusion){
+    contenu += '<div style="margin-top:10px; font-family:\'JetBrains Mono\',monospace; font-weight:400; font-size:.82rem; color:var(--txt); line-height:1.5;">' + m.conclusion + '</div>';
+  }
+  frag.innerHTML = contenu;
+
+  var bv = document.querySelector('.btn-valider[data-m="'+i+'"]');
+  var bi = document.querySelector('.btn-indice[data-m="'+i+'"]');
+  if(bv) bv.disabled = true; if(bi) bi.disabled = true;
+  updateProgress();
+  setTimeout(function(){ avancer(i); }, 950);
+}
+
+function majJauge(){
+  var pct = Math.round((solved/TOTAL)*100);
+  var f = $('console-fill'); if(f) f.style.width = pct + '%';
+}
+function updateProgress(){
+  $('prog-fill').style.width = Math.round((solved/TOTAL)*100) + '%';
+  $('prog-count').textContent = solved + ' / ' + TOTAL + ' CALCULS RÉUSSIS';
+}
+
+var PROGRESS_MSGS = [
+  "📊 La console enregistre ton calcul…",
+  "⚙ La machine de fonction tourne…",
+  "📡 Résultat transmis…",
+  "✨ Le défi avance bien…"
+];
+function fireProgress(){
+  var t = $('progress-toast'); if(!t) return;
+  t.textContent = PROGRESS_MSGS[Math.floor(Math.random()*PROGRESS_MSGS.length)];
+  t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+}
+
+function avancer(i){
+  var next = i + 1;
+  if(next >= TOTAL){ terminer(); return; }
+  var scan = $('scan'), prog = $('scan-prog');
+  scan.classList.add('show');
+  prog.style.transition='none'; prog.style.width='0%'; void prog.offsetWidth;
+  prog.style.transition='width .7s ease'; prog.style.width='100%';
+  setTimeout(function(){
+    scan.classList.remove('show');
+    var oldEl = $('m'+i); if(oldEl){ oldEl.classList.remove('active'); oldEl.classList.add('done'); }
+    current = next;
+    var nextEl = $('m'+next);
+    if(nextEl){ nextEl.classList.add('active'); nextEl.scrollIntoView({ behavior:'smooth', block:'center' }); }
+  }, 750);
+}
+
+function terminer(){
+  stopTimer();
+  var oldEl = $('m'+(TOTAL-1)); if(oldEl){ oldEl.classList.remove('active'); oldEl.classList.add('done'); }
+  $('fin').querySelector('.fin-titre').innerHTML = 'DÉFI RÉUSSI · <span style="color:'+(niveau===2?'var(--accent2)':'var(--jour-pale)')+'">NIVEAU '+niveau+'</span>';
+  $('bil-txt').innerHTML = (niveau===1)
+    ? 'Tu as calculé des <b>images</b> (f(x) = a·x) et des <b>antécédents</b> (a·x = y) pour plusieurs fonctions linéaires. Deux opérations inverses, une même fonction.'
+    : 'Tu as étendu la méthode aux coefficients <b>négatifs</b> et <b>fractionnaires</b> : l\'image reste a·x et l\'antécédent se trouve en résolvant a·x = y. Diviser par une fraction, c\'est multiplier par son inverse ; les signes suivent la règle des signes.';
+  $('fin-temps').textContent = fmt(Math.floor((Date.now()-startTime)/1000));
+  var totalTries = etat.reduce(function(a,s){ return a + (s.tries||0); }, 0);
+  var suffixe = (niveau===2) ? ' (niveau expert)' : '';
+  var grade;
+  if(totalTries === 0)      grade = '🏅 EXPERT DES FONCTIONS — sans aucune erreur !' + suffixe;
+  else if(totalTries <= 3)  grade = '🥈 ANALYSTE CONFIRMÉ' + suffixe;
+  else                      grade = '🥉 PERSÉVÉRANT — tu as su te corriger !' + suffixe;
+  $('fin-grade').textContent = grade;
+  $('fin').classList.add('show');
+  $('replay-zone').classList.add('show');
+  $('fin').scrollIntoView({ behavior:'smooth', block:'center' });
+  playCarillon();
+}
+
+function recommencer(){
+  etat = MISSIONS.map(function(){ return { done:false, correct:false, tries:0 }; });
+  solved = 0; current = 0;
+  MISSIONS.forEach(function(m, i){
+    $('fb-'+i).className='feedback'; $('fb-'+i).innerHTML='';
+    $('ind-'+i).className='indice-box'; $('ind-'+i).innerHTML='';
+    $('frag-'+i).className='fragment'; $('frag-'+i).innerHTML='';
+    var bv=document.querySelector('.btn-valider[data-m="'+i+'"]'); var bi=document.querySelector('.btn-indice[data-m="'+i+'"]');
+    if(bv) bv.disabled=true; if(bi) bi.disabled=false;
+    var inp=$('inp-'+i); inp.value=''; inp.disabled=false; inp.classList.remove('good','bad');
+    var el=$('m'+i); if(el){ el.classList.remove('active','done'); if(i===0) el.classList.add('active'); }
+  });
+  $('fin').classList.remove('show'); $('replay-zone').classList.remove('show');
+  $('prog-fill').style.width='0%'; $('prog-count').textContent='0 / '+TOTAL+' CALCULS RÉUSSIS';
+  stopTimer(); timerStarted=false; $('timer').textContent='00:00';
+  armChronoCalcul1();
+  $('console-coef').textContent='f(x) = a·x'; $('console-mode').textContent='EN ATTENTE'; majJauge();
+  var consoleEl = $('console-host').querySelector('.console');
+  if(consoleEl){ $('aff-console-host').appendChild(consoleEl); }
+  $('page-jeu').classList.remove('show');
+  $('page-affiche').classList.add('show');
+  playWhoosh();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+$('btn-rec-fin').addEventListener('click', recommencer);
+$('btn-rec-bas').addEventListener('click', recommencer);
+
+/* ============== SÉLECTEUR DE NIVEAU ============== */
+function setNiveau(n){
+  niveau = n;
+  MISSIONS = BANKS[n];
+  TOTAL = MISSIONS.length;
+  etat = MISSIONS.map(function(){ return { done:false, correct:false, tries:0 }; });
+  solved = 0; current = 0;
+  buildMissions();              // reconstruit les cartes du bon niveau
+  $('prog-count').textContent = '0 / ' + TOTAL + ' CALCULS RÉUSSIS';
+  $('prog-fill').style.width = '0%';
+  majJauge();
+  // état visuel des boutons + textes d'affiche
+  var btns = document.querySelectorAll('.niveau-btn');
+  btns.forEach(function(b){ b.classList.toggle('sel', parseInt(b.dataset.niv,10)===n); });
+  $('aff-question').textContent = (n===1)
+    ? '6 calculs à enchaîner. Prêt à lancer la console ?'
+    : 'Niveau expert : 6 calculs avec négatifs et fractions. Prêt ?';
+}
+document.querySelectorAll('.niveau-btn').forEach(function(b){
+  b.addEventListener('click', function(){ setNiveau(parseInt(b.dataset.niv,10)); });
+});
+
+/* ============== SONS — Web Audio API ============== */
+var audioCtx = null, soundOn = false;
+function ensureCtx(){
+  if(!audioCtx){ try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; } }
+  if(audioCtx && audioCtx.state !== 'running'){ try { audioCtx.resume(); } catch(e){} }
+  return audioCtx;
+}
+function noiseBuf(dur){
+  var ctx=audioCtx; var len=Math.floor(ctx.sampleRate*dur);
+  var buf=ctx.createBuffer(1,len,ctx.sampleRate); var d=buf.getChannelData(0);
+  for(var k=0;k<len;k++){ d[k]=Math.random()*2-1; } return buf;
+}
+function playDing(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime;
+  [1175,1568].forEach(function(f,k){ var o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f; var g=ctx.createGain(); var tt=t+k*0.03; g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.18,tt+0.02); g.gain.exponentialRampToValueAtTime(0.0001,tt+0.32); o.connect(g); g.connect(ctx.destination); o.start(tt); o.stop(tt+0.33); });
+}
+function playClochette(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime+0.04;
+  var o=ctx.createOscillator(); o.type='triangle'; o.frequency.value=2093;
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.12,t+0.01); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+  o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.52);
+}
+function playTap(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime;
+  var o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(180,t+0.1);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.09,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+  o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.18);
+}
+function playWhoosh(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t=ctx.currentTime;
+  var src=ctx.createBufferSource(); src.buffer=noiseBuf(0.45);
+  var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=0.7;
+  bp.frequency.setValueAtTime(300,t); bp.frequency.exponentialRampToValueAtTime(1200,t+0.22); bp.frequency.exponentialRampToValueAtTime(400,t+0.45);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.13,t+0.16); g.gain.exponentialRampToValueAtTime(0.0001,t+0.45);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.47);
+}
+function playCarillon(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return; var t0=ctx.currentTime;
+  [659,784,988,1319].forEach(function(f,k){ var t=t0+k*0.12; var o=ctx.createOscillator(); o.type='triangle'; o.frequency.value=f; var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5); o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.52); });
+}
+$('sound-btn').addEventListener('click', function(){
+  soundOn = !soundOn;
+  var btn = $('sound-btn');
+  if(soundOn){ btn.classList.add('on'); btn.textContent='🔊 SON';
+    var ctx=ensureCtx();
+    if(ctx && ctx.state!=='running' && ctx.resume){ var p=ctx.resume(); if(p&&p.then){ p.then(playClochette); } else { setTimeout(playClochette,60); } }
+    else { playClochette(); }
+  } else { btn.classList.remove('on'); btn.textContent='🔇 SON'; }
+});
+
+/* ============== TRANSITION : COMMENCER ============== */
+$('btn-commencer').addEventListener('click', function(){
+  if(!soundOn){
+    soundOn = true;
+    var sb=$('sound-btn'); sb.classList.add('on'); sb.textContent='🔊 SON';
+    var ctx=ensureCtx();
+    if(ctx && ctx.state!=='running' && ctx.resume){ var p=ctx.resume(); if(p&&p.then){ p.then(playWhoosh); } else { setTimeout(playWhoosh,60); } }
+    else { playWhoosh(); }
+  } else { playWhoosh(); }
+  var consoleEl = $('aff-console-host').querySelector('.console');
+  if(consoleEl){ $('console-host').appendChild(consoleEl); }
+  $('page-affiche').classList.remove('show');
+  $('page-jeu').classList.add('show');
+  // le chrono ne démarre PAS ici : il démarrera au 1er clic sur le CALCUL 1
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+/* ============== INIT ============== */
+stopTimer(); timerStarted=false; $('timer').textContent='00:00';
+majJauge();
+updateProgress();
+</script>
+
+<!-- ===== CALCULATRICE fx-92 (thème indigo, ouverte par bouton mission) ===== -->
+<style>
+#fxc-trigger{ display:none !important; }
+#fxc-panel{ position:fixed; right:14px; bottom:14px; z-index:9999; width:330px; max-width:calc(100vw - 20px); background:#10182f; border-radius:14px; box-shadow:0 12px 36px rgba(0,0,0,.55); font-family:'JetBrains Mono','Courier New',monospace; display:none; flex-direction:column; border:2px solid var(--jour); }
+#fxc-panel.fxc-open{ display:flex; }
+.fxc-bar{ display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:12px 12px 0 0; background:var(--jour); color:#06122e; font-size:.78rem; font-weight:700; cursor:move; touch-action:none; user-select:none; }
+.fxc-bar .fxc-icon{ width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; background:rgba(6,18,46,.2); border:none; border-radius:6px; color:#06122e; font-size:.95rem; cursor:pointer; margin-left:4px; font-family:inherit; }
+.fxc-bar .fxc-icon:hover{ background:rgba(6,18,46,.35); }
+.fxc-bar-title{ flex:1; pointer-events:none; }
+.fxc-help{ display:none; padding:8px 12px; background:#16203f; color:#b9c6f0; font-size:.72rem; line-height:1.5; border-bottom:1px solid #26305a; }
+.fxc-help.fxc-show{ display:block; }
+.fxc-help b{ color:var(--accent2); }
+.fxc-screen{ margin:10px; padding:10px 12px; background:#0a1228; color:#e8edff; border:2px solid #26305a; border-radius:6px; min-height:60px; display:flex; flex-direction:column; justify-content:space-between; }
+.fxc-expr{ font-size:.85rem; color:#8a96bf; text-align:right; min-height:1.2em; overflow-x:auto; white-space:nowrap; }
+.fxc-result{ font-size:1.3rem; font-weight:700; text-align:right; overflow-x:auto; white-space:nowrap; color:var(--accent2); }
+.fxc-pad{ display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; padding:0 10px 12px; }
+.fxc-key{ font-family:'JetBrains Mono','Courier New',monospace; font-size:.95rem; font-weight:700; padding:12px 6px; border:none; border-radius:8px; background:#26305a; color:#e8edff; cursor:pointer; transition:transform .08s, background .15s; min-height:44px; }
+.fxc-key:hover{ background:#313c6e; }
+.fxc-key:active{ transform:scale(.94); }
+.fxc-key.fxc-fn{ background:#1f4a55; color:#a9e8f5; font-size:.78rem; }
+.fxc-key.fxc-op{ background:#313c6e; }
+.fxc-key.fxc-eq{ background:var(--jour); color:#06122e; }
+.fxc-key.fxc-del{ background:#7a3a2e; color:#fff; font-size:.8rem; }
+.fxc-key.fxc-ac{ background:#9c2f28; color:#fff; font-size:.85rem; }
+.fxc-key.fxc-divr{ background:#1f4a55; color:#a9e8f5; font-size:.75rem; }
+.fxc-key.fxc-simp{ background:#1f4a55; color:#a9e8f5; font-size:.7rem; line-height:1; }
+.fxc-key.fxc-simp small{ display:block; font-size:.55rem; opacity:.85; margin-top:2px; }
+</style>
+
+<div id="fxc-trigger"></div>
+<div id="fxc-panel" aria-label="Calculatrice fx-92 Pazapa">
+  <div class="fxc-bar" id="fxc-bar">
+    <span class="fxc-bar-title">☰ fx-92 · glisse pour déplacer</span>
+    <button class="fxc-icon" id="fxc-help-btn" title="Aide">?</button>
+    <button class="fxc-icon" id="fxc-close-btn" title="Fermer">✕</button>
+  </div>
+  <div class="fxc-help" id="fxc-help">
+    <b>(−)</b> signe moins d'un nombre relatif<br>
+    <b>÷R</b> division euclidienne · <b>FACT(</b>n<b>)</b> facteurs premiers<br>
+    <b>PGCD(</b>a;b<b>)</b> · <b>PPCM(</b>a;b<b>)</b> · <b>SIMP(</b>a;b<b>)</b> · <b>√</b> · <b>x²</b>
+  </div>
+  <div class="fxc-screen">
+    <div class="fxc-expr" id="fxc-expr"></div>
+    <div class="fxc-result" id="fxc-result">0</div>
+  </div>
+  <div class="fxc-pad" id="fxc-pad">
+    <button class="fxc-key fxc-fn" data-k="FACT(">FACT(</button>
+    <button class="fxc-key fxc-fn" data-k="PGCD(">PGCD(</button>
+    <button class="fxc-key fxc-fn" data-k="PPCM(">PPCM(</button>
+    <button class="fxc-key fxc-simp" data-k="SIMP(">SIMP(<small>a/b</small></button>
+    <button class="fxc-key fxc-ac"  data-k="AC">AC</button>
+    <button class="fxc-key fxc-del" data-k="DEL">DEL</button>
+    <button class="fxc-key fxc-op"  data-k="(">(</button>
+    <button class="fxc-key fxc-op"  data-k=")">)</button>
+    <button class="fxc-key fxc-op"  data-k=";">;</button>
+    <button class="fxc-key fxc-divr" data-k="÷R">÷R</button>
+    <button class="fxc-key" data-k="7">7</button>
+    <button class="fxc-key" data-k="8">8</button>
+    <button class="fxc-key" data-k="9">9</button>
+    <button class="fxc-key fxc-op" data-k="÷">÷</button>
+    <button class="fxc-key fxc-op" data-k="√(">√(</button>
+    <button class="fxc-key" data-k="4">4</button>
+    <button class="fxc-key" data-k="5">5</button>
+    <button class="fxc-key" data-k="6">6</button>
+    <button class="fxc-key fxc-op" data-k="×">×</button>
+    <button class="fxc-key fxc-op" data-k="²">x²</button>
+    <button class="fxc-key" data-k="1">1</button>
+    <button class="fxc-key" data-k="2">2</button>
+    <button class="fxc-key" data-k="3">3</button>
+    <button class="fxc-key fxc-op" data-k="−">−</button>
+    <button class="fxc-key fxc-op" data-k="^">^</button>
+    <button class="fxc-key" data-k="0">0</button>
+    <button class="fxc-key" data-k=",">,</button>
+    <button class="fxc-key fxc-op" data-k="(−)">(−)</button>
+    <button class="fxc-key fxc-op" data-k="+">+</button>
+    <button class="fxc-key fxc-eq" data-k="=">=</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
+  function lcmFn(a, b){ if(!a || !b) return 0; return Math.abs(a*b)/gcd(a,b); }
+  function isInt(x){ return Number.isFinite(x) && Math.floor(x) === x; }
+  function factor(n){ n = Math.abs(Math.round(n)); if(n === 0) return null; if(n === 1) return { '1': 1 }; var f = {}; var p = 2; while(p * p <= n){ while(n % p === 0){ f[p] = (f[p]||0) + 1; n = n / p; } p++; } if(n > 1) f[n] = (f[n]||0) + 1; return f; }
+  var SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  function sup(n){ return String(n).split('').map(function(c){ return SUP[c]||c; }).join(''); }
+  function factPretty(n){ if(n === 1) return '1'; if(n < 1 || !isInt(n)) return 'Erreur'; var f = factor(n); if(f === null) return 'Erreur'; var keys = Object.keys(f).map(Number).sort(function(a,b){ return a-b; }); if(keys.length === 1 && f[keys[0]] === 1) return keys[0] + ' (premier)'; return keys.map(function(p){ return p + (f[p] > 1 ? sup(f[p]) : ''); }).join('×'); }
+  function parseExpr(src){
+    var s = src.replace(/\s+/g, '').replace(/²/g, '^2').replace(/√/g, 'sqrt').replace(/×/g, '*').replace(/÷/g, '/').replace(/\(−\)/g, '(-)').replace(/−/g, '-').replace(/,/g, '.');
+    var i = 0;
+    function peek(){ return s[i]; }
+    function isDigit(c){ return c >= '0' && c <= '9'; }
+    function parseNumber(){ var start=i; while(i<s.length && (isDigit(s[i])||s[i]==='.')) i++; return parseFloat(s.substring(start,i)); }
+    function parseFactor(){ if(peek()==='+'){ i++; return parseFactor(); } if(peek()==='-'){ i++; return -parseFactor(); } if(peek()==='('){ i++; var v=parseExp(); if(peek()!==')') throw new Error(')'); i++; return v; } if(s.substr(i,5)==='sqrt('){ i+=5; var v2=parseExp(); if(peek()!==')') throw new Error(')'); i++; if(v2<0) throw new Error('neg'); return Math.sqrt(v2); } if(isDigit(peek())||peek()==='.'){ return parseNumber(); } throw new Error('token'); }
+    function parsePow(){ var base=parseFactor(); if(peek()==='^'){ i++; var exp=parsePow(); return Math.pow(base,exp); } return base; }
+    function parseTerm(){ var v=parsePow(); while(peek()==='*'||peek()==='/'){ var op=s[i++]; var r=parsePow(); if(op==='*') v=v*r; else { if(r===0) throw new Error('div0'); v=v/r; } } return v; }
+    function parseExp(){ var v=parseTerm(); while(peek()==='+'||peek()==='-'){ var op=s[i++]; var r=parseTerm(); if(op==='+') v=v+r; else v=v-r; } return v; }
+    var result=parseExp(); if(i!==s.length) throw new Error('reste'); return result;
+  }
+  function calculer(expr){
+    var e = expr.trim(); if(e === '') return '0';
+    try {
+      var m = /^FACT\(([^)]+)\)$/i.exec(e);
+      if(m){ var n=parseExpr(m[1]); if(!isInt(n)||n<1) return 'Erreur'; return factPretty(n); }
+      m = /^PGCD\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){ var a=parseExpr(m[1]); var b=parseExpr(m[2]); if(!isInt(a)||!isInt(b)) return 'Erreur'; return String(gcd(a,b)); }
+      m = /^PPCM\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){ var a2=parseExpr(m[1]); var b2=parseExpr(m[2]); if(!isInt(a2)||!isInt(b2)) return 'Erreur'; return String(lcmFn(a2,b2)); }
+      m = /^SIMP\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){ var a3=parseExpr(m[1]); var b3=parseExpr(m[2]); if(!isInt(a3)||!isInt(b3)||b3===0) return 'Erreur'; var g=gcd(a3,b3); var na=a3/g, nb=b3/g; if(nb===1) return String(na); if(nb===-1) return String(-na); if(nb<0) return (-na)+'/'+(-nb); return na+'/'+nb; }
+      m = /^([^÷R]+)÷R(.+)$/i.exec(e);
+      if(m){ var a4=parseExpr(m[1]); var b4=parseExpr(m[2]); if(!isInt(a4)||!isInt(b4)||b4===0||a4<0||b4<0) return 'Erreur'; var q=Math.floor(a4/b4); var r=a4-q*b4; return 'quotient '+q+' · reste '+r; }
+      var rr=parseExpr(e); if(!Number.isFinite(rr)) return 'Erreur';
+      if(isInt(rr)) return String(rr);
+      return String(Math.round(rr*1e10)/1e10).replace('.', ',');
+    } catch(err) { return 'Erreur'; }
+  }
+  var panel=document.getElementById('fxc-panel'), bar=document.getElementById('fxc-bar');
+  var helpBtn=document.getElementById('fxc-help-btn'), closeBtn=document.getElementById('fxc-close-btn');
+  var help=document.getElementById('fxc-help'), exprEl=document.getElementById('fxc-expr'), resEl=document.getElementById('fxc-result'), pad=document.getElementById('fxc-pad');
+  var currentExpr='', lastResult=null, resetOnNext=false;
+  window.openCalc = function(){ panel.classList.add('fxc-open'); };
+  closeBtn.addEventListener('click', function(e){ e.stopPropagation(); panel.classList.remove('fxc-open'); });
+  helpBtn.addEventListener('click', function(e){ e.stopPropagation(); help.classList.toggle('fxc-show'); });
+  var dragging=false, startX=0, startY=0, startLeft=0, startTop=0, conv=false;
+  bar.addEventListener('pointerdown', function(e){ if(e.target.classList && e.target.classList.contains('fxc-icon')) return; dragging=true; bar.setPointerCapture(e.pointerId); if(!conv){ var r=panel.getBoundingClientRect(); panel.style.right=''; panel.style.bottom=''; panel.style.left=r.left+'px'; panel.style.top=r.top+'px'; conv=true; } startX=e.clientX; startY=e.clientY; startLeft=parseFloat(panel.style.left)||0; startTop=parseFloat(panel.style.top)||0; e.preventDefault(); });
+  bar.addEventListener('pointermove', function(e){ if(!dragging) return; var nl=startLeft+(e.clientX-startX), nt=startTop+(e.clientY-startY); var w=panel.offsetWidth, h=panel.offsetHeight, maxL=window.innerWidth-w-4, maxT=window.innerHeight-h-4; if(nl<4)nl=4; if(nt<4)nt=4; if(nl>maxL)nl=maxL; if(nt>maxT)nt=maxT; panel.style.left=nl+'px'; panel.style.top=nt+'px'; });
+  function endDrag(e){ if(dragging){ dragging=false; try{ bar.releasePointerCapture(e.pointerId); }catch(_){} } }
+  bar.addEventListener('pointerup', endDrag); bar.addEventListener('pointercancel', endDrag);
+  function refresh(){ exprEl.textContent=currentExpr; resEl.textContent=(lastResult!==null)?lastResult:(currentExpr===''?'0':currentExpr); }
+  function smartDel(){ if(currentExpr==='') return; var pf=['FACT(','PGCD(','PPCM(','SIMP(','÷R','√(','(−)']; for(var i=0;i<pf.length;i++){ if(currentExpr.endsWith(pf[i])){ currentExpr=currentExpr.slice(0,-pf[i].length); return; } } currentExpr=currentExpr.slice(0,-1); }
+  pad.addEventListener('click', function(e){
+    var t=e.target.closest('.fxc-key'); if(!t) return; var k=t.dataset.k; if(!k) return;
+    if(k==='AC'){ currentExpr=''; lastResult=null; resetOnNext=false; }
+    else if(k==='DEL'){ if(resetOnNext){ lastResult=null; resetOnNext=false; } smartDel(); }
+    else if(k==='='){ if(currentExpr==='') return; lastResult=calculer(currentExpr); resetOnNext=true; }
+    else { if(resetOnNext){ var ch=['+','−','×','÷','^','²','÷R']; var isChain=ch.indexOf(k)!==-1; if(isChain && lastResult && lastResult!=='Erreur' && lastResult.indexOf('quotient')===-1 && lastResult.indexOf('/')===-1 && lastResult.indexOf('(premier)')===-1){ currentExpr=lastResult.replace(',', '.')+k; } else { currentExpr=k; } lastResult=null; resetOnNext=false; } else { currentExpr+=k; } }
+    refresh();
+  });
+  refresh();
+})();
+</script>
+<!-- ===== FIN CALCULATRICE ===== -->
+</body>
+</html>
