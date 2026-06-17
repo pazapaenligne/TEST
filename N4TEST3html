@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 4ème S1 J5 · Bilan & restauration de la fresque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   4e · Semaine 1 · Jour 5 (VENDREDI) — BILAN habillé « fresque »
+   Couleur du jour : #f5c518 / #8a6000 / #fffbeb / #f5e08a
+   Habillage immersif : restauration d'une fresque antique
+   (les exercices et réponses restent strictement identiques au bilan)
+   ============================================================ */
+:root{
+  --jour:#f5c518; --jour-fonce:#8a6000; --jour-clair:#fffbeb; --jour-pale:#f5e08a;
+  --bg:#fffdf7; --dark:#1a1f2e; --dark-2:#232a3d;
+  --vert:#22c55e; --vert-neon:#4ade80; --rouge:#ef4444;
+  --txt:#2b2b2b; --gris:#8b8b8b;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at top right, rgba(245,197,24,.08), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(245,197,24,.06), transparent 35%),
+    linear-gradient(180deg,#fffdf7 0%, #f8f1dd 100%);
+  color:var(--txt); min-height:100vh; overflow-x:hidden; position:relative; padding:20px 16px 50px;
+}
+/* texture mosaïque antique très discrète */
+body::after{
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image:
+    linear-gradient(rgba(180,150,80,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(180,150,80,.04) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.wrap{ position:relative; z-index:1; max-width:620px; margin:0 auto; }
+
+.header{ text-align:center; margin-bottom:22px; }
+.logo-badge{ display:inline-flex; align-items:center; gap:8px; background:var(--jour); color:#3a2c00; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:1.5px; padding:6px 14px; border-radius:20px; box-shadow:0 3px 10px rgba(245,197,24,.4); margin-bottom:12px; }
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+.semaine{ font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px; color:var(--gris); text-transform:uppercase; margin-bottom:6px; }
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.1rem; line-height:1.1; color:var(--txt); margin-bottom:6px; }
+.titre .accent{ color:var(--jour); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px; color:var(--gris); margin-bottom:10px; }
+.intro-immersive{ font-size:.92rem; line-height:1.6; color:#5a4500; max-width:540px; margin:0 auto 16px; background:var(--jour-clair); border:1px solid var(--jour-pale); border-radius:12px; padding:12px 16px; }
+.badge-revision{ display:inline-block; background:var(--jour); color:#3a2c00; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem; letter-spacing:1px; padding:9px 22px; border-radius:24px; box-shadow:0 4px 14px rgba(245,197,24,.45); animation:pulse 1.8s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ transform:scale(1); box-shadow:0 4px 14px rgba(245,197,24,.45); } 50%{ transform:scale(1.05); box-shadow:0 6px 22px rgba(245,197,24,.7); } }
+
+.sound-btn{ display:inline-block; margin-top:12px; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:1px; padding:7px 14px; border-radius:14px; border:1.5px solid var(--jour-fonce); background:#fff; color:var(--jour-fonce); cursor:pointer; transition:.18s; }
+.sound-btn.on{ background:var(--jour); color:#3a2c00; }
+
+.game{ background:#fff; border:2px solid var(--jour); border-radius:18px; padding:18px 20px 16px; margin-bottom:24px; box-shadow:0 4px 16px rgba(245,197,24,.18); }
+.game-label{ font-family:'Orbitron',sans-serif; font-size:.66rem; font-weight:700; letter-spacing:2px; color:var(--jour-fonce); margin-bottom:12px; }
+.mosaique{ display:flex; flex-wrap:wrap; justify-content:center; gap:7px; margin-bottom:18px; }
+.tuile{ width:28px; height:28px; border-radius:4px; background:#d8d2c4; border:2px solid #c8bfae; transition:.3s; }
+.tuile.on{ background:linear-gradient(135deg,#f5c518,#fff2a8); border-color:var(--jour-fonce); box-shadow:0 0 10px rgba(245,197,24,.6); transform:scale(1.08); animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+@keyframes pop{ 0%{ transform:scale(.4); } 60%{ transform:scale(1.25); } 100%{ transform:scale(1.08); } }
+/* motif grec (méandre) discret */
+.meandre{ height:8px; opacity:.18; margin:0 0 14px; background:repeating-linear-gradient(90deg, var(--jour-fonce) 0 12px, transparent 12px 24px); border-radius:2px; }
+.scoreboard{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
+.score-col{ background:#faf7ef; border:1.5px solid #ece4cf; border-radius:12px; padding:12px 6px; text-align:center; }
+.score-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.4rem; line-height:1; }
+.score-col.reussis{ border-color:#9be7a5; } .score-col.reussis .score-num{ color:#157f3a; }
+.score-col.restants{ border-color:var(--jour-pale); } .score-col.restants .score-num{ color:var(--jour-fonce); }
+.score-col.erreurs{ border-color:#f5b5b5; } .score-col.erreurs .score-num{ color:#c0392b; }
+.score-lbl{ font-family:'Orbitron',sans-serif; font-size:.56rem; font-weight:700; letter-spacing:1px; color:#7a7a7a; margin-top:6px; text-transform:uppercase; }
+.xp-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.xp-head span:first-child{ font-family:'Orbitron',sans-serif; font-size:.62rem; letter-spacing:1.5px; color:var(--jour-fonce); }
+.xp-head span:last-child{ font-family:'Orbitron',sans-serif; font-size:.7rem; font-weight:700; color:var(--jour-fonce); }
+.xp-bar{ display:flex; gap:4px; height:14px; }
+.xp-seg{ flex:1; background:#f0ead7; border-radius:3px; border:1px solid #e4dcc4; transition:background .4s, box-shadow .4s; }
+.xp-seg.on{ background:linear-gradient(135deg, var(--jour-fonce), var(--jour)); border-color:var(--jour-fonce); box-shadow:0 0 6px rgba(245,197,24,.5); }
+.defi-count{ text-align:center; margin-top:12px; font-family:'Orbitron',sans-serif; font-size:.78rem; font-weight:700; letter-spacing:2px; color:#7a7a7a; }
+
+.card{ background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.04); }
+.rainbow{ height:6px; background:linear-gradient(90deg,#ff5e5e,#f5c518,#9be7a5,#3ab5d8,#a884ff,#ff5e5e); background-size:300% 100%; animation:slide 4s linear infinite; }
+@keyframes slide{ 0%{ background-position:0% 0; } 100%{ background-position:300% 0; } }
+.card-body{ padding:22px 24px 24px; }
+.card-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:10px; }
+.defi-num{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; color:var(--txt); }
+.type-badge{ font-family:'Orbitron',sans-serif; font-size:.62rem; font-weight:700; background:var(--jour-clair); color:var(--jour-fonce); padding:5px 11px; border-radius:14px; border:1px solid var(--jour-pale); white-space:nowrap; }
+.ambiance{ font-size:.9rem; line-height:1.5; color:#6b5200; background:#fff8e0; border-left:3px solid var(--jour); border-radius:6px; padding:10px 14px; margin-bottom:14px; font-style:italic; }
+.texte-fable{ background:var(--jour-clair); border:2px solid var(--jour); border-radius:14px; padding:18px 18px; margin-bottom:16px; text-align:center; box-shadow:0 2px 8px rgba(245,197,24,.12); }
+.texte-fable .ft-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:1px; color:var(--jour-fonce); margin-bottom:10px; }
+.texte-fable .ft-expr{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem; color:var(--jour-fonce); letter-spacing:1px; }
+.question-txt{ font-size:1.05rem; font-weight:bold; color:var(--txt); margin-bottom:16px; line-height:1.5; }
+.choix{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+.choix-btn{ text-align:left; font-family:'Orbitron',sans-serif; font-size:1rem; font-weight:700; padding:14px 16px; border:2px solid #e8e2d4; background:#fff; border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt); display:flex; align-items:center; gap:11px; }
+.choix-btn .choix-content{ flex:1; }
+.choix-btn .lettre{ flex-shrink:0; width:28px; height:28px; border-radius:50%; background:var(--jour-clair); color:var(--jour-fonce); font-family:'Orbitron',sans-serif; font-weight:700; font-size:.85rem; display:flex; align-items:center; justify-content:center; border:1px solid var(--jour-pale); }
+.choix-btn sup{ font-size:.7rem; }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:var(--jour-clair); }
+.choix-btn.selected{ border-color:var(--jour); background:var(--jour-clair); box-shadow:0 0 0 3px rgba(245,197,24,.25); }
+.choix-btn.selected .lettre{ background:var(--jour); color:#fff; }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{ border-color:var(--vert); background:#e7faec; }
+.choix-btn.good .lettre{ background:var(--vert); color:#fff; }
+.choix-btn.bad{ border-color:var(--rouge); background:#fdeaea; }
+.choix-btn.bad .lettre{ background:var(--rouge); color:#fff; }
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin:18px 0 4px; }
+.btn{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem; letter-spacing:1px; padding:11px 18px; border:none; border-radius:10px; cursor:pointer; transition:transform .12s; color:#fff; position:relative; }
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); }
+.btn-indice{ background:#3ab5d8; }
+.btn-valider:not(:disabled){ animation:neon-vert 1.4s ease-in-out infinite; }
+.btn-indice:not(:disabled){ animation:neon-bleu 1.4s ease-in-out infinite; }
+@keyframes neon-vert{ 0%,100%{ box-shadow:0 0 6px rgba(34,197,94,.5); } 50%{ box-shadow:0 0 18px rgba(34,197,94,.95); } }
+@keyframes neon-bleu{ 0%,100%{ box-shadow:0 0 6px rgba(58,181,216,.5); } 50%{ box-shadow:0 0 18px rgba(58,181,216,.95); } }
+.btn:disabled{ background:#d8d8d8 !important; color:#fff !important; cursor:not-allowed; animation:none !important; box-shadow:none !important; }
+.indice-box{ display:none; margin-top:14px; padding:13px 16px; background:#e8f6fb; border-left:4px solid #3ab5d8; border-radius:8px; font-size:.9rem; color:#1a6e88; }
+.indice-box.show{ display:block; animation:pop .35s ease; }
+.feedback{ display:none; margin-top:16px; padding:14px 16px; border-radius:10px; font-weight:bold; font-size:1rem; }
+.feedback.show{ display:block; animation:pop .4s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:#e7faec; color:#157f3a; border:1px solid #9be7a5; }
+.feedback.ko{ background:#fdeaea; color:#c0392b; border:1px solid #f5b5b5; }
+.correction{ display:none; margin-top:14px; padding:15px 18px; background:#fff8e6; border:1px dashed var(--jour); border-radius:10px; font-size:.92rem; color:#5a4500; line-height:1.6; }
+.correction.show{ display:block; animation:pop .4s ease; }
+.correction b{ color:var(--jour-fonce); }
+.xp-pop{ position:fixed; top:45%; left:50%; transform:translate(-50%,-50%) scale(.5); font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.4rem; color:var(--jour); text-shadow:0 0 20px var(--jour), 0 4px 10px rgba(0,0,0,.3); z-index:50; opacity:0; pointer-events:none; }
+.xp-pop.go{ animation:xpfly 1.2s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes xpfly{ 0%{ opacity:0; transform:translate(-50%,-50%) scale(.4); } 25%{ opacity:1; transform:translate(-50%,-50%) scale(1.25); } 70%{ opacity:1; transform:translate(-50%,-80%) scale(1); } 100%{ opacity:0; transform:translate(-50%,-130%) scale(.9); } }
+.results{ display:none; }
+.results.show{ display:block; animation:pop .5s ease; }
+.results .mission{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.5rem; text-align:center; color:var(--jour-fonce); letter-spacing:2px; margin-bottom:6px; }
+.medaillon{ text-align:center; margin:4px auto 10px; padding:14px 18px; max-width:340px; background:linear-gradient(135deg,#fff8d8,#f5e08a); border:2px solid var(--jour-fonce); border-radius:50px; box-shadow:0 4px 16px rgba(245,197,24,.4); animation:medalIn .6s cubic-bezier(.18,.89,.32,1.6); }
+.medaillon .med-grade{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.15rem; color:var(--jour-fonce); letter-spacing:1px; }
+@keyframes medalIn{ 0%{ transform:scale(.3) rotate(-12deg); opacity:0; } 60%{ transform:scale(1.12) rotate(4deg); } 100%{ transform:scale(1) rotate(0); opacity:1; } }
+.results .big-score{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:3.4rem; text-align:center; color:var(--jour); text-shadow:0 0 16px rgba(245,197,24,.5); margin:8px 0; }
+.results .gg{ text-align:center; font-family:'Orbitron',sans-serif; font-size:.84rem; color:var(--vert); font-weight:700; letter-spacing:.5px; margin-bottom:20px; line-height:1.5; }
+.recap{ background:#faf7ef; border-radius:12px; padding:14px 16px; margin-bottom:20px; }
+.recap-item{ display:flex; justify-content:space-between; align-items:center; padding:9px 4px; border-bottom:1px solid #ece4cf; font-size:.86rem; gap:10px; }
+.recap-item:last-child{ border-bottom:none; }
+.recap-item .eq{ font-weight:600; color:var(--txt); flex:1; }
+.recap-item .st{ font-size:1.1rem; flex-shrink:0; }
+.btn-rejouer{ display:block; width:100%; font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1px; padding:14px; border:none; border-radius:12px; color:#3a2c00; background:var(--jour); cursor:pointer; animation:neon-jour 1.4s ease-in-out infinite; }
+@keyframes neon-jour{ 0%,100%{ box-shadow:0 0 6px rgba(245,197,24,.5); } 50%{ box-shadow:0 0 18px rgba(245,197,24,.95); } }
+.btn-rejouer:active{ transform:scale(.97); }
+.btn-score-final{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; letter-spacing:1.5px; padding:16px 32px; border:2px solid var(--jour); border-radius:14px; background:#fff; color:var(--gris); cursor:not-allowed; transition:all .25s; opacity:.55; }
+.btn-score-final:not(:disabled){ background:linear-gradient(135deg, var(--jour) 0%, #fff8d0 50%, var(--jour) 100%); background-size:200% 100%; color:#3a2c00; cursor:pointer; opacity:1; border-color:var(--jour-fonce); animation:shine-final 2s linear infinite, pulse-final 1.6s ease-in-out infinite; box-shadow:0 6px 20px rgba(245,197,24,.4); }
+.btn-score-final:not(:disabled):hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(245,197,24,.5); }
+.btn-score-final:not(:disabled):active{ transform:translateY(0) scale(.97); }
+@keyframes shine-final{ 0%{ background-position:0% 0; } 100%{ background-position:200% 0; } }
+@keyframes pulse-final{ 0%,100%{ box-shadow:0 6px 20px rgba(245,197,24,.4); } 50%{ box-shadow:0 8px 28px rgba(245,197,24,.7); } }
+.hint-score{ font-family:'Orbitron',sans-serif; font-size:.7rem; letter-spacing:1px; color:var(--gris); margin-top:8px; text-transform:uppercase; transition:opacity .3s; }
+.hint-score.hidden{ opacity:0; }
+
+/* ===== PAGES (affiche / bilan) ===== */
+.page{ display:none; }
+.page.show{ display:block; animation:fadein .4s ease; }
+@keyframes fadein{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+
+.affiche{
+  background:#fff; border:2px solid var(--jour); border-radius:18px;
+  padding:24px 24px 26px; margin-bottom:20px; box-shadow:0 6px 22px rgba(245,197,24,.2); text-align:center;
+}
+.affiche .aff-mission{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.2rem; letter-spacing:1px;
+  color:var(--jour-fonce); margin-bottom:16px;
+}
+.affiche .aff-intro{
+  font-size:.96rem; line-height:1.7; color:#5a4500; max-width:480px; margin:0 auto 8px;
+}
+.affiche .aff-intro b{ color:var(--jour-fonce); }
+.affiche .aff-question{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.92rem; color:var(--jour-fonce);
+  margin:14px 0 18px; letter-spacing:.5px;
+}
+.aff-mosaique{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; max-width:330px; margin:0 auto 22px; }
+.aff-mosaique .tuile{ width:40px; height:40px; }
+@media (max-width:480px){ .aff-mosaique .tuile{ width:34px; height:34px; } }
+.btn-commencer{
+  display:inline-block; width:100%; max-width:360px;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1.05rem; letter-spacing:1.5px;
+  padding:16px; border:none; border-radius:14px; background:var(--jour); color:#3a2c00;
+  cursor:pointer; box-shadow:0 4px 16px rgba(245,197,24,.5); transition:transform .12s;
+  animation:pulse 1.8s ease-in-out infinite;
+}
+.btn-commencer:active{ transform:scale(.97); }
+
+/* toast de progression immersive (après chaque réussite) */
+.progress-toast{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+  background:#fff; border:2px solid var(--jour); border-radius:14px;
+  padding:12px 20px; font-size:.9rem; font-weight:bold; color:var(--jour-fonce);
+  box-shadow:0 6px 22px rgba(245,197,24,.4); z-index:60; opacity:0; pointer-events:none;
+  max-width:90vw; text-align:center;
+}
+.progress-toast.show{ animation:toastIn 2.2s ease forwards; }
+@keyframes toastIn{
+  0%{ opacity:0; transform:translateX(-50%) translateY(20px); }
+  12%{ opacity:1; transform:translateX(-50%) translateY(0); }
+  80%{ opacity:1; transform:translateX(-50%) translateY(0); }
+  100%{ opacity:0; transform:translateX(-50%) translateY(-12px); }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 4E
+    </div>
+    <div class="semaine">Semaine 1 – Jour 5</div>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span> !</h1>
+    <div class="sous-titre">🏁 BILAN SEMAINE 1 · 🎨 RESTAURER LA FRESQUE · 10 challenges</div>
+    <div class="intro-immersive">
+      🎨 <b>Mission : restaurer la fresque antique.</b> L'équipe d'archéologues doit restaurer
+      une fresque ancienne avant la fermeture du chantier. Chaque défi réussi permet de
+      progresser dans les travaux et de redonner vie à la mosaïque.
+    </div>
+    <div class="badge-revision">▶ BILAN BREVET 4ÈME</div>
+    <br>
+    <button class="sound-btn" id="sound-btn">🔇 SON</button>
+  </div>
+
+  <!-- ============== PAGE 1 : AFFICHE IMMERSIVE ============== -->
+  <div class="page show" id="page-affiche">
+    <div class="affiche">
+      <div class="aff-mission">🏛️ BILAN DE LA SEMAINE<br>🎨 Mission : restaurer la fresque antique</div>
+      <div class="aff-intro">
+        Une équipe d'archéologues a découvert une <b>fresque ancienne</b> endommagée par le
+        temps. Pour achever sa restauration, tu devras résoudre une série de défis
+        mathématiques. <b>Chaque réussite restaurera une partie de la mosaïque.</b>
+      </div>
+      <div class="aff-question">Seras-tu capable de compléter la fresque ?</div>
+      <div class="aff-mosaique" id="aff-mosaique"></div>
+      <button class="btn-commencer" id="btn-commencer">▶ COMMENCER LA RESTAURATION</button>
+    </div>
+  </div>
+
+  <!-- ============== PAGE 2 : LE BILAN ============== -->
+  <div class="page" id="page-bilan">
+
+  <div class="game">
+    <div class="game-label">🎨 PROGRESSION DE LA RESTAURATION</div>
+    <div class="meandre"></div>
+    <div class="mosaique" id="mosaique"></div>
+    <div class="scoreboard">
+      <div class="score-col reussis">
+        <div class="score-num" id="sc-reussis">0</div>
+        <div class="score-lbl">🎨 Zones restaurées</div>
+      </div>
+      <div class="score-col restants">
+        <div class="score-num" id="sc-restants">10</div>
+        <div class="score-lbl">🧩 Zones restantes</div>
+      </div>
+      <div class="score-col erreurs">
+        <div class="score-num" id="sc-erreurs">0</div>
+        <div class="score-lbl">⚠ Ajustements</div>
+      </div>
+    </div>
+    <div class="xp-head">
+      <span>🎨 FRESQUE RESTAURÉE</span>
+      <span id="xp-pct">0 %</span>
+    </div>
+    <div class="xp-bar" id="xp-bar"></div>
+    <div class="defi-count" id="defi-count">10 ZONES À RESTAURER</div>
+  </div>
+
+  <div id="defis-container"></div>
+
+  <div style="margin: 24px 0 10px; text-align:center;">
+    <button class="btn-score-final" id="btn-score-final" disabled>
+      🏛 RÉVÉLER LA FRESQUE COMPLÈTE
+    </button>
+    <div class="hint-score" id="hint-score">Termine les 10 zones pour révéler la fresque complète</div>
+  </div>
+
+  <div class="card results" id="results-card">
+    <div class="rainbow"></div>
+    <div class="card-body">
+      <div class="mission">🎨 FRESQUE RESTAURÉE</div>
+      <div class="big-score" id="res-score">0 / 10</div>
+      <div class="mosaique" id="res-mosaique" style="margin-bottom:12px;"></div>
+      <div class="medaillon"><div class="med-grade" id="res-grade"></div></div>
+      <div class="gg" id="res-msg"></div>
+      <div class="meandre" style="margin-bottom:18px;"></div>
+      <div class="recap" id="res-recap"></div>
+      <button class="btn-rejouer" id="btn-rejouer">▶ NOUVELLE RESTAURATION</button>
+    </div>
+  </div>
+
+  </div><!-- /page-bilan -->
+
+</div>
+
+<div class="xp-pop" id="xp-pop">+ zone !</div>
+<div class="progress-toast" id="progress-toast"></div>
+
+<script>
+/* =========================================================
+   DONNÉES DES 10 DÉFIS — Bilan S1 + ouverture x² (4e)
+   MATHS STRICTEMENT IDENTIQUES au bilan J5.
+   Seul ajout : une phrase d'ambiance "fresque" (champ `ambiance`).
+   ========================================================= */
+const DEFIS = [
+  {
+    titre:`Tuile du calcul`,
+    ambiance:`🧩 Les artisans vérifient les calculs nécessaires à la restauration.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fffbeb; border-left:3px solid #8a6000; border-radius:6px; margin-bottom:10px;">🏁 <b>Bilan calcul littéral :</b> calcule l'expression suivante.</div><div class="ft-expr" style="font-size:1.4rem;">2x² + 1</div><div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>x = −4</b></div>`,
+    question:`Quel est le résultat ?`,
+    choices:[`−31`,`33`,`−63`,`9`],
+    correct:1,
+    indice:`Étape 1 : x² = (−4)² = 16 (le carré d'un négatif est positif !). Étape 2 : 2 × 16 + 1.`,
+    correction:`x² = (−4)² = 16 (le carré d'un négatif est toujours positif).<br>2x² + 1 = 2 × 16 + 1 = 32 + 1 = <b>33</b>.<br>(Erreur classique : croire que (−4)² = −16, ce qui donnerait −31.)`
+  },
+  {
+    titre:`Motif simplifié`,
+    ambiance:`🎨 Les motifs géométriques de la fresque doivent être simplifiés.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fffbeb; border-left:3px solid #8a6000; border-radius:6px; margin-bottom:10px;">🏁 <b>Bilan calcul littéral :</b> réduis l'expression.</div><div class="ft-expr" style="font-size:1.4rem;">5a + 3 + 2a − 7</div>`,
+    question:`Quelle est la forme réduite ?`,
+    choices:[`7a − 4`,`7a + 10`,`10a − 4`,`7a²−4`],
+    correct:0,
+    indice:`Regroupe les termes en a entre eux (5a et 2a), et les constantes entre elles (+3 et −7).`,
+    correction:`Termes en a : 5a + 2a = 7a.<br>Constantes : 3 − 7 = −4.<br>Forme réduite : <b>7a − 4</b>.`
+  },
+  {
+    titre:`Inscription vérifiée`,
+    ambiance:`📜 Les inscriptions antiques doivent être vérifiées.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fffbeb; border-left:3px solid #8a6000; border-radius:6px; margin-bottom:10px;">🏁 <b>Bilan calcul littéral :</b> teste cette égalité.</div><div class="ft-expr" style="font-size:1.3rem;">3y + 4 = y + 10</div><div style="font-size:.92rem; padding:6px; text-align:center;">pour <b>y = 3</b></div>`,
+    question:`L'égalité est-elle vraie pour y = 3 ?`,
+    choices:[`Oui : les deux membres valent 13`,`Non : 13 ≠ 14`,`Oui : les deux membres valent 10`,`On ne peut pas le savoir`],
+    correct:0,
+    indice:`Calcule le membre de gauche (3y + 4 pour y = 3) puis le membre de droite (y + 10 pour y = 3). Si les deux donnent la même valeur, l'égalité est vraie.`,
+    correction:`Membre de gauche : 3 × 3 + 4 = 9 + 4 = <b>13</b>.<br>Membre de droite : 3 + 10 = <b>13</b>.<br>Les deux membres valent 13 → l'égalité est <b>vraie</b> pour y = 3.`
+  },
+  {
+    titre:`Plan du chantier`,
+    ambiance:`🛠 L'équipe modélise les quantités nécessaires au chantier.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fffbeb; border-left:3px solid #8a6000; border-radius:6px; margin-bottom:10px;">🏁 <b>Bilan mise en équation :</b><br>« Le <b>triple</b> d'un nombre vaut <b>24</b>. Quel est ce nombre ? »</div><div style="font-size:.92rem; padding:6px; text-align:center;">On note <b>x</b> ce nombre.</div>`,
+    question:`Quelle équation traduit cet énoncé ?`,
+    choices:[`x + 3 = 24`,`x − 3 = 24`,`3x = 24`,`x/3 = 24`],
+    correct:2,
+    indice:`« Le triple » signifie multiplier par 3. « Vaut 24 » signifie égal à 24. Donc 3 fois le nombre = 24.`,
+    correction:`« Le triple d'un nombre » = 3x.<br>« Vaut 24 » = égal à 24.<br>Équation : <b>3x = 24</b>. On résout : x = 8 (vérification : 3 × 8 = 24 ✓).`
+  },
+  {
+    titre:`Équilibre des artisans`,
+    ambiance:`⏳ Les restaurateurs planifient leur temps de travail.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fffbeb; border-left:3px solid #8a6000; border-radius:6px; margin-bottom:10px;">🏁 <b>Bilan résoudre :</b> résous cette équation.</div><div class="ft-expr" style="font-size:1.5rem;">5x − 7 = 18</div>`,
+    question:`Quelle est la solution ?`,
+    choices:[`x = 5`,`x = 11`,`x = 25`,`x = 2,2`],
+    correct:0,
+    indice:`Étape 1 : ajoute 7 des deux côtés (pour annuler le −7). Étape 2 : divise par 5.`,
+    correction:`5x − 7 = 18.<br>Ajouter 7 : 5x = 25.<br>Diviser par 5 : x = <b>5</b>.<br>(Vérification : 5 × 5 − 7 = 25 − 7 = 18 ✓)`
+  },
+  {
+    titre:`Deux équipes, un accord`,
+    ambiance:`🧱 On équilibre les ressources entre deux équipes d'artisans.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fffbeb; border-left:3px solid #8a6000; border-radius:6px; margin-bottom:10px;">🏁 <b>Bilan résoudre :</b> niveau brevet anticipé.</div><div class="ft-expr" style="font-size:1.4rem;">7x − 2 = 4x + 13</div>`,
+    question:`Quelle est la solution ?`,
+    choices:[`x = 11/3`,`x = 5`,`x = 3`,`x = 15`],
+    correct:1,
+    indice:`Regroupe d'abord les x à gauche (soustrais 4x), puis les nombres à droite (ajoute 2), puis divise par le coefficient.`,
+    correction:`7x − 2 = 4x + 13.<br>Soustraire 4x : 3x − 2 = 13.<br>Ajouter 2 : 3x = 15.<br>Diviser par 3 : x = <b>5</b>.<br>(Vérification : 7 × 5 − 2 = 33 et 4 × 5 + 13 = 33 ✓)`
+  },
+  {
+    titre:`Lots de peinture`,
+    ambiance:`🖌 On répartit la peinture par lots identiques sur la fresque.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fffbeb; border-left:3px solid #8a6000; border-radius:6px; margin-bottom:10px;">🏁 <b>Bilan résoudre :</b> attention aux parenthèses.</div><div class="ft-expr" style="font-size:1.5rem;">3(x − 2) = 12</div>`,
+    question:`Quelle est la solution ?`,
+    choices:[`x = 4`,`x = 6`,`x = 14`,`x = 10`],
+    correct:1,
+    indice:`Méthode rapide : divise les deux côtés par 3 d'abord (x − 2 = 4), puis ajoute 2. Méthode alternative : développe d'abord.`,
+    correction:`<b>Méthode rapide :</b> diviser par 3 → x − 2 = 4 → x = <b>6</b>.<br><b>Méthode développée :</b> 3x − 6 = 12 → 3x = 18 → x = 6.<br>(Vérification : 3 × (6 − 2) = 3 × 4 = 12 ✓)`
+  },
+  {
+    titre:`La tuile carrée`,
+    ambiance:`🔷 Une tuile carrée de la mosaïque doit être reconstituée.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fff5f0; border-left:3px solid #c47a10; border-radius:6px; margin-bottom:10px;">🚀 <b>Ouverture 3e :</b> tu as appris à résoudre les équations du type ax + b = c. Voici une nouvelle famille d'équations.</div><div class="ft-expr" style="font-size:1.6rem;">x² = 9</div>`,
+    question:`Quelle(s) est/sont la/les solution(s) ?`,
+    choices:[`x = 3 (uniquement)`,`x = 9 (la racine de 9 ?)`,`x = 3 ou x = −3 (deux solutions !)`,`x = 4,5`],
+    correct:2,
+    indice:`Quel nombre, au carré, donne 9 ? Réfléchis : 3² = 9, mais aussi (−3)² = (−3) × (−3) = 9.`,
+    correction:`On cherche les nombres dont le carré vaut 9.<br>3² = 9 ✓ et (−3)² = 9 ✓ (car négatif × négatif = positif).<br>Donc <b>deux solutions</b> : <b>x = 3</b> et <b>x = −3</b>. (Une équation du type x² = k positif a TOUJOURS deux solutions opposées.)`
+  },
+  {
+    titre:`Une seconde tuile carrée`,
+    ambiance:`🔶 On vérifie les dimensions d'une autre tuile carrée.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fff5f0; border-left:3px solid #c47a10; border-radius:6px; margin-bottom:10px;">🚀 <b>Ouverture 3e :</b> en t'inspirant de l'exercice précédent…</div><div class="ft-expr" style="font-size:1.5rem;">x² = 25</div>`,
+    question:`Combien cette équation a-t-elle de solutions ?`,
+    choices:[`0 solution`,`1 solution (x = 5)`,`2 solutions (x = 5 et x = −5)`,`Une infinité`],
+    correct:2,
+    indice:`Quels sont les nombres qui, élevés au carré, donnent 25 ? Pense aux nombres POSITIFS et NÉGATIFS.`,
+    correction:`5² = 25 ✓ et (−5)² = 25 ✓.<br>Donc <b>deux solutions</b> : x = 5 et x = −5.<br><i>Règle générale (3e) :</i> l'équation x² = k a deux solutions opposées (√k et −√k) si k > 0, une seule (x = 0) si k = 0, et aucune si k < 0.`
+  },
+  {
+    titre:`La tuile impossible`,
+    ambiance:`🏛 Dernière tuile : l'équipe vérifie un calcul délicat avant de terminer.`,
+    expr:`<div style="font-size:.95rem; line-height:1.55; padding:9px 12px; text-align:left; background:#fff5f0; border-left:3px solid #c47a10; border-radius:6px; margin-bottom:10px;">🚀 <b>Ouverture 3e :</b> et celle-ci ?</div><div class="ft-expr" style="font-size:1.5rem;">x² = −4</div>`,
+    question:`Quelle est la solution de cette équation ?`,
+    choices:[`x = −2`,`x = 2 ou x = −2`,`x = −16`,`Aucune solution`],
+    correct:3,
+    indice:`Un nombre élevé au carré peut-il être NÉGATIF ? Pense à un nombre positif (au carré) et un nombre négatif (au carré).`,
+    correction:`Un carré est <b>TOUJOURS positif ou nul</b> : pour tout réel x, x² ≥ 0.<br>Donc x² = −4 est <b>impossible</b> : il n'y a <b>aucune solution</b>.<br><i>Astuce pour le brevet :</i> si tu trouves une équation x² = k avec k < 0, écris « pas de solution » et précise « car x² ≥ 0 pour tout x ».`
+  }
+];
+
+const TOTAL = DEFIS.length;
+let etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
+let reussis = 0;
+let erreurs = 0;
+const $ = id => document.getElementById(id);
+const LETTRES = ['A','B','C','D','E','F'];
+
+function buildMosaique(){
+  const c = $('mosaique'); if(!c) return;
+  c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const t = document.createElement('div');
+    t.className = 'tuile';
+    c.appendChild(t);
+  }
+}
+function buildXpBar(){
+  const c = $('xp-bar'); if(!c) return;
+  c.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const s = document.createElement('div');
+    s.className = 'xp-seg';
+    c.appendChild(s);
+  }
+}
+buildMosaique();
+buildXpBar();
+/* mosaïque vide affichée sur la page 1 (affiche) */
+(function(){
+  const c = $('aff-mosaique'); if(!c) return;
+  for(let i=0;i<TOTAL;i++){ const t=document.createElement('div'); t.className='tuile'; c.appendChild(t); }
+})();
+
+const container = $('defis-container');
+container.innerHTML = '';
+DEFIS.forEach((d, idx) => {
+  const card = document.createElement('div');
+  card.className = 'card defi-card';
+  card.id = 'defi-card-' + idx;
+  card.style.marginBottom = '20px';
+  let choicesHTML = '';
+  d.choices.forEach((ch, ci) => {
+    choicesHTML += '<button class="choix-btn" data-idx="'+idx+'" data-ci="'+ci+'">'
+                + '<span class="lettre">'+LETTRES[ci]+'</span>'
+                + '<span class="choix-content">'+ch+'</span>'
+                + '</button>';
+  });
+  card.innerHTML =
+    '<div class="rainbow"></div>'
+  + '<div class="card-body">'
+  +   '<div class="card-head">'
+  +     '<div class="defi-num">ZONE ' + String(idx+1).padStart(2,'0') + '</div>'
+  +     '<div class="type-badge">BILAN S1</div>'
+  +   '</div>'
+  +   '<div class="ambiance">' + (d.ambiance || '') + '</div>'
+  +   '<div class="texte-fable">'
+  +     '<div class="ft-titre">🔢 ' + (d.titre ? d.titre.toUpperCase() : 'DÉFI') + '</div>'
+  +     '<div class="ft-expr">' + d.expr + '</div>'
+  +   '</div>'
+  +   '<div class="question-txt">' + d.question + '</div>'
+  +   '<div class="choix" id="choix-'+idx+'">' + choicesHTML + '</div>'
+  +   '<div class="btns">'
+  +     '<button class="btn btn-valider" id="btn-valider-'+idx+'" disabled>✓ VALIDER</button>'
+  +     '<button class="btn btn-indice"  id="btn-indice-'+idx+'">? INDICE</button>'
+  +   '</div>'
+  +   '<div class="indice-box" id="indice-box-'+idx+'"></div>'
+  +   '<div class="feedback"   id="feedback-'+idx+'"></div>'
+  +   '<div class="correction" id="correction-'+idx+'"></div>'
+  + '</div>';
+  container.appendChild(card);
+});
+
+container.addEventListener('click', (e) => {
+  const btn = e.target.closest('.choix-btn');
+  if(btn){
+    const i = parseInt(btn.dataset.idx, 10);
+    const ci = parseInt(btn.dataset.ci, 10);
+    if(etat[i].validated) return;
+    etat[i].picked = ci;
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    $('btn-valider-'+i).disabled = false;
+    return;
+  }
+  if(e.target.id && e.target.id.startsWith('btn-valider-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    valider(i);
+  } else if(e.target.id && e.target.id.startsWith('btn-indice-')){
+    const i = parseInt(e.target.id.split('-').pop(), 10);
+    indice(i);
+  }
+});
+
+function valider(i){
+  const e = etat[i];
+  if(e.validated) return;
+  if(e.picked == null) return;
+  e.validated = true;
+  e.correct = (e.picked === DEFIS[i].correct);
+  if(e.correct) reussis++; else erreurs++;
+  const choixZone = $('choix-'+i);
+  choixZone.querySelectorAll('.choix-btn').forEach((b, ci) => {
+    b.disabled = true; b.classList.add('locked');
+    if(ci === DEFIS[i].correct) b.classList.add('good');
+    else if(ci === e.picked) b.classList.add('bad');
+  });
+  const fb = $('feedback-'+i);
+  if(e.correct){
+    fb.className = 'feedback ok show';
+    fb.innerHTML = '✅ Zone restaurée !';
+    fireXP();
+    fireProgress();
+    playDing();
+    playStone();
+  } else {
+    fb.className = 'feedback ko show';
+    fb.innerHTML = '❌ Réponse incorrecte. Regarde la correction.';
+    playTap();
+  }
+  const corr = $('correction-'+i);
+  corr.className = 'correction show';
+  corr.innerHTML = '<b>📖 Correction :</b> ' + DEFIS[i].correction;
+  $('btn-valider-'+i).disabled = true;
+  $('btn-indice-'+i).disabled = true;
+  updateScoreboard();
+  const tousValides = etat.every(s => s.validated);
+  if(tousValides){ activerBoutonFinal(); }
+}
+
+function activerBoutonFinal(){
+  const btn = $('btn-score-final');
+  btn.disabled = false;
+  btn.textContent = '🏛 RÉVÉLER LA FRESQUE COMPLÈTE';
+  $('hint-score').classList.add('hidden');
+  btn.style.transform = 'scale(1.1)';
+  setTimeout(()=> btn.style.transform = '', 250);
+}
+
+function indice(i){
+  const e = etat[i];
+  if(e.validated) return;
+  const box = $('indice-box-'+i);
+  box.className = 'indice-box show';
+  box.innerHTML = '💡 <b>Indice :</b> ' + DEFIS[i].indice;
+  e.indiceShown = true;
+  $('btn-indice-'+i).disabled = true;
+}
+
+function updateScoreboard(){
+  $('sc-reussis').textContent = reussis;
+  $('sc-erreurs').textContent = erreurs;
+  $('sc-restants').textContent = TOTAL - reussis - erreurs;
+  // tuiles de mosaïque : une tuile dorée par ZONE RÉUSSIE
+  const tuiles = document.querySelectorAll('#mosaique .tuile');
+  tuiles.forEach((t, k) => t.classList.toggle('on', k < reussis));
+  // barre en tesselles : segments allumés = zones réussies
+  const segs = document.querySelectorAll('#xp-bar .xp-seg');
+  segs.forEach((s, k) => s.classList.toggle('on', k < reussis));
+  // % de fresque réellement restaurée (réussites, pas défis traités)
+  const pct = Math.round((reussis / TOTAL) * 100);
+  $('xp-pct').textContent = pct + ' %';
+  // compteur d'avancement (défis traités)
+  const finis = etat.filter(s => s.validated).length;
+  $('defi-count').textContent = finis + ' / ' + TOTAL + ' ZONES TRAITÉES';
+}
+
+function fireXP(){
+  const p = $('xp-pop');
+  p.classList.remove('go'); void p.offsetWidth; p.classList.add('go');
+}
+
+const PROGRESS_MSGS = [
+  "🧩 Une nouvelle partie de la fresque apparaît…",
+  "🎨 Les couleurs de la mosaïque réapparaissent…",
+  "🏛 Les archéologues avancent dans la restauration…",
+  "🪶 Une tesselle dorée retrouve sa place…",
+  "✨ La fresque reprend peu à peu vie…"
+];
+function fireProgress(){
+  const t = $('progress-toast');
+  if(!t) return;
+  t.textContent = PROGRESS_MSGS[Math.floor(Math.random()*PROGRESS_MSGS.length)];
+  t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+}
+
+function showResults(){
+  const r = $('results-card');
+  r.classList.add('show');
+  $('res-score').textContent = reussis + ' / ' + TOTAL;
+  // mosaïque finale : reflète les zones réussies
+  const mc = $('res-mosaique');
+  mc.innerHTML = '';
+  for(let i=0;i<TOTAL;i++){
+    const t = document.createElement('div');
+    t.className = 'tuile' + (i < reussis ? ' on' : '');
+    mc.appendChild(t);
+  }
+  // médaillon selon le score
+  let grade;
+  if(reussis === TOTAL)      grade = '🏛 Maître restaurateur';
+  else if(reussis >= 8)      grade = '🎨 Restaurateur expert';
+  else if(reussis >= 5)      grade = '🧩 Artisan confirmé';
+  else                       grade = '🔨 Apprenti restaurateur';
+  $('res-grade').textContent = grade;
+  // message
+  let msg;
+  const ratio = reussis / TOTAL;
+  if(reussis === TOTAL)   msg = '🏛 Grâce à tes calculs, l\'équipe a restauré toute la fresque en respectant les contraintes du chantier !';
+  else if(ratio >= 0.75)  msg = '🎨 Belle restauration — la fresque reprend vie !';
+  else if(ratio >= 0.5)   msg = '🧩 Bon travail — quelques zones restent à reprendre.';
+  else if(reussis > 0)    msg = '🛠 La restauration avance — relis le cours et réessaie !';
+  else                    msg = '📜 Courage — révise et relance la restauration !';
+  $('res-msg').innerHTML = msg;
+  let html = '';
+  DEFIS.forEach((d, i) => {
+    html += '<div class="recap-item">'
+         + '<span class="eq">' + (d.titre || 'Zone ' + (i+1)) + '</span>'
+         + '<span class="st">' + (etat[i].correct ? '🎨' : '⚠') + '</span>'
+         + '</div>';
+  });
+  $('res-recap').innerHTML = html;
+  playCarillon();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function rejouer(){
+  etat = DEFIS.map(()=>({ validated:false, correct:false, picked:null, indiceShown:false }));
+  reussis = 0; erreurs = 0;
+  $('results-card').classList.remove('show');
+  DEFIS.forEach((d, i) => {
+    const choixZone = $('choix-'+i);
+    choixZone.querySelectorAll('.choix-btn').forEach(b => {
+      b.disabled = false; b.classList.remove('selected','good','bad','locked');
+    });
+    $('btn-valider-'+i).disabled = true;
+    $('btn-indice-'+i).disabled = false;
+    $('feedback-'+i).className = 'feedback'; $('feedback-'+i).innerHTML = '';
+    $('correction-'+i).className = 'correction'; $('correction-'+i).innerHTML = '';
+    $('indice-box-'+i).className = 'indice-box'; $('indice-box-'+i).innerHTML = '';
+  });
+  updateScoreboard();
+  const btnF = $('btn-score-final');
+  btnF.disabled = true;
+  btnF.textContent = '🏛 RÉVÉLER LA FRESQUE COMPLÈTE';
+  $('hint-score').classList.remove('hidden');
+  // revenir à la page affiche (page 1)
+  $('page-bilan').classList.remove('show');
+  $('page-affiche').classList.add('show');
+  playWhoosh();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+$('btn-rejouer').addEventListener('click', rejouer);
+$('btn-score-final').addEventListener('click', showResults);
+
+/* =========================================================
+   SONS D'INTERACTION — Web Audio API (100% autonome)
+   ding (réussite) · tap (erreur) · clac pierre (étoile)
+   carillon (fin) · whoosh (relance)
+   Pas d'ambiance continue.
+   ========================================================= */
+let audioCtx = null, soundOn = false;
+function ensureCtx(){
+  if(!audioCtx){ try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; } }
+  if(audioCtx && audioCtx.state !== 'running'){ try { audioCtx.resume(); } catch(e){} }
+  return audioCtx;
+}
+function noiseBuf(dur){
+  const ctx = audioCtx;
+  const len = Math.floor(ctx.sampleRate * dur);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  for(let k=0;k<len;k++){ d[k] = Math.random()*2 - 1; }
+  return buf;
+}
+function playDing(){
+  if(!soundOn) return; const ctx = ensureCtx(); if(!ctx) return;
+  const t = ctx.currentTime;
+  [1175, 1568].forEach((f,k)=>{
+    const o = ctx.createOscillator(); o.type='sine'; o.frequency.value=f;
+    const g = ctx.createGain(); const tt=t+k*0.03;
+    g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.18,tt+0.02); g.gain.exponentialRampToValueAtTime(0.0001,tt+0.35);
+    o.connect(g); g.connect(ctx.destination); o.start(tt); o.stop(tt+0.36);
+  });
+}
+function playTap(){
+  if(!soundOn) return; const ctx = ensureCtx(); if(!ctx) return;
+  const t = ctx.currentTime;
+  const o = ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(300,t); o.frequency.exponentialRampToValueAtTime(180,t+0.1);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.09,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16);
+  o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.18);
+}
+function playStone(){
+  if(!soundOn) return; const ctx = ensureCtx(); if(!ctx) return;
+  const t = ctx.currentTime + 0.05;
+  const src = ctx.createBufferSource(); src.buffer = noiseBuf(0.08);
+  const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1100; bp.Q.value=1.4;
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.2,t+0.004); g.gain.exponentialRampToValueAtTime(0.0001,t+0.07);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.08);
+  const o = ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(90,t+0.06);
+  const go = ctx.createGain(); go.gain.setValueAtTime(0.0001,t); go.gain.exponentialRampToValueAtTime(0.14,t+0.01); go.gain.exponentialRampToValueAtTime(0.0001,t+0.1);
+  o.connect(go); go.connect(ctx.destination); o.start(t); o.stop(t+0.12);
+}
+function playWhoosh(){
+  if(!soundOn) return; const ctx = ensureCtx(); if(!ctx) return;
+  const t = ctx.currentTime;
+  const src = ctx.createBufferSource(); src.buffer = noiseBuf(0.4);
+  const bp = ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=0.7;
+  bp.frequency.setValueAtTime(350,t); bp.frequency.exponentialRampToValueAtTime(1300,t+0.2); bp.frequency.exponentialRampToValueAtTime(400,t+0.4);
+  const g = ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.13,t+0.15); g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.42);
+}
+function playCarillon(){
+  if(!soundOn) return; const ctx = ensureCtx(); if(!ctx) return;
+  const t0 = ctx.currentTime;
+  [659, 784, 988, 1319].forEach((f,k)=>{
+    const t = t0 + k*0.12;
+    const o = ctx.createOscillator(); o.type='triangle'; o.frequency.value=f;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.22,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.52);
+  });
+}
+$('sound-btn').addEventListener('click', function(){
+  soundOn = !soundOn;
+  const btn = $('sound-btn');
+  if(soundOn){
+    btn.classList.add('on'); btn.textContent='🔊 SON';
+    const ctx = ensureCtx();
+    if(ctx && ctx.state!=='running' && ctx.resume){ const p=ctx.resume(); if(p&&p.then){ p.then(playStone); } else { setTimeout(playStone,60); } }
+    else { playStone(); }
+  } else { btn.classList.remove('on'); btn.textContent='🔇 SON'; }
+});
+
+/* ============== TRANSITION : COMMENCER LA RESTAURATION ============== */
+$('btn-commencer').addEventListener('click', function(){
+  // activer le son si pas déjà fait, puis whoosh d'ouverture
+  if(!soundOn){
+    soundOn = true;
+    const sb = $('sound-btn'); sb.classList.add('on'); sb.textContent='🔊 SON';
+    const ctx = ensureCtx();
+    if(ctx && ctx.state!=='running' && ctx.resume){ const p=ctx.resume(); if(p&&p.then){ p.then(playWhoosh); } else { setTimeout(playWhoosh,60); } }
+    else { playWhoosh(); }
+  } else { playWhoosh(); }
+  // bascule de page
+  $('page-affiche').classList.remove('show');
+  $('page-bilan').classList.add('show');
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+/* ============== INIT ============== */
+updateScoreboard();
+</script>
+</body>
+</html>
