@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Je relève le défi – 3ème S2 J5 · Évolutions en pourcentage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#f5c518; --jour-fonce:#8a6000; --jour-clair:#fffbeb; --jour-pale:#f5e08a;
+  --bg:#fffdf7; --txt:#2b2010; --gris:#8b7a60;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg); color: var(--txt);
+  min-height: 100vh; padding: 20px 16px 50px;
+  position: relative; overflow-x: hidden;
+}
+.bulle{ position:fixed; border-radius:50%; opacity:.30; z-index:0; pointer-events:none; }
+.bulle-1{ width:200px; height:200px; background:#ffd84d; top:-60px; right:-50px; }
+.bulle-2{ width:240px; height:240px; background:var(--jour-pale); bottom:-80px; left:-70px; }
+.bulle-3{ width:150px; height:150px; background:#9be7a5; top:45%; right:-70px; }
+.bulle-4{ width:120px; height:120px; background:#f7c8d4; top:200px; left:-30px; }
+.wrap{ position:relative; z-index:1; max-width:1100px; margin:0 auto; }
+.header{ text-align:center; margin-bottom:24px; }
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--jour); color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1.5px; padding:6px 14px; border-radius:20px;
+  box-shadow:0 3px 10px rgba(245,197,24,.4); margin-bottom:12px;
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; background:#3a2c00; display:block; }
+.logo-badge .dots i:nth-child(2){ opacity:.6; }
+.logo-badge .dots i:nth-child(3){ opacity:.3; }
+.semaine{
+  font-family:'Orbitron',sans-serif; font-size:.78rem; letter-spacing:3px;
+  color:var(--gris); text-transform:uppercase; margin-bottom:6px;
+}
+.titre{
+  font-family:'Orbitron', sans-serif; font-weight:900;
+  font-size:2.2rem; line-height:1.1; color:var(--txt); margin-bottom:6px;
+}
+.titre .accent{ color:var(--jour-fonce); }
+.sous-titre{
+  font-family:'Orbitron',sans-serif; font-size:.82rem; letter-spacing:2px;
+  color:var(--gris); margin-bottom:14px;
+}
+.badge-mission{
+  display:inline-block; background: var(--jour); color:#3a2c00;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem;
+  letter-spacing:1px; padding:9px 22px; border-radius:24px;
+  box-shadow:0 4px 14px rgba(245,197,24,.45);
+}
+.consigne{
+  background: var(--jour-clair);
+  border: 2px solid var(--jour);
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin-bottom: 18px;
+  text-align: center;
+  font-size: .95rem;
+  color: var(--jour-fonce);
+  font-weight: 600;
+}
+.consigne b{ color: var(--txt); }
+.cadre-iframe{
+  background: #fff;
+  border: 4px solid var(--jour);
+  border-radius: 16px;
+  padding: 8px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.12);
+}
+.cadre-iframe .iframe-container{
+  position: relative;
+  padding-bottom: 56.25%;
+  height: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+.cadre-iframe iframe{
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border: none;
+  background: #fff;
+}
+.footer-aide{
+  text-align: center; margin-top: 14px;
+  font-size: .85rem; color: var(--gris);
+  font-family:'Orbitron',sans-serif;
+  letter-spacing: 1px; font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="bulle bulle-1"></div>
+<div class="bulle bulle-2"></div>
+<div class="bulle bulle-3"></div>
+<div class="bulle bulle-4"></div>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 3ÈME
+    </div>
+    <div class="semaine">Semaine 2 – Jour 5</div>
+    <h1 class="titre">🏆 Je relève le <span class="accent">défi</span>&nbsp;!</h1>
+    <div class="sous-titre">Évolutions en pourcentage</div>
+    <div class="badge-mission">▶ DÉFI MATHS 3ÈME</div>
+  </div>
+
+  <div class="consigne">
+    🎯 <b>Consigne</b>&nbsp;: calculer le pourcentage d&apos;une valeur, puis retrouver un taux d&apos;évolution. 💡 Calculatrice fx-92 disponible en bas à droite.
+  </div>
+
+  <div class="cadre-iframe">
+    <div class="iframe-container">
+      <iframe
+        title="Évolutions en pourcentage"
+        src="https://learningapps.org/watch?app=16631819"
+        allowfullscreen="true"
+        webkitallowfullscreen="true"
+        mozallowfullscreen="true"></iframe>
+    </div>
+  </div>
+
+  <div class="footer-aide">✨ Termine l&apos;exercice puis recommence pour t&apos;améliorer ✨</div>
+
+</div>
+
+<!-- ===== CALCULATRICE fx-92 PAZAPA (déplaçable) ===== -->
+<style>
+/* === Déclencheur (SVG CASIO + étiquette) === */
+#fxc-trigger{
+  position:fixed; right:14px; bottom:14px; z-index:9998;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; user-select:none;
+  transition:transform .15s ease;
+}
+#fxc-trigger:hover{ transform:translateY(-2px) scale(1.03); }
+#fxc-trigger.fxc-hidden{ display:none; }
+#fxc-trigger svg{ display:block; filter:drop-shadow(0 4px 10px rgba(0,0,0,.25)); }
+#fxc-trigger .fxc-label{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.65rem;
+  letter-spacing:1px; padding:3px 10px; border-radius:10px;
+  background:var(--titre,#1a1f2e); color:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.2);
+}
+
+/* === Panneau calculatrice === */
+#fxc-panel{
+  position:fixed; right:14px; bottom:14px; z-index:9999;
+  width:330px; max-width:calc(100vw - 20px);
+  background:#2f343b; border-radius:14px;
+  box-shadow:0 12px 36px rgba(0,0,0,.45);
+  font-family:'JetBrains Mono','Courier New',monospace;
+  display:none; flex-direction:column;
+  border:2px solid var(--main, #3ab5d8);
+}
+#fxc-panel.fxc-open{ display:flex; }
+
+/* Barre de titre */
+.fxc-bar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 12px; border-radius:12px 12px 0 0;
+  background:var(--main, #3ab5d8); color:#fff;
+  font-size:.78rem; font-weight:700;
+  cursor:move; touch-action:none; user-select:none;
+}
+.fxc-bar .fxc-icon{
+  width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,.18); border:none; border-radius:6px;
+  color:#fff; font-size:.95rem; cursor:pointer; margin-left:4px;
+  font-family:inherit;
+}
+.fxc-bar .fxc-icon:hover{ background:rgba(255,255,255,.32); }
+.fxc-bar-title{ flex:1; pointer-events:none; }
+
+/* Aide */
+.fxc-help{
+  display:none; padding:8px 12px;
+  background:#3a3f47; color:#cfe2dc;
+  font-size:.72rem; line-height:1.5;
+  border-bottom:1px solid #1a1f2e;
+}
+.fxc-help.fxc-show{ display:block; }
+.fxc-help b{ color:var(--main, #3ab5d8); }
+
+/* Écran LCD */
+.fxc-screen{
+  margin:10px; padding:10px 12px;
+  background:#d7e3c8; color:#1a1f2e;
+  border:2px solid #4d5663; border-radius:6px;
+  min-height:60px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  font-family:'JetBrains Mono','Courier New',monospace;
+}
+.fxc-expr{
+  font-size:.85rem; color:#3a4250; text-align:right;
+  min-height:1.2em;
+  overflow-x:auto; white-space:nowrap;
+}
+.fxc-result{
+  font-size:1.3rem; font-weight:700; text-align:right;
+  overflow-x:auto; white-space:nowrap;
+}
+
+/* Clavier */
+.fxc-pad{
+  display:grid; grid-template-columns:repeat(5, 1fr);
+  gap:6px; padding:0 10px 12px;
+}
+.fxc-key{
+  font-family:'JetBrains Mono','Courier New',monospace;
+  font-size:.95rem; font-weight:700;
+  padding:12px 6px; border:none; border-radius:8px;
+  background:#4d5663; color:#fff;
+  cursor:pointer; transition:transform .08s, background .15s;
+  min-height:44px;
+}
+.fxc-key:hover{ background:#5a6371; }
+.fxc-key:active{ transform:scale(.94); }
+.fxc-key.fxc-fn{ background:#3a7a8c; font-size:.78rem; }
+.fxc-key.fxc-fn:hover{ background:#458899; }
+.fxc-key.fxc-op{ background:#5a6371; }
+.fxc-key.fxc-eq{ background:#3a7bd5; }
+.fxc-key.fxc-eq:hover{ background:#4d8aea; }
+.fxc-key.fxc-del{ background:#a04a3a; font-size:.8rem; }
+.fxc-key.fxc-del:hover{ background:#b85a4a; }
+.fxc-key.fxc-ac{ background:#d04a3a; font-size:.85rem; }
+.fxc-key.fxc-ac:hover{ background:#e85a4a; }
+.fxc-key.fxc-divr{ background:#3a7a8c; font-size:.75rem; }
+.fxc-key.fxc-simp{ background:#3a7a8c; font-size:.7rem; line-height:1; }
+.fxc-key.fxc-simp small{ display:block; font-size:.55rem; opacity:.85; margin-top:2px; }
+</style>
+
+<!-- Déclencheur SVG CASIO fx-92 -->
+<div id="fxc-trigger" aria-label="Ouvrir la calculatrice">
+  <svg width="64" height="78" viewBox="0 0 64 78" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="fxcBody" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#dcefe8"/>
+        <stop offset="100%" stop-color="#bcdcd5"/>
+      </linearGradient>
+    </defs>
+    <rect x="2" y="2" width="60" height="74" rx="7" fill="url(#fxcBody)" stroke="#7ea89e" stroke-width="1"/>
+    <text x="8" y="11" font-family="Arial,sans-serif" font-size="5.5" font-weight="bold" fill="#1a3540">CASIO</text>
+    <text x="40" y="11" font-family="Arial,sans-serif" font-size="5" font-weight="bold" fill="#1a3540">fx-92</text>
+    <rect x="8" y="14" width="20" height="3.5" fill="#2a3540" rx="0.5"/>
+    <rect x="6" y="20" width="52" height="16" fill="#c4d3a6" stroke="#5a6f3a" stroke-width="0.6" rx="1"/>
+    <text x="52" y="32" font-family="Courier New,monospace" font-size="6" fill="#2a3a1a" text-anchor="end" font-weight="bold">0</text>
+    <circle cx="14" cy="46" r="6" fill="#9bc4ba" stroke="#5a8479" stroke-width="0.6"/>
+    <circle cx="14" cy="46" r="2" fill="#7ea89e"/>
+    <g fill="#4d5663" stroke="#2a3540" stroke-width="0.3">
+      <rect x="26" y="42" width="6" height="4" rx="1"/>
+      <rect x="34" y="42" width="6" height="4" rx="1"/>
+      <rect x="42" y="42" width="6" height="4" rx="1"/>
+      <rect x="50" y="42" width="6" height="4" rx="1"/>
+      <rect x="26" y="48" width="6" height="4" rx="1"/>
+      <rect x="34" y="48" width="6" height="4" rx="1"/>
+      <rect x="42" y="48" width="6" height="4" rx="1"/>
+      <rect x="50" y="48" width="6" height="4" rx="1"/>
+    </g>
+    <g fill="#dcefe8" stroke="#7ea89e" stroke-width="0.4">
+      <rect x="6" y="56" width="7" height="5" rx="1"/>
+      <rect x="14" y="56" width="7" height="5" rx="1"/>
+      <rect x="22" y="56" width="7" height="5" rx="1"/>
+      <rect x="30" y="56" width="7" height="5" rx="1"/>
+      <rect x="6" y="62" width="7" height="5" rx="1"/>
+      <rect x="14" y="62" width="7" height="5" rx="1"/>
+      <rect x="22" y="62" width="7" height="5" rx="1"/>
+      <rect x="30" y="62" width="7" height="5" rx="1"/>
+      <rect x="6" y="68" width="7" height="5" rx="1"/>
+      <rect x="14" y="68" width="7" height="5" rx="1"/>
+      <rect x="22" y="68" width="7" height="5" rx="1"/>
+      <rect x="30" y="68" width="7" height="5" rx="1"/>
+    </g>
+    <rect x="50" y="68" width="8" height="5" rx="1" fill="#3a7bd5" stroke="#1f5cab" stroke-width="0.4"/>
+    <text x="54" y="71.7" font-family="Arial,sans-serif" font-size="3" fill="#fff" text-anchor="middle" font-weight="bold">=</text>
+    <rect x="50" y="56" width="8" height="5" rx="1" fill="#d04a3a" stroke="#9c3528" stroke-width="0.4"/>
+    <g fill="#4d5663" stroke="#2a3540" stroke-width="0.3">
+      <rect x="40" y="56" width="7" height="5" rx="1"/>
+      <rect x="40" y="62" width="7" height="5" rx="1"/>
+      <rect x="40" y="68" width="7" height="5" rx="1"/>
+      <rect x="50" y="62" width="8" height="5" rx="1"/>
+    </g>
+  </svg>
+  <span class="fxc-label">Calculatrice</span>
+</div>
+
+<div id="fxc-panel" aria-label="Calculatrice fx-92 Pazapa">
+  <div class="fxc-bar" id="fxc-bar">
+    <span class="fxc-bar-title">☰ fx-92 · glisse pour déplacer</span>
+    <button class="fxc-icon" id="fxc-help-btn" title="Aide">?</button>
+    <button class="fxc-icon" id="fxc-close-btn" title="Fermer">✕</button>
+  </div>
+  <div class="fxc-help" id="fxc-help">
+    <b>÷R</b> division euclidienne (quotient · reste)<br>
+    <b>FACT(</b>n<b>)</b> décomposition en facteurs premiers<br>
+    <b>PGCD(</b>a;b<b>)</b> · <b>PPCM(</b>a;b<b>)</b><br>
+    <b>SIMP(</b>a;b<b>)</b> fraction a/b irréductible<br>
+    <b>√</b> racine · <b>x²</b> carré · <b>^</b> puissance
+  </div>
+  <div class="fxc-screen">
+    <div class="fxc-expr" id="fxc-expr"></div>
+    <div class="fxc-result" id="fxc-result">0</div>
+  </div>
+  <div class="fxc-pad" id="fxc-pad">
+    <button class="fxc-key fxc-fn" data-k="FACT(">FACT(</button>
+    <button class="fxc-key fxc-fn" data-k="PGCD(">PGCD(</button>
+    <button class="fxc-key fxc-fn" data-k="PPCM(">PPCM(</button>
+    <button class="fxc-key fxc-simp" data-k="SIMP(">SIMP(<small>a/b</small></button>
+    <button class="fxc-key fxc-ac"  data-k="AC">AC</button>
+
+    <button class="fxc-key fxc-del" data-k="DEL">DEL</button>
+    <button class="fxc-key fxc-op"  data-k="(">(</button>
+    <button class="fxc-key fxc-op"  data-k=")">)</button>
+    <button class="fxc-key fxc-op"  data-k=";">;</button>
+    <button class="fxc-key fxc-divr" data-k="÷R">÷R</button>
+
+    <button class="fxc-key" data-k="7">7</button>
+    <button class="fxc-key" data-k="8">8</button>
+    <button class="fxc-key" data-k="9">9</button>
+    <button class="fxc-key fxc-op" data-k="÷">÷</button>
+    <button class="fxc-key fxc-op" data-k="√(">√(</button>
+
+    <button class="fxc-key" data-k="4">4</button>
+    <button class="fxc-key" data-k="5">5</button>
+    <button class="fxc-key" data-k="6">6</button>
+    <button class="fxc-key fxc-op" data-k="×">×</button>
+    <button class="fxc-key fxc-op" data-k="²">x²</button>
+
+    <button class="fxc-key" data-k="1">1</button>
+    <button class="fxc-key" data-k="2">2</button>
+    <button class="fxc-key" data-k="3">3</button>
+    <button class="fxc-key fxc-op" data-k="−">−</button>
+    <button class="fxc-key fxc-op" data-k="^">^</button>
+
+    <button class="fxc-key" data-k="0">0</button>
+    <button class="fxc-key" data-k=",">,</button>
+    <button class="fxc-key fxc-op" data-k="(−)">(−)</button>
+    <button class="fxc-key fxc-op" data-k="+">+</button>
+    <button class="fxc-key fxc-eq" data-k="=">=</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
+  function lcmFn(a, b){ if(!a || !b) return 0; return Math.abs(a*b)/gcd(a,b); }
+  function isInt(x){ return Number.isFinite(x) && Math.floor(x) === x; }
+  function factor(n){
+    n = Math.abs(Math.round(n));
+    if(n === 0) return null;
+    if(n === 1) return { '1': 1 };
+    var f = {};
+    var p = 2;
+    while(p * p <= n){
+      while(n % p === 0){ f[p] = (f[p]||0) + 1; n = n / p; }
+      p++;
+    }
+    if(n > 1) f[n] = (f[n]||0) + 1;
+    return f;
+  }
+  var SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  function sup(n){ return String(n).split('').map(function(c){ return SUP[c]||c; }).join(''); }
+  function factPretty(n){
+    if(n === 1) return '1';
+    if(n < 1 || !isInt(n)) return 'Erreur';
+    var f = factor(n);
+    if(f === null) return 'Erreur';
+    var keys = Object.keys(f).map(Number).sort(function(a,b){ return a-b; });
+    if(keys.length === 1 && f[keys[0]] === 1) return keys[0] + ' (premier)';
+    return keys.map(function(p){ return p + (f[p] > 1 ? sup(f[p]) : ''); }).join('×');
+  }
+  function parseExpr(src){
+    var s = src
+      .replace(/\s+/g, '')
+      .replace(/²/g, '^2')
+      .replace(/√/g, 'sqrt')
+      .replace(/×/g, '*')
+      .replace(/÷/g, '/')
+      .replace(/\(−\)/g, '(-)')
+      .replace(/−/g, '-')
+      .replace(/,/g, '.');
+    var i = 0;
+    function peek(){ return s[i]; }
+    function isDigit(c){ return c >= '0' && c <= '9'; }
+    function parseNumber(){
+      var start = i;
+      while(i < s.length && (isDigit(s[i]) || s[i] === '.')) i++;
+      return parseFloat(s.substring(start, i));
+    }
+    function parseFactor(){
+      if(peek() === '+'){ i++; return parseFactor(); }
+      if(peek() === '-'){ i++; return -parseFactor(); }
+      if(peek() === '('){
+        i++;
+        var v = parseExp();
+        if(peek() !== ')') throw new Error(') manquante');
+        i++;
+        return v;
+      }
+      if(s.substr(i, 5) === 'sqrt('){
+        i += 5;
+        var v2 = parseExp();
+        if(peek() !== ')') throw new Error(') sqrt');
+        i++;
+        if(v2 < 0) throw new Error('sqrt négatif');
+        return Math.sqrt(v2);
+      }
+      if(isDigit(peek()) || peek() === '.'){
+        return parseNumber();
+      }
+      throw new Error('token');
+    }
+    function parsePow(){
+      var base = parseFactor();
+      if(peek() === '^'){
+        i++;
+        var exp = parsePow();
+        return Math.pow(base, exp);
+      }
+      return base;
+    }
+    function parseTerm(){
+      var v = parsePow();
+      while(peek() === '*' || peek() === '/'){
+        var op = s[i++];
+        var r = parsePow();
+        if(op === '*') v = v * r;
+        else { if(r === 0) throw new Error('div 0'); v = v / r; }
+      }
+      return v;
+    }
+    function parseExp(){
+      var v = parseTerm();
+      while(peek() === '+' || peek() === '-'){
+        var op = s[i++];
+        var r = parseTerm();
+        if(op === '+') v = v + r;
+        else v = v - r;
+      }
+      return v;
+    }
+    var result = parseExp();
+    if(i !== s.length) throw new Error('reste');
+    return result;
+  }
+  function calculer(expr){
+    var e = expr.trim();
+    if(e === '') return '0';
+    try {
+      var m = /^FACT\(([^)]+)\)$/i.exec(e);
+      if(m){
+        var n = parseExpr(m[1]);
+        if(!isInt(n) || n < 1) return 'Erreur';
+        return factPretty(n);
+      }
+      m = /^PGCD\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){
+        var a = parseExpr(m[1]); var b = parseExpr(m[2]);
+        if(!isInt(a) || !isInt(b)) return 'Erreur';
+        return String(gcd(a, b));
+      }
+      m = /^PPCM\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){
+        var a2 = parseExpr(m[1]); var b2 = parseExpr(m[2]);
+        if(!isInt(a2) || !isInt(b2)) return 'Erreur';
+        return String(lcmFn(a2, b2));
+      }
+      m = /^SIMP\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){
+        var a3 = parseExpr(m[1]); var b3 = parseExpr(m[2]);
+        if(!isInt(a3) || !isInt(b3) || b3 === 0) return 'Erreur';
+        var g = gcd(a3, b3);
+        var na = a3 / g, nb = b3 / g;
+        if(nb === 1) return String(na);
+        if(nb === -1) return String(-na);
+        if(nb < 0) return (-na) + '/' + (-nb);
+        return na + '/' + nb;
+      }
+      m = /^([^÷R]+)÷R(.+)$/i.exec(e);
+      if(m){
+        var a4 = parseExpr(m[1]); var b4 = parseExpr(m[2]);
+        if(!isInt(a4) || !isInt(b4) || b4 === 0 || a4 < 0 || b4 < 0) return 'Erreur';
+        var q = Math.floor(a4 / b4);
+        var r = a4 - q * b4;
+        return 'quotient ' + q + ' · reste ' + r;
+      }
+      var rr = parseExpr(e);
+      if(!Number.isFinite(rr)) return 'Erreur';
+      if(isInt(rr)) return String(rr);
+      var rounded = Math.round(rr * 1e10) / 1e10;
+      return String(rounded).replace('.', ',');
+    } catch(err) {
+      return 'Erreur';
+    }
+  }
+  var trigger = document.getElementById('fxc-trigger');
+  var panel   = document.getElementById('fxc-panel');
+  var bar     = document.getElementById('fxc-bar');
+  var helpBtn = document.getElementById('fxc-help-btn');
+  var closeBtn= document.getElementById('fxc-close-btn');
+  var help    = document.getElementById('fxc-help');
+  var exprEl  = document.getElementById('fxc-expr');
+  var resEl   = document.getElementById('fxc-result');
+  var pad     = document.getElementById('fxc-pad');
+  var currentExpr = '';
+  var lastResult  = null;
+  var resetOnNext = false;
+  trigger.addEventListener('click', function(){
+    trigger.classList.add('fxc-hidden');
+    panel.classList.add('fxc-open');
+  });
+  closeBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    panel.classList.remove('fxc-open');
+    trigger.classList.remove('fxc-hidden');
+  });
+  helpBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    help.classList.toggle('fxc-show');
+  });
+  var dragging = false;
+  var startX = 0, startY = 0;
+  var startLeft = 0, startTop = 0;
+  var convertedToLeftTop = false;
+  bar.addEventListener('pointerdown', function(e){
+    if(e.target.classList && e.target.classList.contains('fxc-icon')) return;
+    dragging = true;
+    bar.setPointerCapture(e.pointerId);
+    if(!convertedToLeftTop){
+      var rect = panel.getBoundingClientRect();
+      panel.style.right = '';
+      panel.style.bottom = '';
+      panel.style.left = rect.left + 'px';
+      panel.style.top  = rect.top  + 'px';
+      convertedToLeftTop = true;
+    }
+    startX = e.clientX;
+    startY = e.clientY;
+    startLeft = parseFloat(panel.style.left) || 0;
+    startTop  = parseFloat(panel.style.top)  || 0;
+    e.preventDefault();
+  });
+  bar.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    var dx = e.clientX - startX;
+    var dy = e.clientY - startY;
+    var newLeft = startLeft + dx;
+    var newTop  = startTop  + dy;
+    var w = panel.offsetWidth;
+    var h = panel.offsetHeight;
+    var maxLeft = window.innerWidth  - w - 4;
+    var maxTop  = window.innerHeight - h - 4;
+    if(newLeft < 4) newLeft = 4;
+    if(newTop  < 4) newTop  = 4;
+    if(newLeft > maxLeft) newLeft = maxLeft;
+    if(newTop  > maxTop ) newTop  = maxTop;
+    panel.style.left = newLeft + 'px';
+    panel.style.top  = newTop  + 'px';
+  });
+  function endDrag(e){
+    if(dragging){
+      dragging = false;
+      try { bar.releasePointerCapture(e.pointerId); } catch(_){}
+    }
+  }
+  bar.addEventListener('pointerup', endDrag);
+  bar.addEventListener('pointercancel', endDrag);
+  function refresh(){
+    exprEl.textContent = currentExpr;
+    if(lastResult !== null){
+      resEl.textContent = lastResult;
+    } else {
+      resEl.textContent = currentExpr === '' ? '0' : currentExpr;
+    }
+  }
+  function smartDel(){
+    if(currentExpr === '') return;
+    var prefixes = ['FACT(', 'PGCD(', 'PPCM(', 'SIMP(', '÷R', '√('];
+    for(var i = 0; i < prefixes.length; i++){
+      var p = prefixes[i];
+      if(currentExpr.endsWith(p)){
+        currentExpr = currentExpr.slice(0, -p.length);
+        return;
+      }
+    }
+    currentExpr = currentExpr.slice(0, -1);
+  }
+  pad.addEventListener('click', function(e){
+    var t = e.target.closest('.fxc-key');
+    if(!t) return;
+    var k = t.dataset.k;
+    if(!k) return;
+    if(k === 'AC'){
+      currentExpr = '';
+      lastResult = null;
+      resetOnNext = false;
+    } else if(k === 'DEL'){
+      if(resetOnNext){
+        lastResult = null;
+        resetOnNext = false;
+      }
+      smartDel();
+    } else if(k === '='){
+      if(currentExpr === '') return;
+      lastResult = calculer(currentExpr);
+      resetOnNext = true;
+    } else {
+      if(resetOnNext){
+        var chainOps = ['+', '−', '×', '÷', '^', '²', '÷R'];
+        var isChain = chainOps.indexOf(k) !== -1;
+        if(isChain && lastResult && lastResult !== 'Erreur' && lastResult.indexOf('quotient') === -1 && lastResult.indexOf('/') === -1 && lastResult.indexOf('(premier)') === -1){
+          currentExpr = lastResult.replace(',', '.') + k;
+        } else {
+          currentExpr = k;
+        }
+        lastResult = null;
+        resetOnNext = false;
+      } else {
+        currentExpr += k;
+      }
+    }
+    refresh();
+  });
+  refresh();
+})();
+</script>
+
+
+</body>
+</html>
