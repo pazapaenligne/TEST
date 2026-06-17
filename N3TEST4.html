@@ -119,7 +119,7 @@ body{
   </div>
 
   <div class="consigne">
-    🎯 <b>Consigne</b>&nbsp;: calculer le pourcentage d&apos;une valeur, puis retrouver un taux d&apos;évolution. 💡 Calculatrice fx-92 disponible en bas à gauche.
+    🎯 <b>Consigne</b>&nbsp;: calculer le pourcentage d&apos;une valeur, puis retrouver un taux d&apos;évolution. 💡 Calculatrice fx-92 disponible à droite de l&apos;écran.
   </div>
 
   <div class="cadre-iframe">
@@ -141,7 +141,7 @@ body{
 <style>
 /* === Déclencheur (SVG CASIO + étiquette) === */
 #fxc-trigger{
-  position:fixed; left:14px; bottom:14px; z-index:9998;
+  position:fixed; right:14px; bottom:90px; z-index:9998;
   display:flex; flex-direction:column; align-items:center; gap:4px;
   cursor:pointer; user-select:none;
   transition:transform .15s ease;
@@ -158,7 +158,7 @@ body{
 
 /* === Panneau calculatrice === */
 #fxc-panel{
-  position:fixed; left:14px; bottom:14px; z-index:9999;
+  position:fixed; right:14px; bottom:90px; z-index:9999;
   width:330px; max-width:calc(100vw - 20px);
   background:#2f343b; border-radius:14px;
   box-shadow:0 12px 36px rgba(0,0,0,.45);
