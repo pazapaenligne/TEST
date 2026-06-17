@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Le monte-charge de la galerie · Pazapa 4e</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAZAPA — JE RELÈVE LE DÉFI
+   4e · Semaine 1 — « Le monte-charge de la galerie »
+   Notion : résoudre une inéquation  (150 + 25n ≤ 500)
+   Ambiance : chantier archéologique moderne
+   Palette : bleu ardoise #4F6D7A / beige pierre #EDE7DC
+             vert sécurité #8DC63F / orange alerte #F5A623
+   ============================================================ */
+:root{
+  --jour:#4F6D7A;        /* bleu ardoise principal */
+  --jour-fonce:#34505c;  /* ardoise foncée */
+  --jour-clair:#EDE7DC;  /* beige pierre */
+  --jour-pale:#9db3bd;   /* ardoise pâle */
+  --vert:#8DC63F;        /* vert sécurité */
+  --vert-fonce:#5d922a;
+  --orange:#F5A623;      /* orange alerte */
+  --rouge:#e05a3a;       /* dépassement */
+
+  --bg:#1d262b;          /* fond sombre ardoise */
+  --panel:#26333a;
+  --panel-2:#2f3e46;
+  --txt:#eef2f4;
+  --gris:#9db3bd;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:'JetBrains Mono','Courier New',monospace;
+  background:
+    radial-gradient(circle at 20% 14%, rgba(79,109,122,.18), transparent 44%),
+    radial-gradient(circle at 82% 80%, rgba(52,80,92,.25), transparent 48%),
+    var(--bg);
+  color:var(--txt); min-height:100vh; overflow-x:hidden; position:relative; padding:0 0 60px;
+}
+.wrap{ position:relative; z-index:2; max-width:680px; margin:0 auto; padding:0 16px; }
+
+/* ============== HUD + CHRONO ============== */
+.hud{
+  position:sticky; top:0; z-index:30;
+  background:linear-gradient(180deg, rgba(29,38,43,.97), rgba(29,38,43,.82));
+  backdrop-filter:blur(6px); border-bottom:1px solid rgba(79,109,122,.4);
+  padding:10px 16px; margin-bottom:18px;
+}
+.hud-inner{ max-width:680px; margin:0 auto; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.logo-badge{
+  display:inline-flex; align-items:center; gap:8px; background:var(--jour); color:#fff;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.68rem; letter-spacing:1.5px;
+  padding:6px 13px; border-radius:18px; box-shadow:0 0 14px rgba(79,109,122,.6);
+}
+.logo-badge .dots{ display:inline-flex; gap:3px; }
+.logo-badge .dots i{ width:7px; height:7px; border-radius:50%; display:block; }
+.logo-badge .dots i:nth-child(1){ background:var(--vert); }
+.logo-badge .dots i:nth-child(2){ background:var(--orange); }
+.logo-badge .dots i:nth-child(3){ background:var(--jour-clair); }
+.sound-btn{
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:.66rem; letter-spacing:1px;
+  padding:7px 12px; border-radius:14px; border:1px solid var(--jour-pale);
+  background:transparent; color:var(--jour-pale); cursor:pointer; transition:.18s; white-space:nowrap; min-height:32px;
+}
+.sound-btn:hover{ background:rgba(79,109,122,.18); }
+.sound-btn.on{ background:var(--jour); color:#fff; border-color:var(--jour); }
+.chrono{
+  margin-left:auto; display:inline-flex; align-items:center; gap:8px;
+  background:linear-gradient(135deg, rgba(52,80,92,.6), rgba(38,51,58,.85));
+  border:1px solid rgba(157,179,189,.4); border-radius:14px; padding:6px 12px;
+  box-shadow:inset 0 0 10px rgba(0,0,0,.35);
+}
+.chrono .ico{ font-size:1rem; }
+.chrono .chrono-lbl{ font-family:'Orbitron',sans-serif; font-size:.56rem; letter-spacing:1px; color:var(--jour-pale); line-height:1.1; }
+.chrono .chrono-time{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1rem; color:var(--txt); letter-spacing:1px; line-height:1.1; }
+.prog-wrap{ max-width:680px; margin:8px auto 0; }
+.prog-bar{ height:7px; background:rgba(157,179,189,.2); border-radius:6px; overflow:hidden; }
+.prog-fill{ height:100%; width:0%; background:linear-gradient(90deg, var(--jour-fonce), var(--jour), var(--vert)); border-radius:6px; transition:width .6s cubic-bezier(.22,1,.36,1); }
+.prog-count{ text-align:center; margin-top:5px; font-family:'Orbitron',sans-serif; font-size:.6rem; letter-spacing:1.5px; color:var(--gris); }
+
+/* ============== INTRO ============== */
+.titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.75rem; line-height:1.15; text-align:center; color:var(--txt); margin:6px 0 4px; }
+.titre .accent{ color:var(--orange); }
+.sous-titre{ font-family:'Orbitron',sans-serif; font-size:.66rem; letter-spacing:2px; color:var(--gris); text-align:center; margin-bottom:16px; }
+.depart{
+  background:linear-gradient(160deg, var(--panel), var(--panel-2));
+  border:1px solid rgba(79,109,122,.45); border-left:4px solid var(--orange);
+  border-radius:14px; padding:18px 20px; margin-bottom:18px;
+  font-size:.93rem; line-height:1.65; box-shadow:0 6px 24px rgba(0,0,0,.32);
+}
+.depart .dep-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:2px; color:var(--orange); margin-bottom:10px; }
+.depart b{ color:var(--jour-clair); }
+.depart .dep-final{ margin-top:10px; font-style:italic; color:var(--jour-pale); }
+
+/* ============== MONTE-CHARGE (immersion, curseur décoratif) ============== */
+.mc{
+  background:linear-gradient(160deg, var(--panel), var(--panel-2));
+  border:1px solid rgba(79,109,122,.4); border-radius:16px;
+  padding:18px 20px 20px; margin-bottom:22px; box-shadow:0 6px 24px rgba(0,0,0,.3);
+}
+.mc-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.7rem; letter-spacing:2px; color:var(--jour-pale); text-align:center; margin-bottom:14px; }
+.mc-grid{ display:flex; flex-direction:column; gap:16px; align-items:stretch; }
+.mc-grid .jauge-zone{ order:-1; }
+
+/* jauge horizontale */
+.jauge-zone{ display:flex; flex-direction:column; gap:6px; }
+.jauge{
+  position:relative; width:100%; height:34px;
+  background:#1a2227; border:2px solid #3a4b54; border-radius:8px; overflow:hidden;
+}
+.jauge-fill{
+  position:absolute; left:0; top:0; height:100%;
+  background:var(--vert); transition:width .35s ease, background .35s ease;
+  width:25%;
+}
+.jauge-seuil{
+  position:absolute; top:0; height:100%; width:0; border-left:2px dashed var(--rouge);
+  left:0; /* placé par JS au niveau 500 */
+}
+.jauge-labels{ display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:.62rem; color:var(--gris); }
+.jauge-labels span.lim{ color:var(--rouge); font-weight:700; }
+
+/* contrôles curseur */
+.mc-ctrl{ display:flex; flex-direction:column; gap:12px; }
+.mc-read{ text-align:center; }
+.mc-read .charge-val{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.5rem; color:var(--orange); }
+.mc-read .charge-lbl{ font-family:'Orbitron',sans-serif; font-size:.56rem; letter-spacing:1px; color:var(--gris); }
+.mc-etat{
+  text-align:center; font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem;
+  letter-spacing:1px; padding:6px 10px; border-radius:10px; border:1px solid;
+}
+.mc-etat.stable{ color:var(--vert); border-color:var(--vert); background:rgba(141,198,63,.12); }
+.mc-etat.attention{ color:var(--orange); border-color:var(--orange); background:rgba(245,166,35,.12); }
+.mc-etat.depasse{ color:var(--rouge); border-color:var(--rouge); background:rgba(224,90,58,.14); }
+.mc-slider-row{ display:flex; flex-direction:column; gap:6px; }
+.mc-slider-row label{ font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--jour-pale); text-align:center; }
+.mc-slider-row .cnt{ color:var(--txt); font-weight:700; }
+input[type=range].mc-slider{
+  -webkit-appearance:none; appearance:none; width:100%; height:8px; border-radius:6px;
+  background:linear-gradient(90deg, var(--vert), var(--orange)); outline:none;
+}
+input[type=range].mc-slider::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:24px; height:24px; border-radius:50%;
+  background:var(--jour-clair); border:3px solid var(--jour); cursor:pointer;
+}
+input[type=range].mc-slider::-moz-range-thumb{
+  width:24px; height:24px; border-radius:50%; background:var(--jour-clair); border:3px solid var(--jour); cursor:pointer;
+}
+.mc-note{ font-family:'JetBrains Mono',monospace; font-size:.62rem; color:var(--gris); text-align:center; font-style:italic; }
+
+/* piliers décoratifs */
+.piliers{ display:flex; gap:5px; justify-content:center; margin-top:4px; }
+.pilier{ width:9px; height:38px; border-radius:2px; background:var(--vert); transition:background .35s; }
+
+/* ============== MISSIONS ============== */
+.mission{
+  background:linear-gradient(160deg, var(--panel), var(--panel-2));
+  border:1px solid rgba(79,109,122,.35); border-radius:16px;
+  padding:20px 22px 22px; margin-bottom:18px; box-shadow:0 6px 24px rgba(0,0,0,.3);
+  opacity:.4; filter:grayscale(.55); transition:opacity .4s, filter .4s;
+}
+.mission.active{ opacity:1; filter:none; border-color:var(--jour); box-shadow:0 0 20px rgba(79,109,122,.3), 0 6px 24px rgba(0,0,0,.3); }
+.mission.done{ opacity:.9; filter:none; border-color:rgba(141,198,63,.5); }
+.mission.enigme.active{ border-color:var(--orange); box-shadow:0 0 24px rgba(245,166,35,.3); }
+.m-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:14px; }
+.m-num{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1rem; letter-spacing:1px; color:var(--jour-pale); }
+.m-badge{ font-family:'Orbitron',sans-serif; font-size:.56rem; font-weight:700; letter-spacing:1.5px; padding:5px 11px; border-radius:13px; background:rgba(79,109,122,.2); color:var(--jour-pale); border:1px solid rgba(79,109,122,.45); white-space:nowrap; }
+.m-enonce{ background:rgba(26,34,39,.6); border:1px dashed rgba(157,179,189,.4); border-radius:11px; padding:14px 16px; margin-bottom:14px; font-size:.94rem; line-height:1.6; }
+.m-enonce b{ color:var(--jour-clair); }
+.m-enonce .expr{ display:block; text-align:center; margin:10px 0 4px; font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.25rem; color:var(--orange); letter-spacing:1px; }
+.m-question{ font-weight:700; font-size:.98rem; margin-bottom:13px; }
+.choix{ display:flex; flex-direction:column; gap:10px; }
+.choix-btn{ text-align:left; font-family:'JetBrains Mono',monospace; font-size:1rem; font-weight:500; padding:14px 16px; border:2px solid rgba(157,179,189,.3); background:rgba(26,34,39,.45); border-radius:12px; cursor:pointer; transition:.15s; color:var(--txt); display:flex; align-items:center; gap:12px; min-height:44px; }
+.choix-btn .lettre{ flex-shrink:0; width:28px; height:28px; border-radius:50%; background:rgba(79,109,122,.22); color:var(--jour-pale); font-family:'Orbitron',sans-serif; font-weight:700; font-size:.82rem; display:flex; align-items:center; justify-content:center; border:1px solid rgba(79,109,122,.45); }
+.choix-btn:hover:not(.locked){ border-color:var(--jour); background:rgba(79,109,122,.16); }
+.choix-btn.selected{ border-color:var(--jour); background:rgba(79,109,122,.18); box-shadow:0 0 0 3px rgba(79,109,122,.25); }
+.choix-btn.locked{ cursor:default; }
+.choix-btn.good{ border-color:var(--vert); background:rgba(141,198,63,.16); }
+.choix-btn.good .lettre{ background:var(--vert); color:#1a2a08; }
+.choix-btn.bad{ border-color:var(--rouge); background:rgba(224,90,58,.16); }
+.choix-btn.bad .lettre{ background:var(--rouge); color:#2a0c06; }
+.m-input-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+.m-input{ flex:1; min-width:120px; font-family:'JetBrains Mono',monospace; font-size:16px; font-weight:700; padding:13px 15px; border-radius:11px; border:2px solid rgba(157,179,189,.4); background:rgba(26,34,39,.5); color:var(--txt); text-align:center; letter-spacing:1px; }
+.m-input:focus{ outline:none; border-color:var(--jour); box-shadow:0 0 0 3px rgba(79,109,122,.25); }
+.m-input.good{ border-color:var(--vert); }
+.m-input.bad{ border-color:var(--rouge); }
+.m-unit{ color:var(--gris); font-size:.85rem; }
+.btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.btn{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.78rem; letter-spacing:1px; padding:12px 18px; border:none; border-radius:11px; cursor:pointer; transition:transform .12s; color:#fff; min-height:44px; }
+.btn:active{ transform:scale(.96); }
+.btn-valider{ background:var(--vert); color:#1a2a08; }
+.btn-indice{ background:transparent; color:var(--jour-pale); border:1.5px solid var(--jour-pale); }
+.btn-calc{ background:transparent; color:var(--jour-pale); border:1.5px solid rgba(157,179,189,.5); }
+.btn:disabled{ background:#3a4b54 !important; color:#7e8d94 !important; cursor:not-allowed; box-shadow:none !important; border-color:#3a4b54 !important; }
+.indice-box{ display:none; margin-top:13px; padding:13px 16px; background:rgba(79,109,122,.14); border-left:4px solid var(--jour-pale); border-radius:9px; font-size:.9rem; color:var(--jour-pale); line-height:1.55; }
+.indice-box.show{ display:block; }
+.feedback{ display:none; margin-top:13px; padding:12px 15px; border-radius:10px; font-weight:700; font-size:.95rem; }
+.feedback.show{ display:block; animation:pop .35s cubic-bezier(.18,.89,.32,1.6); }
+.feedback.ok{ background:rgba(141,198,63,.16); color:var(--vert); border:1px solid rgba(141,198,63,.5); }
+.feedback.ko{ background:rgba(224,90,58,.16); color:#f0a890; border:1px solid rgba(224,90,58,.5); }
+@keyframes pop{ 0%{ transform:scale(.7); opacity:0; } 100%{ transform:scale(1); opacity:1; } }
+.fragment{ display:none; margin-top:14px; padding:13px 16px; background:linear-gradient(135deg, rgba(79,109,122,.25), rgba(52,80,92,.3)); border:1px solid var(--jour); border-radius:11px; font-family:'Orbitron',sans-serif; font-size:.8rem; font-weight:700; letter-spacing:1px; color:var(--jour-clair); text-align:center; }
+.fragment.show{ display:block; animation:pop .45s cubic-bezier(.18,.89,.32,1.6); }
+.fragment .frag-val{ color:var(--orange); font-size:1.05rem; }
+
+/* overlay scan */
+.scan{ position:fixed; inset:0; z-index:80; display:none; align-items:center; justify-content:center; background:rgba(15,20,23,.92); backdrop-filter:blur(3px); }
+.scan.show{ display:flex; animation:fadein .25s ease; }
+@keyframes fadein{ from{opacity:0;} to{opacity:1;} }
+.scan-box{ text-align:center; padding:24px; }
+.scan-ico{ font-size:2.6rem; margin-bottom:14px; }
+.scan-txt{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.92rem; letter-spacing:2px; color:var(--jour-pale); margin-bottom:18px; }
+.scan-track{ width:220px; height:8px; margin:0 auto; background:rgba(157,179,189,.2); border-radius:6px; overflow:hidden; }
+.scan-prog{ height:100%; width:0%; background:linear-gradient(90deg,var(--jour),var(--vert)); }
+
+/* écran final */
+.fin{ display:none; background:linear-gradient(160deg, var(--panel), #1a2227); border:1.5px solid var(--orange); border-radius:18px; padding:30px 24px; text-align:center; box-shadow:0 0 40px rgba(245,166,35,.2); }
+.fin.show{ display:block; animation:pop .5s cubic-bezier(.18,.89,.32,1.6); }
+.fin .trophy{ font-size:3rem; margin-bottom:10px; }
+.fin .fin-titre{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem; color:var(--orange); letter-spacing:1px; margin-bottom:6px; }
+.fin .fin-score{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:2.6rem; color:var(--jour-clair); margin:6px 0; }
+.fin .fin-temps{ font-family:'Orbitron',sans-serif; font-size:.82rem; color:var(--gris); letter-spacing:1px; margin-bottom:4px; }
+.fin .fin-grade{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:1rem; color:var(--vert); letter-spacing:1px; margin-bottom:16px; }
+.arrivee{ background:rgba(26,34,39,.6); border:1px dashed var(--jour-pale); border-radius:12px; padding:18px; margin:0 0 22px; text-align:left; font-size:.93rem; line-height:1.65; }
+.arrivee .arr-titre{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:2px; color:var(--orange); margin-bottom:10px; text-align:center; }
+.arrivee b{ color:var(--jour-clair); }
+.arrivee .arr-expr{ display:block; text-align:center; margin:10px 0; font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.3rem; color:var(--orange); }
+.btn-recommencer{ font-family:'Orbitron',sans-serif; font-weight:700; font-size:.95rem; letter-spacing:1.5px; padding:14px 30px; border:none; border-radius:13px; background:var(--orange); color:#3a2600; cursor:pointer; box-shadow:0 0 18px rgba(245,166,35,.5); transition:transform .12s; min-height:44px; }
+.btn-recommencer:active{ transform:scale(.96); }
+.replay-zone{ text-align:center; margin:10px 0 0; display:none; }
+.replay-zone.show{ display:block; }
+
+@media (max-width:1024px){ .wrap{ max-width:100%; } }
+@media (max-width:520px){ .titre{ font-size:1.45rem; } }
+
+/* ===== PAGES (intro / jeu) ===== */
+.page{ display:none; }
+.page.show{ display:block; animation:fadein .35s ease; }
+@keyframes fadein{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+
+.affiche{
+  background:linear-gradient(160deg, var(--panel), var(--panel-2));
+  border:1px solid rgba(79,109,122,.45); border-radius:18px;
+  padding:22px 24px; margin-bottom:20px; box-shadow:0 8px 30px rgba(0,0,0,.35);
+}
+.affiche .aff-titre{
+  font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.15rem; letter-spacing:1px;
+  color:var(--orange); text-align:center; margin-bottom:16px;
+}
+.aff-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0; }
+@media (max-width:520px){ .aff-stats{ grid-template-columns:1fr; } }
+.aff-stat{
+  text-align:center; background:rgba(26,34,39,.55); border:1px solid rgba(79,109,122,.4);
+  border-radius:12px; padding:12px 8px;
+}
+.aff-stat .v{ font-family:'Orbitron',sans-serif; font-weight:900; font-size:1.4rem; color:var(--jour-clair); }
+.aff-stat .l{ font-family:'Orbitron',sans-serif; font-size:.56rem; letter-spacing:1px; color:var(--gris); margin-top:4px; }
+.aff-stat.lim .v{ color:var(--rouge); }
+.aff-question{
+  text-align:center; font-size:.98rem; line-height:1.6; color:var(--txt);
+  margin:16px 0 18px; padding:0 6px;
+}
+.aff-question b{ color:var(--orange); }
+.btn-commencer{
+  display:block; width:100%;
+  font-family:'Orbitron',sans-serif; font-weight:700; font-size:1.05rem; letter-spacing:1.5px;
+  padding:16px; border:none; border-radius:14px; background:var(--orange); color:#3a2600;
+  cursor:pointer; box-shadow:0 0 20px rgba(245,166,35,.5); transition:transform .12s;
+  min-height:44px;
+  animation:pulseStart 1.8s ease-in-out infinite;
+}
+.btn-commencer:active{ transform:scale(.97); }
+@keyframes pulseStart{ 0%,100%{ box-shadow:0 0 20px rgba(245,166,35,.5); } 50%{ box-shadow:0 0 30px rgba(245,166,35,.8); } }
+
+/* ===== LAYOUT 2 COLONNES (PC) ===== */
+.main-layout{ display:grid; grid-template-columns:280px 1fr; gap:22px; align-items:start; }
+.col-gauche{ position:sticky; top:96px; }
+.col-droite{ min-width:0; }
+@media (max-width:900px){
+  .main-layout{ grid-template-columns:1fr; gap:0; }
+  .col-gauche{ position:static; top:auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============== HUD ============== -->
+<div class="hud">
+  <div class="hud-inner">
+    <div class="logo-badge">
+      <span class="dots"><i></i><i></i><i></i></span>
+      PAZAPA · MATHS · 4E
+    </div>
+    <button class="sound-btn" id="sound-btn">🔇 SON</button>
+    <div class="chrono">
+      <span class="ico">🏗️</span>
+      <span>
+        <span class="chrono-lbl">CHANTIER EN COURS</span><br>
+        <span class="chrono-time" id="timer">00:00</span>
+      </span>
+    </div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-count" id="prog-count">0 / 6 ÉTAPES VALIDÉES</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <h1 class="titre">Le monte-charge de la <span class="accent">galerie</span></h1>
+  <div class="sous-titre">SEMAINE 1 — RÉSOUDRE UNE INÉQUATION</div>
+
+  <!-- ============== PAGE 1 : AFFICHE DE MISSION ============== -->
+  <div class="page show" id="page-intro">
+    <div class="depart">
+      <div class="dep-titre">🏗️ LE CHANTIER SOUTERRAIN</div>
+      Lors de l'exploration d'un site antique, l'équipe découvre une galerie souterraine dont
+      le plafond est soutenu par des piliers de bois vieillissants. L'ingénieur du chantier
+      indique que la charge totale sur la structure ne doit <b>jamais dépasser 500 kg</b> pour
+      éviter un effondrement. Une base d'équipement fixe de <b>150 kg</b> est déjà installée, et
+      l'équipe doit transporter des caisses de matériel de <b>25 kg chacune</b>.
+    </div>
+
+    <div class="affiche">
+      <div class="aff-titre">🏗️ MISSION : SÉCURISER LA GALERIE</div>
+      <div class="aff-stats">
+        <div class="aff-stat lim"><div class="v">500 kg</div><div class="l">CHARGE MAXIMALE</div></div>
+        <div class="aff-stat"><div class="v">150 kg</div><div class="l">ÉQUIPEMENT FIXE</div></div>
+        <div class="aff-stat"><div class="v">25 kg</div><div class="l">PAR CAISSE</div></div>
+      </div>
+      <div class="aff-question">
+        ❓ <b>Quelle quantité maximale de caisses</b> l'équipe peut-elle transporter sans
+        dépasser la limite autorisée ?
+      </div>
+      <!-- host du monte-charge sur la page intro -->
+      <div id="mc-host-intro"></div>
+      <button class="btn-commencer" id="btn-commencer">▶ COMMENCER LA MISSION</button>
+    </div>
+  </div>
+
+  <!-- ============== PAGE 2 : LE TRAVAIL (2 colonnes) ============== -->
+  <div class="page" id="page-jeu">
+  <div class="main-layout">
+    <div class="col-gauche">
+      <!-- le monte-charge sera déplacé ici au clic sur Commencer -->
+      <div id="mc-host-jeu"></div>
+    </div><!-- /col-gauche -->
+
+    <div class="col-droite">
+  <div id="missions-container"></div>
+
+  <!-- écran final -->
+  <div class="fin" id="fin">
+    <div class="trophy">🏗️</div>
+    <div class="fin-titre">CHARGE SÉCURISÉE</div>
+    <div class="fin-score" id="fin-score">0 / 6</div>
+    <div class="fin-temps">🏅 Mission accomplie · Temps utilisé : <span id="fin-temps">00:00</span></div>
+    <div class="fin-grade" id="fin-grade"></div>
+    <div class="arrivee">
+      <div class="arr-titre">📐 CE QUE TU AS DÉCOUVERT</div>
+      Une situation de contrainte peut se traduire par une <b>inéquation</b>. Ici, la charge
+      totale dépend d'une partie fixe et d'une partie variable :
+      <span class="arr-expr">150 + 25n ≤ 500</span>
+      Résoudre une inéquation permet de trouver <b>toutes</b> les valeurs possibles qui
+      respectent une condition, et pas seulement une.<br><br>
+      🎯 La mission finale permet de déterminer la plus grande valeur entière autorisée.
+    </div>
+    <button class="btn-recommencer" id="btn-rec-fin">↻ RECOMMENCER</button>
+  </div>
+
+  <div class="replay-zone" id="replay-zone">
+    <button class="btn-recommencer" id="btn-rec-bas">↻ RECOMMENCER</button>
+  </div>
+
+    </div><!-- /col-droite -->
+  </div><!-- /main-layout -->
+  </div><!-- /page-jeu -->
+
+</div>
+
+<!-- overlay scan -->
+<div class="scan" id="scan">
+  <div class="scan-box">
+    <div class="scan-ico">📐</div>
+    <div class="scan-txt">VÉRIFICATION DE LA STRUCTURE…</div>
+    <div class="scan-track"><div class="scan-prog" id="scan-prog"></div></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* =========================================================
+   6 MISSIONS — résoudre l'inéquation 150 + 25n ≤ 500 (4e)
+   Réponses vérifiées sous Python.
+   ========================================================= */
+var MISSIONS = [
+  { badge:"TRADUIRE", type:'qcm',
+    enonce:"La structure porte déjà <b>150 kg</b> de base. Chaque caisse ajoute <b>25 kg</b>. "
+         + "On note <b>n</b> le nombre de caisses transportées.",
+    question:"Quelle expression donne la charge totale sur la structure ?",
+    choices:["25 + 150n","150 + 25n","150 × 25 + n","(150 + 25) × n"], correct:1,
+    indice:"Une partie de la charge est fixe, l'autre d\u00e9pend du nombre de caisses.",
+    frag:"INDICE 1", fragVal:"charge = 150 + 25n",
+    koMsg:"Réfléchis à ce qui est fixe et à ce qui dépend du nombre de caisses." },
+
+  { badge:"CALCULER", type:'input', answer:300, unit:"kg",
+    enonce:"L'équipe a déjà chargé <b>6 caisses</b>. Utilise l'expression "
+         + "<span class='expr'>150 + 25 × n</span> pour vérifier la charge.",
+    question:"Quelle est la charge totale pour 6 caisses ?",
+    indice:"Remplace n par le nombre de caisses, puis effectue le calcul en respectant les priorit\u00e9s.",
+    frag:"INDICE 2", fragVal:"300 kg",
+    koMsg:"Vérifie la charge totale lorsque n = 6." },
+
+  { badge:"POSER LA CONTRAINTE", type:'qcm',
+    enonce:"L'ingénieur rappelle que la charge ne doit <b>jamais dépasser 500 kg</b>. "
+         + "On veut écrire cette condition de sécurité avec la charge <b>150 + 25n</b>.",
+    question:"Quelle inéquation traduit la condition de sécurité ?",
+    choices:["150 + 25n ≥ 500","150 + 25n ≤ 500","150 + 25n = 500","25n ≤ 500"], correct:1,
+    indice:"\u00ab Ne pas d\u00e9passer 500 \u00bb signifie que la charge reste inf\u00e9rieure ou \u00e9gale \u00e0 500.",
+    frag:"INDICE 3", fragVal:"150 + 25n ≤ 500",
+    koMsg:"« Ne pas dépasser » correspond à une comparaison particulière." },
+
+  { badge:"RÉSOUDRE — ÉTAPE 1", type:'input', answer:350, unit:"",
+    enonce:"On résout <span class='expr'>150 + 25n ≤ 500</span>. Première étape : isoler le "
+         + "terme en n en retranchant 150 des deux côtés.",
+    question:"Après avoir retranché 150 des deux côtés, on obtient : 25n ≤ ?",
+    indice:"Fais la m\u00eame op\u00e9ration des deux c\u00f4t\u00e9s de l'in\u00e9quation pour garder l'\u00e9quilibre.",
+    frag:"INDICE 4", fragVal:"25n ≤ 350",
+    koMsg:"Effectue la même opération sur les deux membres." },
+
+  { badge:"RÉSOUDRE — ÉTAPE 2", type:'input', answer:14, unit:"",
+    enonce:"On poursuit avec <span class='expr'>25n ≤ 350</span>. Deuxième étape : isoler n "
+         + "en divisant les deux côtés par 25.",
+    question:"Après division par 25, on obtient : n ≤ ?",
+    indice:"Pour conserver une in\u00e9galit\u00e9 vraie, on effectue la m\u00eame op\u00e9ration sur les deux membres.",
+    frag:"INDICE 5", fragVal:"n ≤ 14",
+    koMsg:"Vérifie l'opération qui permet d'isoler n." },
+
+  { badge:"ÉNIGME", type:'qcm', enigme:true,
+    enonce:"On a trouvé <b>n ≤ 14</b>. L'équipe veut transporter le <b>maximum</b> de caisses "
+         + "sans dépasser 500 kg.",
+    question:"Combien de caisses au maximum peut-on charger en sécurité ?",
+    choices:["13 caisses","14 caisses","15 caisses","20 caisses"], correct:1,
+    indice:"Cherche la plus grande valeur enti\u00e8re de n qui respecte la condition trouv\u00e9e.",
+    frag:"CONCLUSION", fragVal:"14 caisses max",
+    koMsg:"Cherche la plus grande valeur entière qui respecte la condition.",
+    conclusion:"En r\u00e9solvant 150 + 25n \u2264 500, on obtient 25n \u2264 350 puis n \u2264 14. "
+             + "L'\u00e9quipe peut donc charger <b>au maximum 14 caisses</b> (14 caisses = 500 kg pile, "
+             + "la limite est atteinte sans \u00eatre d\u00e9pass\u00e9e)." }
+];
+
+var TOTAL = MISSIONS.length;
+var LETTRES = ['A','B','C','D'];
+var $ = function(id){ return document.getElementById(id); };
+
+var etat = MISSIONS.map(function(){ return { done:false, picked:null, correct:false, tries:0 }; });
+var solved = 0;
+var current = 0;
+
+/* ============== CHRONO (démarre au 1er clic) ============== */
+var startTime = Date.now(), timerInt = null, timerStarted = false;
+function fmt(s){ var m=Math.floor(s/60), r=s%60; return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0'); }
+function tick(){ $('timer').textContent = fmt(Math.floor((Date.now()-startTime)/1000)); }
+function startTimer(){ if(timerInt) clearInterval(timerInt); timerStarted=true; startTime=Date.now(); tick(); timerInt=setInterval(tick,1000); }
+function stopTimer(){ if(timerInt){ clearInterval(timerInt); timerInt=null; } }
+
+/* ============== MONTE-CHARGE (généré en JS, partagé intro→jeu) ============== */
+var MC_HTML =
+    '<div class="mc">'
+  +   '<div class="mc-titre">🚧 MONTE-CHARGE — EXPLORE LA CHARGE (ceci ne valide rien)</div>'
+  +   '<div class="mc-grid">'
+  +     '<div class="mc-ctrl">'
+  +       '<div class="mc-read"><div class="charge-val"><span id="mc-charge">150</span> kg</div><div class="charge-lbl">CHARGE ACTUELLE</div></div>'
+  +       '<div class="mc-etat stable" id="mc-etat">🟢 STABLE</div>'
+  +       '<div class="piliers" id="piliers"></div>'
+  +       '<div class="mc-slider-row"><label>Nombre de caisses : <span class="cnt" id="mc-cnt">0</span></label>'
+  +         '<input type="range" class="mc-slider" id="mc-slider" min="0" max="20" value="0" step="1"></div>'
+  +       '<div class="mc-note">Fais glisser pour explorer. Les vrais calculs sont dans les étapes.</div>'
+  +     '</div>'
+  +     '<div class="jauge-zone">'
+  +       '<div class="jauge"><div class="jauge-fill" id="jauge-fill"></div><div class="jauge-seuil" id="jauge-seuil"></div></div>'
+  +       '<div class="jauge-labels"><span>0</span><span>100</span><span>200</span><span>300</span><span>400</span><span class="lim">500</span></div>'
+  +     '</div>'
+  +   '</div>'
+  + '</div>';
+
+$('mc-host-intro').innerHTML = MC_HTML;
+
+/* ============== MONTE-CHARGE DÉCORATIF (logique) ============== */
+var slider, piliersWrap, lastSliderN = 0;
+
+function bindMonteCharge(){
+  slider = $('mc-slider');
+  piliersWrap = $('piliers');
+  piliersWrap.innerHTML = '';
+  for(var pk=0; pk<6; pk++){ var pe=document.createElement('div'); pe.className='pilier'; piliersWrap.appendChild(pe); }
+  slider.addEventListener('input', majMonteCharge);
+  placerSeuil();
+  majMonteCharge();
+}
+
+function placerSeuil(){
+  // jauge horizontale : 0 à gauche, plafond visuel 600 kg à droite
+  // 500 kg -> 500/600 de la largeur
+  var seuil = $('jauge-seuil');
+  seuil.style.left = (500/600*100) + '%';
+}
+function majMonteCharge(){
+  var n = parseInt(slider.value, 10);
+  var charge = 150 + 25*n;
+  $('mc-charge').textContent = charge;
+  $('mc-cnt').textContent = n;
+  // jauge horizontale (plafond visuel à 600 kg)
+  var pct = Math.min(charge/600*100, 100);
+  var f = $('jauge-fill');
+  f.style.width = pct + '%';
+  // état + couleurs
+  var etatEl = $('mc-etat');
+  var col, cls, txt;
+  if(charge <= 400){ col='var(--vert)'; cls='stable'; txt='🟢 STABLE'; }
+  else if(charge <= 500){ col='var(--orange)'; cls='attention'; txt='🟠 ATTENTION'; }
+  else { col='var(--rouge)'; cls='depasse'; txt='🔴 DÉPASSEMENT'; }
+  f.style.background = col;
+  etatEl.className = 'mc-etat ' + cls;
+  etatEl.textContent = txt;
+  // piliers
+  piliersWrap.querySelectorAll('.pilier').forEach(function(p){ p.style.background = col; });
+  // son (anti-spam : clac seulement 1 déplacement sur 3)
+  if(n !== lastSliderN){
+    if(charge > 500){ playBip(); }
+    else {
+      clacCounter++;
+      if(clacCounter % 3 === 0){ playClac(); }
+    }
+    lastSliderN = n;
+  }
+}
+var clacCounter = 0;
+
+/* ============== GÉNÉRATION DES MISSIONS ============== */
+var cont = $('missions-container');
+MISSIONS.forEach(function(m, i){
+  var card = document.createElement('div');
+  card.className = 'mission' + (m.enigme ? ' enigme' : '') + (i===0 ? ' active' : '');
+  card.id = 'm'+i;
+  var body = '';
+  body += '<div class="m-head">'
+        +   '<div class="m-num">'+(m.enigme ? '🔓 ÉNIGME FINALE' : '🔧 ÉTAPE '+(i+1))+'</div>'
+        +   '<div class="m-badge">'+m.badge+'</div>'
+        + '</div>'
+        + '<div class="m-enonce">'+m.enonce+'</div>'
+        + '<div class="m-question">'+m.question+'</div>';
+  if(m.type === 'qcm'){
+    body += '<div class="choix" data-m="'+i+'">';
+    m.choices.forEach(function(c, ci){
+      body += '<button class="choix-btn" data-m="'+i+'" data-ci="'+ci+'"><span class="lettre">'+LETTRES[ci]+'</span><span>'+c+'</span></button>';
+    });
+    body += '</div>';
+  } else {
+    body += '<div class="m-input-row"><input class="m-input" id="inp-'+i+'" type="text" inputmode="numeric" placeholder="?" autocomplete="off"><span class="m-unit">'+(m.unit||'')+'</span></div>';
+  }
+  body += '<div class="btns">'
+        +   '<button class="btn btn-valider" data-m="'+i+'" disabled>✓ VALIDER</button>'
+        +   '<button class="btn btn-indice" data-m="'+i+'">? INDICE</button>'
+        +   '<button class="btn btn-calc" type="button" id="calc-'+i+'">🧮 CALCULATRICE</button>'
+        + '</div>'
+        + '<div class="indice-box" id="ind-'+i+'"></div>'
+        + '<div class="feedback" id="fb-'+i+'"></div>'
+        + '<div class="fragment" id="frag-'+i+'"></div>';
+  card.innerHTML = body;
+  cont.appendChild(card);
+});
+
+/* saisie : activer Valider */
+MISSIONS.forEach(function(m, i){
+  if(m.type === 'input'){
+    var inp = $('inp-'+i);
+    inp.addEventListener('input', function(){
+      inp.classList.remove('bad');
+      var fb = $('fb-'+i); if(fb){ fb.className='feedback'; fb.innerHTML=''; }
+      document.querySelector('.btn-valider[data-m="'+i+'"]').disabled = (inp.value.trim()==='');
+    });
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter' && i===current && !etat[i].done && inp.value.trim()!==''){ valider(i); } });
+  }
+  var cb = $('calc-'+i);
+  if(cb) cb.addEventListener('click', function(){ if(window.openCalc) window.openCalc(); });
+});
+
+/* clics QCM + boutons */
+document.body.addEventListener('click', function(e){
+  var ch = e.target.closest('.choix-btn');
+  if(ch){
+    var i = parseInt(ch.dataset.m,10);
+    if(etat[i].done || i!==current) return;
+    if(!timerStarted) startTimer();
+    etat[i].picked = parseInt(ch.dataset.ci,10);
+    document.querySelectorAll('.choix-btn[data-m="'+i+'"]').forEach(function(b){ b.classList.remove('selected','bad'); });
+    ch.classList.add('selected');
+    document.querySelector('.btn-valider[data-m="'+i+'"]').disabled = false;
+    return;
+  }
+  var v = e.target.closest('.btn-valider');
+  if(v){ valider(parseInt(v.dataset.m,10)); return; }
+  var ind = e.target.closest('.btn-indice');
+  if(ind){ montrerIndice(parseInt(ind.dataset.m,10)); return; }
+});
+
+function montrerIndice(i){
+  if(etat[i].done || i!==current) return;
+  if(!timerStarted) startTimer();
+  var box = $('ind-'+i);
+  box.classList.add('show');
+  box.innerHTML = '💡 ' + MISSIONS[i].indice;
+  var btn = document.querySelector('.btn-indice[data-m="'+i+'"]');
+  if(btn) btn.disabled = true;
+}
+
+/* ============== VALIDATION ============== */
+function valider(i){
+  if(etat[i].done || i!==current) return;
+  if(!timerStarted) startTimer();
+  var m = MISSIONS[i];
+  var bon = false;
+
+  if(m.type === 'qcm'){
+    if(etat[i].picked == null) return;
+    bon = (etat[i].picked === m.correct);
+  } else {
+    var inp = $('inp-'+i);
+    var raw = inp.value.trim().replace(/\s/g,'').replace(',', '.');
+    bon = (parseFloat(raw) === m.answer);
+  }
+
+  var fb = $('fb-'+i);
+
+  if(!bon){
+    /* ===== RÉPONSE FAUSSE : on laisse réessayer ===== */
+    etat[i].tries = (etat[i].tries || 0) + 1;
+    fb.className = 'feedback show ko';
+    fb.innerHTML = '❌ ' + (m.koMsg || 'Pas tout à fait.') + ' <span style="opacity:.85;">Modifie ta réponse et réessaie.</span>';
+    playBip();
+    if(m.type === 'qcm'){
+      document.querySelectorAll('.choix-btn[data-m="'+i+'"]').forEach(function(b){ b.classList.remove('bad'); });
+      var picked = document.querySelector('.choix-btn[data-m="'+i+'"][data-ci="'+etat[i].picked+'"]');
+      if(picked){ picked.classList.add('bad'); }
+    } else {
+      var inpb = $('inp-'+i);
+      inpb.classList.remove('good'); inpb.classList.add('bad');
+    }
+    return;   /* on n'avance pas, l'étape suivante reste verrouillée */
+  }
+
+  /* ===== RÉPONSE CORRECTE : on valide ===== */
+  etat[i].done = true;
+  etat[i].correct = true;
+  solved++;
+
+  if(m.type === 'qcm'){
+    document.querySelectorAll('.choix-btn[data-m="'+i+'"]').forEach(function(b, ci){
+      b.classList.add('locked'); b.disabled = true;
+      b.classList.remove('bad');
+      if(ci === m.correct) b.classList.add('good');
+    });
+  } else {
+    var inp2 = $('inp-'+i);
+    inp2.classList.remove('bad'); inp2.classList.add('good');
+    inp2.disabled = true;
+  }
+
+  fb.className = 'feedback show ok';
+  fb.innerHTML = '✅ Validé, la structure tient !';
+  playDing();
+
+  var frag = $('frag-'+i);
+  frag.classList.add('show');
+  var contenu = '🔧 ' + m.frag + ' : <span class="frag-val">' + m.fragVal + '</span>';
+  if(m.conclusion){
+    contenu += '<div style="margin-top:10px; font-family:\'JetBrains Mono\',monospace; font-weight:400; font-size:.84rem; color:var(--txt); line-height:1.55;">' + m.conclusion + '</div>';
+  }
+  frag.innerHTML = contenu;
+
+  var bv = document.querySelector('.btn-valider[data-m="'+i+'"]');
+  var bi = document.querySelector('.btn-indice[data-m="'+i+'"]');
+  if(bv) bv.disabled = true;
+  if(bi) bi.disabled = true;
+
+  updateProgress();
+  setTimeout(function(){ avancer(i); }, 900);
+}
+
+function updateProgress(){
+  var finis = etat.filter(function(s){ return s.done; }).length;
+  $('prog-fill').style.width = Math.round((finis/TOTAL)*100) + '%';
+  $('prog-count').textContent = finis + ' / ' + TOTAL + ' ÉTAPES VALIDÉES';
+}
+
+function avancer(i){
+  var next = i + 1;
+  if(next >= TOTAL){ terminer(); return; }
+  var scan = $('scan'), prog = $('scan-prog');
+  scan.classList.add('show');
+  prog.style.transition='none'; prog.style.width='0%'; void prog.offsetWidth;
+  prog.style.transition='width .7s ease'; prog.style.width='100%';
+  setTimeout(function(){
+    scan.classList.remove('show');
+    var oldEl = $('m'+i); if(oldEl){ oldEl.classList.remove('active'); oldEl.classList.add('done'); }
+    current = next;
+    var nextEl = $('m'+next);
+    if(nextEl){ nextEl.classList.add('active'); nextEl.scrollIntoView({ behavior:'smooth', block:'center' }); }
+    playVerrou();   // bruit de verrou : l'étape suivante s'ouvre
+  }, 800);
+}
+
+function terminer(){
+  stopTimer();
+  var oldEl = $('m'+(TOTAL-1)); if(oldEl){ oldEl.classList.remove('active'); oldEl.classList.add('done'); }
+  $('fin-score').textContent = TOTAL + ' / ' + TOTAL;
+  $('fin-temps').textContent = fmt(Math.floor((Date.now()-startTime)/1000));
+  var totalTries = etat.reduce(function(acc, s){ return acc + (s.tries||0); }, 0);
+  var grade;
+  if(totalTries === 0)      grade = '🏅 INGÉNIEUR ÉMÉRITE — sans aucune erreur !';
+  else if(totalTries <= 3)  grade = '🥈 CHEF DE CHANTIER CONFIRMÉ';
+  else                      grade = '🥉 PERSÉVÉRANT — tu as su te corriger !';
+  $('fin-grade').textContent = grade;
+  $('fin').classList.add('show');
+  $('replay-zone').classList.add('show');
+  $('fin').scrollIntoView({ behavior:'smooth', block:'center' });
+  playFanfare();
+}
+
+function recommencer(){
+  etat = MISSIONS.map(function(){ return { done:false, picked:null, correct:false, tries:0 }; });
+  solved = 0; current = 0;
+  MISSIONS.forEach(function(m, i){
+    $('fb-'+i).className='feedback'; $('fb-'+i).innerHTML='';
+    $('ind-'+i).className='indice-box'; $('ind-'+i).innerHTML='';
+    $('frag-'+i).className='fragment'; $('frag-'+i).innerHTML='';
+    var bv=document.querySelector('.btn-valider[data-m="'+i+'"]'); var bi=document.querySelector('.btn-indice[data-m="'+i+'"]');
+    if(bv) bv.disabled=true; if(bi) bi.disabled=false;
+    if(m.type==='qcm'){
+      document.querySelectorAll('.choix-btn[data-m="'+i+'"]').forEach(function(b){ b.classList.remove('selected','good','bad','locked'); b.disabled=false; });
+    } else { var inp=$('inp-'+i); inp.value=''; inp.disabled=false; inp.classList.remove('good','bad'); }
+    var el=$('m'+i); if(el){ el.classList.remove('active','done'); if(i===0) el.classList.add('active'); }
+  });
+  $('fin').classList.remove('show'); $('replay-zone').classList.remove('show');
+  $('prog-fill').style.width='0%'; $('prog-count').textContent='0 / '+TOTAL+' ÉTAPES VALIDÉES';
+  stopTimer(); timerStarted=false; $('timer').textContent='00:00';
+  if(slider){ slider.value=0; } lastSliderN=0; majMonteCharge();
+  // revenir à la page d'intro et y replacer le monte-charge
+  var mc = $('mc-host-jeu').querySelector('.mc');
+  if(mc){ $('mc-host-intro').insertBefore(mc, $('btn-commencer')); }
+  $('page-jeu').classList.remove('show');
+  $('page-intro').classList.add('show');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+$('btn-rec-fin').addEventListener('click', recommencer);
+$('btn-rec-bas').addEventListener('click', recommencer);
+
+/* =========================================================
+   SONS — Web Audio API (100% autonome)
+   clac métallique (ajout caisse) · ding (réussite) · bip (dépassement)
+   ========================================================= */
+var audioCtx = null, soundOn = false;
+function ensureCtx(){
+  if(!audioCtx){ try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e){ audioCtx = null; } }
+  if(audioCtx && audioCtx.state !== 'running'){ try { audioCtx.resume(); } catch(e){} }
+  return audioCtx;
+}
+function playClac(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return;
+  var t=ctx.currentTime;
+  var o=ctx.createOscillator(); o.type='square'; o.frequency.setValueAtTime(320,t); o.frequency.exponentialRampToValueAtTime(140,t+0.06);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.18,t+0.005); g.gain.exponentialRampToValueAtTime(0.0001,t+0.09);
+  o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.1);
+}
+function playDing(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return;
+  var t=ctx.currentTime;
+  [880,1320].forEach(function(f,k){
+    var o=ctx.createOscillator(); o.type='sine'; o.frequency.value=f;
+    var g=ctx.createGain(); var tt=t+k*0.04;
+    g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.2,tt+0.02); g.gain.exponentialRampToValueAtTime(0.0001,tt+0.45);
+    o.connect(g); g.connect(ctx.destination); o.start(tt); o.stop(tt+0.46);
+  });
+}
+function playBip(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return;
+  if(ctx.state!=='running' && ctx.resume){ try{ ctx.resume(); }catch(e){} }
+  var t=ctx.currentTime;
+  var o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(330,t); o.frequency.exponentialRampToValueAtTime(247,t+0.12);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.10,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.2);
+  o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.22);
+}
+/* whoosh discret : début de mission (entrée dans la galerie) */
+function playWhoosh(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return;
+  if(ctx.state!=='running' && ctx.resume){ try{ ctx.resume(); }catch(e){} }
+  var t=ctx.currentTime;
+  var len=Math.floor(ctx.sampleRate*0.5);
+  var buf=ctx.createBuffer(1,len,ctx.sampleRate); var d=buf.getChannelData(0);
+  for(var k=0;k<len;k++){ d[k]=Math.random()*2-1; }
+  var src=ctx.createBufferSource(); src.buffer=buf;
+  var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.Q.value=0.7;
+  bp.frequency.setValueAtTime(300,t); bp.frequency.exponentialRampToValueAtTime(1400,t+0.25); bp.frequency.exponentialRampToValueAtTime(400,t+0.5);
+  var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.16,t+0.18); g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
+  src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(t); src.stop(t+0.52);
+}
+/* verrou métallique « clic-clac » : déblocage d'une étape */
+function playVerrou(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return;
+  if(ctx.state!=='running' && ctx.resume){ try{ ctx.resume(); }catch(e){} }
+  var t=ctx.currentTime;
+  function clic(tt, freq, vol){
+    var len=Math.floor(ctx.sampleRate*0.06);
+    var buf=ctx.createBuffer(1,len,ctx.sampleRate); var d=buf.getChannelData(0);
+    for(var k=0;k<len;k++){ d[k]=Math.random()*2-1; }
+    var src=ctx.createBufferSource(); src.buffer=buf;
+    var bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=freq; bp.Q.value=2.5;
+    var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,tt); g.gain.exponentialRampToValueAtTime(0.22*vol,tt+0.004); g.gain.exponentialRampToValueAtTime(0.0001,tt+0.05);
+    src.connect(bp); bp.connect(g); g.connect(ctx.destination); src.start(tt); src.stop(tt+0.06);
+  }
+  clic(t, 1600, 0.8);        // "clic"
+  clic(t+0.11, 900, 1.0);    // "clac" plus grave
+}
+function playFanfare(){
+  if(!soundOn) return; var ctx=ensureCtx(); if(!ctx) return;
+  var t0=ctx.currentTime;
+  [523,659,784].forEach(function(f,k){
+    var t=t0+k*0.12; var o=ctx.createOscillator(); o.type='triangle'; o.frequency.value=f;
+    var g=ctx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.03); g.gain.exponentialRampToValueAtTime(0.0001,t+0.4);
+    o.connect(g); g.connect(ctx.destination); o.start(t); o.stop(t+0.42);
+  });
+}
+$('sound-btn').addEventListener('click', function(){
+  soundOn = !soundOn;
+  var btn = $('sound-btn');
+  if(soundOn){
+    btn.classList.add('on'); btn.textContent='🔊 SON';
+    var ctx=ensureCtx();
+    if(ctx && ctx.state!=='running' && ctx.resume){ var p=ctx.resume(); if(p&&p.then){ p.then(function(){ playClac(); }); } else { setTimeout(playClac,60); } }
+    else { playClac(); }
+  } else { btn.classList.remove('on'); btn.textContent='🔇 SON'; }
+});
+
+/* ============== TRANSITION : COMMENCER LA MISSION ============== */
+$('btn-commencer').addEventListener('click', function(){
+  // son de transition : whoosh discret (entrée dans la galerie)
+  if(soundOn){ playWhoosh(); }
+  else {
+    soundOn = true;
+    var sb = $('sound-btn'); sb.classList.add('on'); sb.textContent='🔊 SON';
+    var ctx = ensureCtx();
+    if(ctx && ctx.state!=='running' && ctx.resume){ var p=ctx.resume(); if(p&&p.then){ p.then(function(){ playWhoosh(); }); } else { setTimeout(playWhoosh,60); } }
+    else { playWhoosh(); }
+  }
+  // déplacer le monte-charge de l'intro vers la colonne gauche
+  var mc = $('mc-host-intro').querySelector('.mc');
+  if(mc){ $('mc-host-jeu').appendChild(mc); }
+  // changer de page
+  $('page-intro').classList.remove('show');
+  $('page-jeu').classList.add('show');
+  // démarrer le chrono au lancement de la mission
+  if(!timerStarted) startTimer();
+  window.scrollTo({ top:0, behavior:'smooth' });
+});
+
+/* ============== INIT ============== */
+bindMonteCharge();
+stopTimer(); timerStarted=false; $('timer').textContent='00:00';
+updateProgress();
+</script>
+
+<!-- ===== CALCULATRICE fx-92 (thème ardoise, ouverte via bouton mission) ===== -->
+<style>
+#fxc-trigger{ display:none !important; }
+#fxc-panel{
+  position:fixed; right:14px; bottom:14px; z-index:9999;
+  width:330px; max-width:calc(100vw - 20px);
+  background:#26333a; border-radius:14px; box-shadow:0 12px 36px rgba(0,0,0,.5);
+  font-family:'JetBrains Mono','Courier New',monospace; display:none; flex-direction:column; border:2px solid #4F6D7A;
+}
+#fxc-panel.fxc-open{ display:flex; }
+.fxc-bar{ display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-radius:12px 12px 0 0; background:#4F6D7A; color:#fff; font-size:.78rem; font-weight:700; cursor:move; touch-action:none; user-select:none; }
+.fxc-bar .fxc-icon{ width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; background:rgba(255,255,255,.18); border:none; border-radius:6px; color:#fff; font-size:.95rem; cursor:pointer; margin-left:4px; font-family:inherit; }
+.fxc-bar .fxc-icon:hover{ background:rgba(255,255,255,.3); }
+.fxc-bar-title{ flex:1; pointer-events:none; }
+.fxc-help{ display:none; padding:8px 12px; background:#2f3e46; color:#bcd0d8; font-size:.72rem; line-height:1.5; border-bottom:1px solid #1a2227; }
+.fxc-help.fxc-show{ display:block; }
+.fxc-help b{ color:#8DC63F; }
+.fxc-screen{ margin:10px; padding:10px 12px; background:#EDE7DC; color:#1a2227; border:2px solid #3a4b54; border-radius:6px; min-height:60px; display:flex; flex-direction:column; justify-content:space-between; }
+.fxc-expr{ font-size:.85rem; color:#4a5b63; text-align:right; min-height:1.2em; overflow-x:auto; white-space:nowrap; }
+.fxc-result{ font-size:1.3rem; font-weight:700; text-align:right; overflow-x:auto; white-space:nowrap; }
+.fxc-pad{ display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; padding:0 10px 12px; }
+.fxc-key{ font-family:'JetBrains Mono','Courier New',monospace; font-size:.95rem; font-weight:700; padding:12px 6px; border:none; border-radius:8px; background:#3a4b54; color:#eef2f4; cursor:pointer; transition:transform .08s, background .15s; min-height:44px; }
+.fxc-key:hover{ background:#465963; }
+.fxc-key:active{ transform:scale(.94); }
+.fxc-key.fxc-fn{ background:#4F6D7A; font-size:.78rem; }
+.fxc-key.fxc-fn:hover{ background:#5c7e8c; }
+.fxc-key.fxc-op{ background:#465963; }
+.fxc-key.fxc-eq{ background:#8DC63F; color:#1a2a08; }
+.fxc-key.fxc-eq:hover{ background:#9ed455; }
+.fxc-key.fxc-del{ background:#c47a2e; font-size:.8rem; }
+.fxc-key.fxc-ac{ background:#e05a3a; font-size:.85rem; }
+.fxc-key.fxc-divr{ background:#4F6D7A; font-size:.75rem; }
+.fxc-key.fxc-simp{ background:#4F6D7A; font-size:.7rem; line-height:1; }
+.fxc-key.fxc-simp small{ display:block; font-size:.55rem; opacity:.85; margin-top:2px; }
+</style>
+
+<div id="fxc-trigger"></div>
+<div id="fxc-panel" aria-label="Calculatrice fx-92 Pazapa">
+  <div class="fxc-bar" id="fxc-bar">
+    <span class="fxc-bar-title">☰ fx-92 · glisse pour déplacer</span>
+    <button class="fxc-icon" id="fxc-help-btn" title="Aide">?</button>
+    <button class="fxc-icon" id="fxc-close-btn" title="Fermer">✕</button>
+  </div>
+  <div class="fxc-help" id="fxc-help">
+    <b>÷R</b> division euclidienne (quotient · reste)<br>
+    <b>FACT(</b>n<b>)</b> facteurs premiers · <b>PGCD(</b>a;b<b>)</b> · <b>PPCM(</b>a;b<b>)</b><br>
+    <b>SIMP(</b>a;b<b>)</b> fraction irréductible · <b>√</b> · <b>x²</b> · <b>^</b>
+  </div>
+  <div class="fxc-screen">
+    <div class="fxc-expr" id="fxc-expr"></div>
+    <div class="fxc-result" id="fxc-result">0</div>
+  </div>
+  <div class="fxc-pad" id="fxc-pad">
+    <button class="fxc-key fxc-fn" data-k="FACT(">FACT(</button>
+    <button class="fxc-key fxc-fn" data-k="PGCD(">PGCD(</button>
+    <button class="fxc-key fxc-fn" data-k="PPCM(">PPCM(</button>
+    <button class="fxc-key fxc-simp" data-k="SIMP(">SIMP(<small>a/b</small></button>
+    <button class="fxc-key fxc-ac"  data-k="AC">AC</button>
+    <button class="fxc-key fxc-del" data-k="DEL">DEL</button>
+    <button class="fxc-key fxc-op"  data-k="(">(</button>
+    <button class="fxc-key fxc-op"  data-k=")">)</button>
+    <button class="fxc-key fxc-op"  data-k=";">;</button>
+    <button class="fxc-key fxc-divr" data-k="÷R">÷R</button>
+    <button class="fxc-key" data-k="7">7</button>
+    <button class="fxc-key" data-k="8">8</button>
+    <button class="fxc-key" data-k="9">9</button>
+    <button class="fxc-key fxc-op" data-k="÷">÷</button>
+    <button class="fxc-key fxc-op" data-k="√(">√(</button>
+    <button class="fxc-key" data-k="4">4</button>
+    <button class="fxc-key" data-k="5">5</button>
+    <button class="fxc-key" data-k="6">6</button>
+    <button class="fxc-key fxc-op" data-k="×">×</button>
+    <button class="fxc-key fxc-op" data-k="²">x²</button>
+    <button class="fxc-key" data-k="1">1</button>
+    <button class="fxc-key" data-k="2">2</button>
+    <button class="fxc-key" data-k="3">3</button>
+    <button class="fxc-key fxc-op" data-k="−">−</button>
+    <button class="fxc-key fxc-op" data-k="^">^</button>
+    <button class="fxc-key" data-k="0">0</button>
+    <button class="fxc-key" data-k=",">,</button>
+    <button class="fxc-key fxc-op" data-k="(−)">(−)</button>
+    <button class="fxc-key fxc-op" data-k="+">+</button>
+    <button class="fxc-key fxc-eq" data-k="=">=</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  function gcd(a, b){ a = Math.abs(a); b = Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
+  function lcmFn(a, b){ if(!a || !b) return 0; return Math.abs(a*b)/gcd(a,b); }
+  function isInt(x){ return Number.isFinite(x) && Math.floor(x) === x; }
+  function factor(n){
+    n = Math.abs(Math.round(n)); if(n === 0) return null; if(n === 1) return { '1': 1 };
+    var f = {}; var p = 2;
+    while(p * p <= n){ while(n % p === 0){ f[p] = (f[p]||0) + 1; n = n / p; } p++; }
+    if(n > 1) f[n] = (f[n]||0) + 1; return f;
+  }
+  var SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+  function sup(n){ return String(n).split('').map(function(c){ return SUP[c]||c; }).join(''); }
+  function factPretty(n){
+    if(n === 1) return '1'; if(n < 1 || !isInt(n)) return 'Erreur';
+    var f = factor(n); if(f === null) return 'Erreur';
+    var keys = Object.keys(f).map(Number).sort(function(a,b){ return a-b; });
+    if(keys.length === 1 && f[keys[0]] === 1) return keys[0] + ' (premier)';
+    return keys.map(function(p){ return p + (f[p] > 1 ? sup(f[p]) : ''); }).join('×');
+  }
+  function parseExpr(src){
+    var s = src.replace(/\s+/g, '').replace(/²/g, '^2').replace(/√/g, 'sqrt').replace(/×/g, '*').replace(/÷/g, '/').replace(/\(−\)/g, '(-)').replace(/−/g, '-').replace(/,/g, '.');
+    var i = 0;
+    function peek(){ return s[i]; }
+    function isDigit(c){ return c >= '0' && c <= '9'; }
+    function parseNumber(){ var start = i; while(i < s.length && (isDigit(s[i]) || s[i] === '.')) i++; return parseFloat(s.substring(start, i)); }
+    function parseFactor(){
+      if(peek() === '+'){ i++; return parseFactor(); }
+      if(peek() === '-'){ i++; return -parseFactor(); }
+      if(peek() === '('){ i++; var v = parseExp(); if(peek() !== ')') throw new Error(')'); i++; return v; }
+      if(s.substr(i, 5) === 'sqrt('){ i += 5; var v2 = parseExp(); if(peek() !== ')') throw new Error(')'); i++; if(v2 < 0) throw new Error('neg'); return Math.sqrt(v2); }
+      if(isDigit(peek()) || peek() === '.'){ return parseNumber(); }
+      throw new Error('token');
+    }
+    function parsePow(){ var base = parseFactor(); if(peek() === '^'){ i++; var exp = parsePow(); return Math.pow(base, exp); } return base; }
+    function parseTerm(){ var v = parsePow(); while(peek() === '*' || peek() === '/'){ var op = s[i++]; var r = parsePow(); if(op === '*') v = v * r; else { if(r === 0) throw new Error('div0'); v = v / r; } } return v; }
+    function parseExp(){ var v = parseTerm(); while(peek() === '+' || peek() === '-'){ var op = s[i++]; var r = parseTerm(); if(op === '+') v = v + r; else v = v - r; } return v; }
+    var result = parseExp(); if(i !== s.length) throw new Error('reste'); return result;
+  }
+  function calculer(expr){
+    var e = expr.trim(); if(e === '') return '0';
+    try {
+      var m = /^FACT\(([^)]+)\)$/i.exec(e);
+      if(m){ var n = parseExpr(m[1]); if(!isInt(n) || n < 1) return 'Erreur'; return factPretty(n); }
+      m = /^PGCD\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){ var a = parseExpr(m[1]); var b = parseExpr(m[2]); if(!isInt(a) || !isInt(b)) return 'Erreur'; return String(gcd(a, b)); }
+      m = /^PPCM\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){ var a2 = parseExpr(m[1]); var b2 = parseExpr(m[2]); if(!isInt(a2) || !isInt(b2)) return 'Erreur'; return String(lcmFn(a2, b2)); }
+      m = /^SIMP\(([^;,]+)[;,]([^)]+)\)$/i.exec(e);
+      if(m){ var a3 = parseExpr(m[1]); var b3 = parseExpr(m[2]); if(!isInt(a3) || !isInt(b3) || b3 === 0) return 'Erreur'; var g = gcd(a3, b3); var na = a3/g, nb = b3/g; if(nb === 1) return String(na); if(nb === -1) return String(-na); if(nb < 0) return (-na)+'/'+(-nb); return na+'/'+nb; }
+      m = /^([^÷R]+)÷R(.+)$/i.exec(e);
+      if(m){ var a4 = parseExpr(m[1]); var b4 = parseExpr(m[2]); if(!isInt(a4) || !isInt(b4) || b4 === 0 || a4 < 0 || b4 < 0) return 'Erreur'; var q = Math.floor(a4/b4); var r = a4 - q*b4; return 'quotient ' + q + ' · reste ' + r; }
+      var rr = parseExpr(e); if(!Number.isFinite(rr)) return 'Erreur';
+      if(isInt(rr)) return String(rr);
+      return String(Math.round(rr*1e10)/1e10).replace('.', ',');
+    } catch(err) { return 'Erreur'; }
+  }
+  var panel=document.getElementById('fxc-panel'), bar=document.getElementById('fxc-bar');
+  var helpBtn=document.getElementById('fxc-help-btn'), closeBtn=document.getElementById('fxc-close-btn');
+  var help=document.getElementById('fxc-help'), exprEl=document.getElementById('fxc-expr'), resEl=document.getElementById('fxc-result'), pad=document.getElementById('fxc-pad');
+  var currentExpr='', lastResult=null, resetOnNext=false;
+  function openCalc(){ panel.classList.add('fxc-open'); }
+  window.openCalc = openCalc;
+  closeBtn.addEventListener('click', function(e){ e.stopPropagation(); panel.classList.remove('fxc-open'); });
+  helpBtn.addEventListener('click', function(e){ e.stopPropagation(); help.classList.toggle('fxc-show'); });
+  var dragging=false, startX=0, startY=0, startLeft=0, startTop=0, conv=false;
+  bar.addEventListener('pointerdown', function(e){
+    if(e.target.classList && e.target.classList.contains('fxc-icon')) return;
+    dragging=true; bar.setPointerCapture(e.pointerId);
+    if(!conv){ var r=panel.getBoundingClientRect(); panel.style.right=''; panel.style.bottom=''; panel.style.left=r.left+'px'; panel.style.top=r.top+'px'; conv=true; }
+    startX=e.clientX; startY=e.clientY; startLeft=parseFloat(panel.style.left)||0; startTop=parseFloat(panel.style.top)||0; e.preventDefault();
+  });
+  bar.addEventListener('pointermove', function(e){
+    if(!dragging) return;
+    var nl=startLeft+(e.clientX-startX), nt=startTop+(e.clientY-startY);
+    var w=panel.offsetWidth, h=panel.offsetHeight, maxL=window.innerWidth-w-4, maxT=window.innerHeight-h-4;
+    if(nl<4)nl=4; if(nt<4)nt=4; if(nl>maxL)nl=maxL; if(nt>maxT)nt=maxT;
+    panel.style.left=nl+'px'; panel.style.top=nt+'px';
+  });
+  function endDrag(e){ if(dragging){ dragging=false; try{ bar.releasePointerCapture(e.pointerId); }catch(_){} } }
+  bar.addEventListener('pointerup', endDrag); bar.addEventListener('pointercancel', endDrag);
+  function refresh(){ exprEl.textContent=currentExpr; resEl.textContent=(lastResult!==null)?lastResult:(currentExpr===''?'0':currentExpr); }
+  function smartDel(){ if(currentExpr==='') return; var pf=['FACT(','PGCD(','PPCM(','SIMP(','÷R','√(']; for(var i=0;i<pf.length;i++){ if(currentExpr.endsWith(pf[i])){ currentExpr=currentExpr.slice(0,-pf[i].length); return; } } currentExpr=currentExpr.slice(0,-1); }
+  pad.addEventListener('click', function(e){
+    var t=e.target.closest('.fxc-key'); if(!t) return; var k=t.dataset.k; if(!k) return;
+    if(k==='AC'){ currentExpr=''; lastResult=null; resetOnNext=false; }
+    else if(k==='DEL'){ if(resetOnNext){ lastResult=null; resetOnNext=false; } smartDel(); }
+    else if(k==='='){ if(currentExpr==='') return; lastResult=calculer(currentExpr); resetOnNext=true; }
+    else {
+      if(resetOnNext){
+        var ch=['+','−','×','÷','^','²','÷R']; var isChain=ch.indexOf(k)!==-1;
+        if(isChain && lastResult && lastResult!=='Erreur' && lastResult.indexOf('quotient')===-1 && lastResult.indexOf('/')===-1 && lastResult.indexOf('(premier)')===-1){ currentExpr=lastResult.replace(',', '.')+k; }
+        else { currentExpr=k; }
+        lastResult=null; resetOnNext=false;
+      } else { currentExpr+=k; }
+    }
+    refresh();
+  });
+  refresh();
+})();
+</script>
+<!-- ===== FIN CALCULATRICE ===== -->
+</body>
+</html>
