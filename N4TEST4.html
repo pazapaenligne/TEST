@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Combat de troupes — Nombres relatifs</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pos:#2f7fb0; --pos-soft:#e8f4fc; --pos-dark:#1a4d6e;
+  --neg:#c0392b; --neg-soft:#fdecea; --neg-dark:#7a1c14;
+  --jour:#f28b82; --jour-dark:#b03a30; --jour-soft:#ffeae7;
+  --green:#8dc63f; --green-dark:#3d7a10; --green-soft:#f0faeb;
+  --ink:#23262d; --muted:#8a8f9a; --bg:#fffdf7; --surface:#fff;
+  --border:#ece8dd; --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--ink);min-height:100vh;padding:0 0 80px;}
+
+/* ── HEADER ── */
+.hero{background:var(--jour-soft);border-bottom:3px solid var(--jour);padding:18px 16px 14px;text-align:center;}
+.badge{display:inline-flex;align-items:center;gap:7px;background:var(--jour);color:#fff;font-weight:800;font-size:.8rem;letter-spacing:1px;padding:6px 18px;border-radius:20px;margin-bottom:10px;}
+.badge .d{width:9px;height:9px;border-radius:50%;}
+h1{font-size:1.35rem;font-weight:800;color:var(--jour-dark);margin-bottom:4px;}
+.subtitle{font-size:.88rem;color:var(--muted);margin-bottom:12px;}
+
+/* ── CONTRÔLES ── */
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:12px 16px;}
+.ctrl-btn{font-family:inherit;font-weight:700;font-size:.82rem;padding:9px 16px;border:2.5px solid var(--border);border-radius:10px;background:var(--surface);color:var(--ink);cursor:pointer;transition:.12s;}
+.ctrl-btn:hover{border-color:var(--jour);}
+.ctrl-btn.active{background:var(--pos);color:#fff;border-color:var(--pos-dark);}
+.ctrl-btn.mode.active{background:var(--jour);border-color:var(--jour-dark);}
+.ctrl-sep{width:2px;background:var(--border);border-radius:2px;margin:0 2px;}
+
+/* ── ARÈNE ── */
+.arena-wrap{max-width:860px;margin:0 auto;padding:0 12px;}
+.consigne{text-align:center;font-size:.82rem;color:var(--muted);margin:6px 0 10px;font-style:italic;}
+
+.arena{background:var(--surface);border:3px solid var(--border);border-radius:var(--radius);padding:20px 12px 16px;min-height:160px;position:relative;overflow:hidden;}
+.arena-label{position:absolute;top:8px;left:12px;font-size:.7rem;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+
+/* Ligne des opérandes */
+.operandes{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;justify-content:center;min-height:90px;}
+.groupe{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.groupe-label{font-weight:800;font-size:.95rem;color:var(--ink);}
+.groupe-label.pos{color:var(--pos-dark);}
+.groupe-label.neg{color:var(--neg-dark);}
+.pions-row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;max-width:180px;min-height:38px;}
+.op-sign{font-size:1.4rem;font-weight:800;color:var(--muted);align-self:center;padding-top:22px;}
+
+/* PION */
+.pion{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;cursor:grab;user-select:none;touch-action:none;transition:transform .12s,box-shadow .12s;position:relative;flex-shrink:0;}
+.pion:active{cursor:grabbing;}
+.pion.pos-pion{background:var(--surface);border:2.5px solid var(--pos);color:var(--pos-dark);}
+.pion.neg-pion{background:var(--neg-soft);border:2.5px solid var(--neg);color:var(--neg-dark);}
+.pion.dragging{transform:scale(1.15);box-shadow:0 6px 20px rgba(0,0,0,.22);z-index:100;opacity:.9;}
+.pion.annule{animation:annule .35s forwards;}
+@keyframes annule{
+  0%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.4);opacity:.6;}
+  100%{transform:scale(0);opacity:0;}
+}
+.pion.over{box-shadow:0 0 0 4px var(--jour);}
+
+/* Zone drop centrale */
+.drop-zone{border:2.5px dashed var(--border);border-radius:10px;min-height:60px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.8rem;margin:10px 0;transition:border-color .15s,background .15s;}
+.drop-zone.drag-over{border-color:var(--jour);background:var(--jour-soft);}
+.drop-zone .pions-row{padding:6px;}
+
+/* Résultat */
+.result-box{margin-top:14px;padding:12px 16px;border-radius:10px;text-align:center;display:none;}
+.result-box.show{display:block;}
+.result-box.pos-win{background:var(--pos-soft);border:2px solid var(--pos);color:var(--pos-dark);}
+.result-box.neg-win{background:var(--neg-soft);border:2px solid var(--neg);color:var(--neg-dark);}
+.result-box.egalite{background:var(--green-soft);border:2px solid var(--green);color:var(--green-dark);}
+.result-title{font-weight:800;font-size:1rem;margin-bottom:4px;}
+.result-calc{font-size:.85rem;margin-bottom:2px;}
+.result-rel{font-size:.85rem;font-weight:700;}
+
+/* Bouton nouveau combat */
+.btn-nouveau{font-family:inherit;font-weight:800;font-size:.95rem;padding:12px 28px;background:var(--jour);color:#fff;border:none;border-radius:12px;cursor:pointer;box-shadow:0 4px 0 var(--jour-dark);margin-top:12px;display:block;width:fit-content;margin-left:auto;margin-right:auto;transition:.1s;}
+.btn-nouveau:active{transform:translateY(3px);box-shadow:0 1px 0 var(--jour-dark);}
+
+/* Instruction drag */
+.drag-hint{text-align:center;font-size:.78rem;color:var(--muted);margin:8px 0 0;font-style:italic;}
+
+/* Scoreboard */
+.score-bar{max-width:860px;margin:14px auto 0;padding:0 12px;}
+.score-inner{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;gap:12px;justify-content:space-around;flex-wrap:wrap;}
+.sc{text-align:center;}
+.sc b{display:block;font-size:1.2rem;color:var(--jour-dark);}
+.sc small{font-size:.7rem;color:var(--muted);font-weight:600;}
+
+/* Tooltip mode */
+.mode-hint{text-align:center;font-size:.78rem;color:var(--muted);padding:4px 16px 0;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge"><span class="d" style="background:rgba(255,255,255,.4)"></span><span class="d" style="background:#fff"></span>PAZAPA · MATHS · 4ÈME</div>
+  <h1>⚔️ Combat de troupes</h1>
+  <div class="subtitle">Semaine 2 · Jour 1 · Nombres relatifs</div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn mode active" id="btnAdd" onclick="setMode('add')">Que des additions</button>
+  <button class="ctrl-btn mode" id="btnMix" onclick="setMode('mix')">Additions et soustractions</button>
+  <div class="ctrl-sep"></div>
+  <button class="ctrl-btn" id="btnMoins" onclick="setSize('small')">− de troupes</button>
+  <button class="ctrl-btn active" id="btnPlus" onclick="setSize('large')">+ de troupes</button>
+</div>
+<div class="mode-hint" id="modeHint">Les opérandes sont tous positifs ou négatifs.</div>
+
+<div class="arena-wrap">
+  <div class="consigne">💡 Fais glisser un pion ⊕ sur un pion ⊖ (ou l'inverse) pour les annihiler.</div>
+  <div class="arena" id="arena">
+    <div class="arena-label">CHAMP DE BATAILLE</div>
+    <div class="operandes" id="operandes"></div>
+    <div class="drag-hint" id="dragHint">⬆ Glisse les pions les uns sur les autres pour les annuler</div>
+    <div class="result-box" id="resultBox">
+      <div class="result-title" id="resultTitle"></div>
+      <div class="result-calc" id="resultCalc"></div>
+      <div class="result-rel" id="resultRel"></div>
+    </div>
+    <button class="btn-nouveau" id="btnNouveau" onclick="nouveauCombat()" style="display:none;">↻ Nouveau combat</button>
+  </div>
+</div>
+
+<div class="score-bar">
+  <div class="score-inner">
+    <div class="sc"><b id="scPos">0</b><small>Victoires ⊕</small></div>
+    <div class="sc"><b id="scEg">0</b><small>Égalités</small></div>
+    <div class="sc"><b id="scNeg">0</b><small>Victoires ⊖</small></div>
+    <div class="sc"><b id="scTotal">0</b><small>Combats</small></div>
+  </div>
+</div>
+
+<script>
+var mode='add', size='large';
+var score={pos:0,neg:0,eg:0,total:0};
+var operandes=[], done=false;
+
+// Pions dans l'arène : {id, val, el, annule}
+var pions=[];
+var pidCounter=0;
+
+function setMode(m){
+  mode=m;
+  document.getElementById('btnAdd').classList.toggle('active',m==='add');
+  document.getElementById('btnMix').classList.toggle('active',m==='mix');
+  document.getElementById('modeHint').textContent = m==='add'
+    ? 'Les opérandes sont tous positifs ou négatifs.'
+    : 'Mélange de positifs et de négatifs, avec des soustractions.';
+  nouveauCombat();
+}
+function setSize(s){
+  size=s;
+  document.getElementById('btnMoins').classList.toggle('active',s==='small');
+  document.getElementById('btnPlus').classList.toggle('active',s==='large');
+  nouveauCombat();
+}
+
+function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function genCombat(){
+  var n = size==='small' ? rnd(2,3) : rnd(3,5);
+  var vals=[];
+  if(mode==='add'){
+    // que des additions : signes alternés ou tous positifs
+    var allPos = Math.random()<0.5;
+    for(var i=0;i<n;i++){
+      var v = rnd(1, size==='small'?5:8);
+      vals.push(allPos ? v : (i%2===0?v:-v));
+    }
+  } else {
+    // mix : signes aléatoires
+    var signs=[1,-1,-1,1,-1,1,1,-1];
+    for(var i=0;i<n;i++){
+      var v = rnd(1, size==='small'?5:9);
+      vals.push(signs[rnd(0,7)]*v);
+    }
+    // Éviter tous du même signe
+    if(vals.every(function(v){return v>0;})){ vals[rnd(0,n-1)] *= -1; }
+    if(vals.every(function(v){return v<0;})){ vals[rnd(0,n-1)] *= -1; }
+  }
+  return vals;
+}
+
+function labelVal(v){
+  return v>0 ? '(+'+v+')' : '('+v+')';
+}
+
+function signBetween(i, vals){
+  if(i===0) return '';
+  var prev=vals[i-1], cur=vals[i];
+  // On affiche l'opération naturelle : si cur positif, c'est + ; si négatif, soustraction
+  return cur>0 ? ' + ' : ' - ';
+}
+
+function buildPion(v){
+  var pid=pidCounter++;
+  var el=document.createElement('div');
+  el.className='pion '+(v>0?'pos-pion':'neg-pion');
+  el.id='pion'+pid;
+  el.textContent=v>0?'+'+v:''+v;
+  el.dataset.pid=pid;
+  el.dataset.val=v;
+  addDragListeners(el);
+  return {id:pid, val:v, el:el, annule:false};
+}
+
+function nouveauCombat(){
+  done=false;
+  pions=[];
+  pidCounter=0;
+  var vals=genCombat();
+  operandes=vals;
+  document.getElementById('resultBox').classList.remove('show');
+  document.getElementById('btnNouveau').style.display='none';
+  document.getElementById('dragHint').style.display='block';
+  var box=document.getElementById('operandes');
+  box.innerHTML='';
+  for(var i=0;i<vals.length;i++){
+    // Signe entre les groupes
+    if(i>0){
+      var sign=document.createElement('div');
+      sign.className='op-sign';
+      sign.textContent=signBetween(i,vals);
+      box.appendChild(sign);
+    }
+    var v=vals[i], absV=Math.abs(v);
+    var grp=document.createElement('div');
+    grp.className='groupe';
+    var lbl=document.createElement('div');
+    lbl.className='groupe-label '+(v>0?'pos':'neg');
+    lbl.textContent=labelVal(v);
+    var row=document.createElement('div');
+    row.className='pions-row';
+    for(var j=0;j<absV;j++){
+      var p=buildPion(v>0?1:-1);
+      pions.push(p);
+      row.appendChild(p.el);
+    }
+    grp.appendChild(lbl);
+    grp.appendChild(row);
+    box.appendChild(grp);
+  }
+}
+
+/* ── DRAG & DROP (souris + tactile) ── */
+var draggingId=null, startX, startY, clone=null, lastOver=null;
+
+function addDragListeners(el){
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('touchstart', onTouch, {passive:false});
+}
+
+function onDown(e){
+  if(done) return;
+  e.preventDefault();
+  startDrag(parseInt(e.currentTarget.dataset.pid), e.clientX, e.clientY);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+}
+function onTouch(e){
+  if(done) return;
+  e.preventDefault();
+  var t=e.touches[0];
+  startDrag(parseInt(e.currentTarget.dataset.pid), t.clientX, t.clientY);
+  document.addEventListener('touchmove', onTMove, {passive:false});
+  document.addEventListener('touchend', onTUp);
+}
+function onTMove(e){ e.preventDefault(); var t=e.touches[0]; moveAt(t.clientX, t.clientY); }
+function onTUp(e){ endDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY); document.removeEventListener('touchmove',onTMove); document.removeEventListener('touchend',onTUp); }
+function onMove(e){ moveAt(e.clientX, e.clientY); }
+function onUp(e){ endDrag(e.clientX, e.clientY); document.removeEventListener('mousemove',onMove); document.removeEventListener('mouseup',onUp); }
+
+function getPion(id){ for(var i=0;i<pions.length;i++) if(pions[i].id===id && !pions[i].annule) return pions[i]; return null; }
+
+function startDrag(pid, cx, cy){
+  if(done) return;
+  var p=getPion(pid); if(!p) return;
+  draggingId=pid;
+  var r=p.el.getBoundingClientRect();
+  clone=p.el.cloneNode(true);
+  clone.classList.add('dragging');
+  clone.style.position='fixed';
+  clone.style.width=r.width+'px';
+  clone.style.height=r.height+'px';
+  clone.style.left=(r.left)+'px';
+  clone.style.top=(r.top)+'px';
+  clone.style.pointerEvents='none';
+  clone.style.transition='none';
+  document.body.appendChild(clone);
+  p.el.style.opacity='0.3';
+  startX=cx; startY=cy;
+}
+function moveAt(cx, cy){
+  if(!clone) return;
+  var r=clone.getBoundingClientRect();
+  clone.style.left=(parseFloat(clone.style.left)+(cx-startX))+'px';
+  clone.style.top=(parseFloat(clone.style.top)+(cy-startY))+'px';
+  startX=cx; startY=cy;
+  // Highlight over
+  clone.style.display='none';
+  var el=document.elementFromPoint(cx,cy);
+  clone.style.display='';
+  var over=el && el.classList.contains('pion') ? el : null;
+  if(lastOver && lastOver!==over) lastOver.classList.remove('over');
+  if(over && parseInt(over.dataset.pid)!==draggingId){
+    var p2=getPion(parseInt(over.dataset.pid));
+    var p1=getPion(draggingId);
+    if(p2 && p1 && p1.val*p2.val<0) over.classList.add('over');
+    else over=null;
+  }
+  lastOver=over||null;
+}
+function endDrag(cx, cy){
+  if(!clone || draggingId===null) return;
+  var p1=getPion(draggingId);
+  if(p1) p1.el.style.opacity='';
+  clone.remove(); clone=null;
+  if(lastOver) lastOver.classList.remove('over');
+  // Trouver la cible
+  var el=document.elementFromPoint(cx,cy);
+  var target=el && el.classList.contains('pion') ? el : null;
+  if(target){
+    var pid2=parseInt(target.dataset.pid);
+    var p2=getPion(pid2);
+    if(p1 && p2 && pid2!==draggingId && p1.val*p2.val<0){
+      annihile(p1, p2);
+    }
+  }
+  draggingId=null; lastOver=null;
+}
+
+function annihile(p1, p2){
+  p1.annule=true; p2.annule=true;
+  p1.el.classList.add('annule');
+  p2.el.classList.add('annule');
+  setTimeout(function(){
+    p1.el.style.display='none';
+    p2.el.style.display='none';
+    checkFin();
+  }, 380);
+}
+
+function checkFin(){
+  var actifs=pions.filter(function(p){return !p.annule;});
+  if(actifs.length===0){
+    showResult(0);
+  } else {
+    // On vérifie si des paires opposées restent
+    var hasPos=actifs.some(function(p){return p.val>0;});
+    var hasNeg=actifs.some(function(p){return p.val<0;});
+    if(!hasPos || !hasNeg){
+      // Plus de paires possibles : fin
+      var sum=actifs.reduce(function(s,p){return s+p.val;},0);
+      showResult(sum);
+    }
+    // Sinon on attend que l'élève continue
+  }
+}
+
+function showResult(sum){
+  done=true;
+  document.getElementById('dragHint').style.display='none';
+  // Calcul symbolique
+  var parts=operandes.map(function(v){return v>0?'(+'+v+')':'('+v+')';});
+  var expr=parts.join(' + ');
+  // Résultat total
+  var total=operandes.reduce(function(s,v){return s+v;},0);
+  var rb=document.getElementById('resultBox');
+  var title=document.getElementById('resultTitle');
+  var calc=document.getElementById('resultCalc');
+  var rel=document.getElementById('resultRel');
+  calc.textContent=expr+' = '+(total>0?'(+'+total+')':'('+total+')');
+  if(total>0){
+    rb.className='result-box show pos-win';
+    title.textContent='⊕ Les positifs gagnent avec '+total+' survivant'+(total>1?'s':'')+'  !';
+    rel.textContent='Résultat : (+'+total+')';
+    score.pos++;
+  } else if(total<0){
+    rb.className='result-box show neg-win';
+    title.textContent='⊖ Les négatifs gagnent avec '+Math.abs(total)+' survivant'+(Math.abs(total)>1?'s':'')+' !';
+    rel.textContent='Résultat : ('+total+')';
+    score.neg++;
+  } else {
+    rb.className='result-box show egalite';
+    title.textContent='✅ Égalité parfaite ! Tous les soldats sont annihilés.';
+    rel.textContent='Résultat : (0)';
+    score.eg++;
+  }
+  score.total++;
+  document.getElementById('scPos').textContent=score.pos;
+  document.getElementById('scNeg').textContent=score.neg;
+  document.getElementById('scEg').textContent=score.eg;
+  document.getElementById('scTotal').textContent=score.total;
+  document.getElementById('btnNouveau').style.display='block';
+}
+
+// Init
+nouveauCombat();
+</script>
+</body>
+</html>
