@@ -137,7 +137,44 @@ h1{font-size:1.35rem;font-weight:800;color:var(--jour-dark);margin-bottom:4px;}
 </div>
 
 <script>
-var mode='add', size='large';
+
+// ── AUDIO ──
+var AC=null;
+function getAC(){ if(!AC) try{ AC=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){} return AC; }
+
+function sndOk(){
+  try{
+    var ac=getAC(); if(!ac) return;
+    var t=ac.currentTime;
+    var o=ac.createOscillator(), g=ac.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(660,t); o.frequency.linearRampToValueAtTime(880,t+.08);
+    g.gain.setValueAtTime(.18,t); g.gain.exponentialRampToValueAtTime(.001,t+.18);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.2);
+  }catch(e){}
+}
+
+function sndErr(){
+  try{
+    var ac=getAC(); if(!ac) return;
+    var t=ac.currentTime;
+    var o=ac.createOscillator(), g=ac.createGain();
+    o.type='square'; o.frequency.setValueAtTime(180,t);
+    g.gain.setValueAtTime(.12,t); g.gain.exponentialRampToValueAtTime(.001,t+.15);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.18);
+  }catch(e){}
+}
+
+function sndVictoire(){
+  try{
+    var ac=getAC(); if(!ac) return;
+    var t=ac.currentTime;
+    var o=ac.createOscillator(), g=ac.createGain();
+    o.type='sine'; o.frequency.value=880;
+    g.gain.setValueAtTime(.22,t); g.gain.exponentialRampToValueAtTime(.001,t+.4);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t+.45);
+  }catch(e){}
+}
+
 var score={pos:0,neg:0,eg:0,total:0};
 var operandes=[], done=false;
 
@@ -330,6 +367,8 @@ function endDrag(cx, cy){
     var p2=getPion(pid2);
     if(p1 && p2 && pid2!==draggingId && p1.val*p2.val<0){
       annihile(p1, p2);
+    } else if(p1 && p2 && pid2!==draggingId && p1.val*p2.val>0){
+      sndErr();
     }
   }
   draggingId=null; lastOver=null;
@@ -337,6 +376,7 @@ function endDrag(cx, cy){
 
 function annihile(p1, p2){
   p1.annule=true; p2.annule=true;
+  sndOk();
   p1.el.classList.add('annule');
   p2.el.classList.add('annule');
   setTimeout(function(){
@@ -393,6 +433,7 @@ function showResult(sum){
     score.eg++;
   }
   score.total++;
+  sndVictoire();
   document.getElementById('scPos').textContent=score.pos;
   document.getElementById('scNeg').textContent=score.neg;
   document.getElementById('scEg').textContent=score.eg;
