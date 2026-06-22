@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Labyrinthe de nombres — Pazapa</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --jour:#3ab5d8;--jour-dark:#1c6e87;--jour-soft:#e8f6fb;
+  --green:#5cb85c;--green-dark:#2e7d32;
+  --red:#e06060;--red-dark:#b71c1c;
+  --node:#e4e9ee;--node-bord:#b0bec5;
+  --path-col:#3ab5d8;--sol-col:#f5a623;
+  --ink:#23262d;--muted:#8a8f9a;--bg:#f8fafb;--surf:#fff;--bord:#dde3ea;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:40px;}
+.hero{background:var(--jour-soft);border-bottom:3px solid var(--jour);padding:14px 16px;text-align:center;}
+.badge{display:inline-flex;align-items:center;gap:7px;background:var(--jour);color:#fff;font-weight:800;font-size:.8rem;letter-spacing:1px;padding:5px 16px;border-radius:20px;margin-bottom:7px;}
+h1{font-size:1.2rem;font-weight:800;color:var(--jour-dark);}
+.rules{max-width:560px;margin:10px auto;padding:8px 16px;text-align:center;font-size:.88rem;color:var(--ink);line-height:1.9;background:var(--surf);border:2px solid var(--bord);border-radius:10px;}
+.rules b{color:var(--jour-dark);}
+.top-btns{display:flex;gap:8px;justify-content:center;padding:10px 12px 4px;flex-wrap:wrap;}
+.tbtn{font-family:inherit;font-weight:700;font-size:.82rem;padding:8px 16px;border:2.5px solid var(--bord);border-radius:10px;background:var(--surf);color:var(--ink);cursor:pointer;}
+.tbtn:hover{border-color:var(--jour);}
+.tbtn.primary{background:var(--jour);color:#fff;border-color:var(--jour-dark);}
+.tbtn.sol{border-color:var(--sol-col);color:#7a4a00;}
+.levels{display:flex;gap:8px;justify-content:center;padding:6px 12px 4px;flex-wrap:wrap;}
+.lvl{font-family:inherit;font-weight:700;font-size:.78rem;padding:6px 14px;border:2px solid var(--bord);border-radius:8px;background:var(--surf);color:var(--muted);cursor:pointer;}
+.lvl.active{background:var(--jour-dark);color:#fff;border-color:var(--jour-dark);}
+.feedback{text-align:center;padding:7px 16px;font-weight:700;font-size:.9rem;min-height:34px;color:var(--jour-dark);}
+.feedback.ok{color:var(--green-dark);}
+.feedback.no{color:var(--red-dark);}
+.grid-wrap{overflow:auto;padding:10px;display:flex;justify-content:center;}
+svg{display:block;}
+circle.node{fill:var(--node);stroke:var(--node-bord);stroke-width:2;cursor:pointer;}
+circle.node.start{fill:var(--green);stroke:var(--green-dark);stroke-width:3;}
+circle.node.end{fill:var(--red);stroke:var(--red-dark);stroke-width:3;}
+circle.node.onpath{fill:var(--jour-soft);stroke:var(--jour);stroke-width:3;}
+circle.node.head{fill:var(--jour);stroke:var(--jour-dark);stroke-width:3;}
+circle.node.sol{fill:#fff9c4;stroke:var(--sol-col);stroke-width:2.5;}
+text.nlbl{font-family:'JetBrains Mono',monospace;font-weight:700;fill:var(--ink);text-anchor:middle;dominant-baseline:middle;pointer-events:none;}
+text.nlbl.light{fill:#fff;}
+line.edge{stroke:#cdd4da;stroke-width:2;}
+line.edge.onpath{stroke:var(--jour);stroke-width:3.5;}
+line.edge.sol{stroke:var(--sol-col);stroke-width:3;stroke-dasharray:7 4;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">PAZAPA · MATHS</div>
+  <h1>🔢 Labyrinthe de nombres</h1>
+</div>
+<div class="rules">
+  Trace un chemin d'une case <b style="color:var(--green-dark)">verte</b> vers une case <b style="color:var(--red-dark)">rouge</b>.<br>
+  👉 <b>Droite</b> : le nombre doit être <b>plus grand</b> &nbsp;·&nbsp; 👈 <b>Gauche</b> : le nombre doit être <b>plus petit</b>
+</div>
+<div class="top-btns">
+  <button class="tbtn" onclick="resetPath()">↺ Reset</button>
+  <button class="tbtn primary" onclick="newGame()">⊕ Nouveau</button>
+  <button class="tbtn sol" onclick="showSolution()">💡 Solution</button>
+</div>
+<div class="levels">
+  <button class="lvl active" data-lvl="rel5n1" onclick="setLevel(this)">5e relatifs n1</button>
+  <button class="lvl" data-lvl="rel5n2" onclick="setLevel(this)">5e relatifs n2</button>
+  <button class="lvl" data-lvl="dec6n1" onclick="setLevel(this)">6e décimaux n1</button>
+  <button class="lvl" data-lvl="dec6n2" onclick="setLevel(this)">6e décimaux n2</button>
+</div>
+<div class="feedback" id="fb">Clique sur une case verte pour commencer !</div>
+<div class="grid-wrap"><svg id="svg"></svg></div>
+
+<script>
+// ── SONS (Web Audio, sans fichier externe) ──
+var _ac=null;
+function audioCtx(){
+  if(!_ac){ try{ _ac=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ _ac=null; } }
+  if(_ac&&_ac.state==='suspended') _ac.resume();
+  return _ac;
+}
+function beep(freq,dur,type,vol,startAt){
+  var ac=audioCtx(); if(!ac) return;
+  var t0=ac.currentTime+(startAt||0);
+  var o=ac.createOscillator(), g=ac.createGain();
+  o.type=type||'sine'; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,t0);
+  g.gain.exponentialRampToValueAtTime(vol||0.18,t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(t0); o.stop(t0+dur+0.02);
+}
+function soundOk(){ beep(660,0.14,'sine',0.16); beep(990,0.16,'sine',0.14,0.07); }      // pas juste
+function soundNo(){ beep(196,0.22,'sawtooth',0.14); beep(160,0.26,'sawtooth',0.12,0.05); } // faux
+function soundWin(){ // réussite : petite fanfare
+  var notes=[523.25,659.25,783.99,1046.5];
+  notes.forEach(function(f,i){ beep(f,0.18,'triangle',0.16,i*0.11); });
+}
+
+// ── STRUCTURE EN LOSANGE (quinconce) ──
+// 7 colonnes, tailles symétriques pour un diamant régulier.
+// Colonnes en quinconce : une colonne "petite" est décalée d'un demi-pas
+// vers le bas par rapport à ses colonnes "grandes" voisines.
+// Chaque nœud relie ses 4 voisins diagonaux → losanges complets.
+var COL_SIZES=[2,3,4,5,4,3,2];
+var N_COLS=7;
+var R=30, DX=88, DY=66;
+var SVG_PAD=50;
+
+function colSize(c){ return COL_SIZES[c]||0; }
+
+// Position SVG : chaque colonne centrée verticalement (quinconce naturel).
+function nodePos(col,row){
+  var cs=colSize(col);
+  var maxCS=Math.max.apply(null,COL_SIZES); // 5
+  var totalH=(maxCS-1)*DY;
+  var colH=(cs-1)*DY;
+  var offsetY=(totalH-colH)/2;
+  return {x:SVG_PAD+col*DX, y:SVG_PAD+offsetY+row*DY};
+}
+
+function nodeKey(c,r){ return c+','+r; }
+
+// ── TOPOLOGIE LOSANGE UNIFIÉE ──
+// Connexion entre col c et col c+1 selon la différence de taille :
+//   col+1 plus grande (diff>0) : (c,r) ↔ (c+1,r) et (c,r) ↔ (c+1,r+1)
+//   col+1 plus petite (diff<0) : (c,r) ↔ (c+1,r-1) et (c,r) ↔ (c+1,r)
+//   même taille (diff=0)       : (c,r) ↔ (c+1,r-1) et (c,r) ↔ (c+1,r)  [quinconce]
+// Voisins gauche = symétrique. Une seule règle → losanges fermés des deux côtés.
+function rightTargets(c,r){
+  var cs=colSize(c), csN=colSize(c+1), out=[];
+  if(c+1>=N_COLS||csN===0) return out;
+  var diff=csN-cs;
+  var cands = diff>0 ? [r, r+1] : [r-1, r];
+  cands.forEach(function(nr){ if(nr>=0&&nr<csN) out.push(nr); });
+  return out;
+}
+function leftTargets(c,r){
+  // (c,r) relié à (c-1,nr) ssi (c-1,nr) a (c,r) comme cible droite
+  var out=[], csP=colSize(c-1);
+  if(c-1<0||csP===0) return out;
+  for(var nr=0;nr<csP;nr++){
+    if(rightTargets(c-1,nr).indexOf(r)>=0) out.push(nr);
+  }
+  return out;
+}
+
+function getEdges(){
+  var edges=[], seen={};
+  for(var c=0;c<N_COLS-1;c++){
+    for(var r=0;r<colSize(c);r++){
+      rightTargets(c,r).forEach(function(nr){
+        var k=c+','+r+'-'+(c+1)+','+nr;
+        if(!seen[k]){ seen[k]=1; edges.push({c1:c,r1:r,c2:c+1,r2:nr}); }
+      });
+    }
+  }
+  return edges;
+}
+
+function getRightNeighbors(c,r){
+  return rightTargets(c,r).map(function(nr){ return {c:c+1,r:nr}; });
+}
+function getLeftNeighbors(c,r){
+  return leftTargets(c,r).map(function(nr){ return {c:c-1,r:nr}; });
+}
+
+// ── GÉNÉRATION DES NOMBRES ──
+var LEVELS={
+  rel5n1:function(){ return Math.round((Math.random()*40-20)*10)/10; },
+  rel5n2:function(){ return Math.round((Math.random()*60-30)*10)/10; },
+  dec6n1:function(){ return Math.round(Math.random()*30*10)/10; },
+  dec6n2:function(){ return Math.round((Math.random()*50-10)*10)/10; }
+};
+var level='rel5n1';
+
+var nodes={}, edges=[], solPath=null, userPath=[], userHead=null;
+
+function genGame(){
+  var gen=LEVELS[level];
+  nodes={};
+  edges=getEdges();
+  // 1) Choisir au hasard un chemin gauche→droite (une cible droite par colonne).
+  var path=[];
+  var r=Math.floor(Math.random()*colSize(0));
+  path.push({c:0,r:r});
+  for(var c=0;c<N_COLS-1;c++){
+    var t=rightTargets(c,r);
+    r=t[Math.floor(Math.random()*t.length)];
+    path.push({c:c+1,r:r});
+  }
+  // 2) Imposer des valeurs STRICTEMENT croissantes le long de ce chemin.
+  //    On tire N valeurs, on les trie, on les répartit → chemin toujours valide.
+  var vals=[];
+  for(var i=0;i<path.length;i++) vals.push(gen());
+  vals.sort(function(a,b){return a-b;});
+  // dé-dupliquer les égalités (la règle exige strictement plus grand)
+  for(var i=1;i<vals.length;i++){ if(vals[i]<=vals[i-1]) vals[i]=Math.round((vals[i-1]+0.1)*10)/10; }
+  var onPath={};
+  for(var i=0;i<path.length;i++){
+    var k=nodeKey(path[i].c,path[i].r);
+    nodes[k]={c:path[i].c,r:path[i].r,val:vals[i]};
+    onPath[k]=1;
+  }
+  // 3) Remplir les autres cases aléatoirement.
+  for(var c=0;c<N_COLS;c++){
+    for(var rr=0;rr<colSize(c);rr++){
+      var k=nodeKey(c,rr);
+      if(!onPath[k]) nodes[k]={c:c,r:rr,val:gen()};
+    }
+  }
+  solPath=null; userPath=[]; userHead=null;
+}
+
+function findPath(){
+  for(var r=0;r<colSize(0);r++){
+    var start=nodeKey(0,r);
+    var result=dfs(start,[start],{});
+    if(result) return result;
+  }
+  return null;
+}
+
+function dfs(key, path, visited){
+  var n=nodes[key];
+  if(!n) return null;
+  if(n.c===N_COLS-1) return path.slice();
+  var nbrs=getRightNeighbors(n.c,n.r);
+  for(var i=0;i<nbrs.length;i++){
+    var nk=nodeKey(nbrs[i].c,nbrs[i].r);
+    if(!visited[nk]&&nodes[nk]&&nodes[nk].val>n.val){
+      visited[nk]=1;
+      var res=dfs(nk,path.concat([nk]),visited);
+      if(res) return res;
+    }
+  }
+  return null;
+}
+
+// ── RENDU SVG ──
+function render(){
+  var svg=document.getElementById('svg');
+  svg.innerHTML='';
+  var maxCS=Math.max.apply(null,COL_SIZES);
+  var W=SVG_PAD+(N_COLS-1)*DX+SVG_PAD;
+  var H=SVG_PAD+(maxCS-1)*DY+SVG_PAD;
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
+
+  edges.forEach(function(e){
+    var p1=nodePos(e.c1,e.r1), p2=nodePos(e.c2,e.r2);
+    var k1=nodeKey(e.c1,e.r1), k2=nodeKey(e.c2,e.r2);
+    var cls='edge';
+    if(solPath&&isInPath(solPath,k1,k2)) cls+=' sol';
+    else if(isInPath(userPath,k1,k2)) cls+=' onpath';
+    var line=document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',p1.x);line.setAttribute('y1',p1.y);
+    line.setAttribute('x2',p2.x);line.setAttribute('y2',p2.y);
+    line.setAttribute('class',cls);
+    svg.appendChild(line);
+  });
+
+  for(var c=0;c<N_COLS;c++){
+    for(var r=0;r<colSize(c);r++){
+      var key=nodeKey(c,r), n=nodes[key];
+      if(!n) continue;
+      var p=nodePos(c,r);
+      var isStart=c===0, isEnd=c===N_COLS-1;
+      var isHead=userHead===key;
+      var inPath=userPath.indexOf(key)>=0&&!isHead;
+      var inSol=solPath&&solPath.indexOf(key)>=0;
+
+      var cls='node';
+      if(isStart) cls+=' start';
+      else if(isEnd) cls+=' end';
+      else if(isHead) cls+=' head';
+      else if(inPath) cls+=' onpath';
+      else if(inSol) cls+=' sol';
+
+      var circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('cx',p.x);circle.setAttribute('cy',p.y);circle.setAttribute('r',R);
+      circle.setAttribute('class',cls);
+      circle.setAttribute('data-key',key);
+      circle.addEventListener('click',function(e){ onClick(e.currentTarget.getAttribute('data-key')); });
+      svg.appendChild(circle);
+
+      var valStr=(''+Math.round(n.val*10)/10).replace('.',',');
+      var fs=valStr.length>=5?'9.5':valStr.length>=4?'11':'12.5';
+      var txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x',p.x);txt.setAttribute('y',p.y);
+      txt.setAttribute('class','nlbl'+(isStart||isEnd||isHead?' light':''));
+      txt.setAttribute('font-size',fs);
+      txt.textContent=valStr;
+      svg.appendChild(txt);
+    }
+  }
+}
+
+function isInPath(path,k1,k2){
+  if(!path||path.length<2) return false;
+  for(var i=0;i<path.length-1;i++){
+    if((path[i]===k1&&path[i+1]===k2)||(path[i]===k2&&path[i+1]===k1)) return true;
+  }
+  return false;
+}
+
+// ── INTERACTION ──
+function onClick(key){
+  if(solPath) return;
+  var n=nodes[key];
+  if(userPath.length===0){
+    if(n.c!==0){ fb('Commence par une case verte !',''); return; }
+    userPath=[key]; userHead=key; fb('Continue vers la droite !',''); render(); return;
+  }
+  if(userPath.length>=2&&key===userPath[userPath.length-2]){
+    userPath.pop(); userHead=userPath[userPath.length-1];
+    fb('',''); render(); return;
+  }
+  if(key===userHead) return;
+  var head=nodes[userHead];
+  var rightNbrs=getRightNeighbors(head.c,head.r).map(function(nb){return {key:nodeKey(nb.c,nb.r),dir:'right'};});
+  var leftNbrs=getLeftNeighbors(head.c,head.r).map(function(nb){return {key:nodeKey(nb.c,nb.r),dir:'left'};});
+  var all=rightNbrs.concat(leftNbrs);
+  var match=null;
+  for(var i=0;i<all.length;i++) if(all[i].key===key){ match=all[i]; break; }
+  if(!match){ fb('Ces cases ne sont pas connectées.','no'); soundNo(); return; }
+  var ok=(match.dir==='right'&&n.val>head.val)||(match.dir==='left'&&n.val<head.val);
+  if(!ok){
+    var rule=match.dir==='right'?'plus grand (→)':'plus petit (←)';
+    fb('✗ En allant vers '+( match.dir==='right'?'la droite':'la gauche')+', le nombre doit être '+rule+' !','no');
+    soundNo();
+    return;
+  }
+  userPath.push(key); userHead=key;
+  if(n.c===N_COLS-1){ fb('🎉 Bravo ! Chemin valide !','ok'); soundWin(); }
+  else { fb('✓','ok'); soundOk(); }
+  render();
+}
+
+function fb(msg,cls){ var el=document.getElementById('fb'); el.textContent=msg; el.className='feedback '+cls; }
+function resetPath(){ userPath=[]; userHead=null; solPath=null; fb('Clique sur une case verte pour commencer !',''); render(); }
+function showSolution(){ solPath=findPath(); fb(solPath?'💡 Solution en jaune.':'Aucun chemin trouvé — génère un nouveau.',''); render(); }
+function newGame(){ genGame(); fb('Clique sur une case verte pour commencer !',''); render(); }
+function setLevel(btn){
+  document.querySelectorAll('.lvl').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  level=btn.getAttribute('data-lvl');
+  newGame();
+}
+
+genGame(); render();
+</script>
+</body>
+</html>
