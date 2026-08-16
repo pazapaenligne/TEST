@@ -3,700 +3,495 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pazapa Phonics — Week 1 · Lesson 1</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@600;700;900&family=Open+Sans:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<title>Pazapa Phonics — W1L1 Discover — S (Jour 1)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --blue:#36BBD6;
-  --blue-dark:#1B7E92;
-  --green:#C9D646;
-  --yellow:#FCC104;
-  --red:#E6352B;
-  --grey-light:#EBEBEB;
-  --grey-dark:#2E2E2D;
-  --bg:#FFFDF7;
-  --surface:#FFFFFF;
-  --radius:18px;
-  --font-display:'Quicksand', 'Filson Soft', system-ui, sans-serif;
-  --font-body:'Open Sans', system-ui, sans-serif;
-  --font-mono:'JetBrains Mono', monospace;
+  /* Charte JOUR 1 · LUNDI */
+  --day-color:#f5a623;
+  --day-dark:#c47a10;
+  --day-light:#fff5e0;
+  --day-border:#f5d080;
+  --day-glow:rgba(245,166,35,.3);
+
+  /* Feedback (fixes, communs à tous les jours) */
+  --ok-bg:#f0faeb; --ok-border:#8dc63f; --ok-text:#2f6e10;
+  --ko-bg:#fff0ef; --ko-border:#f28b82; --ko-text:#c0392b;
+
+  --bg:#fffdf7;
+  --surface:#ffffff;
+  --grey-border:#e8e4d9;
+  --text:#1a1d23;
+  --muted:#8a8f9a;
+  --font-mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
 body{
-  margin:0;
   background:var(--bg);
-  font-family:var(--font-body);
-  color:var(--grey-dark);
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
+  font-family:Arial, sans-serif;
+  color:var(--text);
+  line-height:1.8;
+  overflow-x:hidden;
+  position:relative;
 }
-.wrap{max-width:900px;margin:0 auto;padding:1.2rem 1.2rem 3rem;}
 
-/* ===== Header ===== */
-header.top{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;padding:.9rem 0;}
-.logo-badge{display:flex;align-items:center;gap:.6rem;background:var(--surface);border:1px solid var(--grey-light);border-radius:999px;padding:.4rem .9rem .4rem .6rem;}
-.logo-dots{display:flex;gap:3px;}
-.logo-dots span{width:8px;height:8px;border-radius:50%;display:inline-block;}
-.logo-dots span:nth-child(1){background:var(--blue);}
-.logo-dots span:nth-child(2){background:var(--green);}
-.logo-dots span:nth-child(3){background:var(--yellow);}
-.logo-text{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--grey-dark);}
-.logo-sub{font-family:var(--font-mono);font-size:13px;color:var(--blue-dark);text-transform:uppercase;letter-spacing:.03em;}
-.week-label{font-family:var(--font-mono);font-size:.88rem;color:var(--blue-dark);background:#EAF8FB;border-radius:999px;padding:.35rem .8rem;}
+/* ===== Bulles décoratives fixes (identiques tous les jours) ===== */
+.bubble{position:fixed;border-radius:50%;filter:blur(2px);opacity:.35;pointer-events:none;z-index:0;}
+.bubble1{width:160px;height:160px;background:#fbe6a0;top:-40px;right:-40px;} /* jaune */
+.bubble2{width:130px;height:130px;background:var(--day-color);bottom:-30px;left:-30px;opacity:.25;} /* couleur du jour */
+.bubble3{width:90px;height:90px;background:#c9e9b0;top:40%;right:-20px;} /* verte */
+.bubble4{width:80px;height:80px;background:#f6cfd1;bottom:20%;left:-25px;} /* rose */
 
+.wrap{max-width:780px;margin:0 auto;padding:1.4rem 1.2rem 2rem;position:relative;z-index:1;}
+
+/* ===== Intro ===== */
+.intro{text-align:left;margin-bottom:1.4rem;}
+.jour-tag{
+  font-family:var(--font-mono);
+  font-size:.75rem;
+  color:var(--day-dark);
+  background:var(--day-light);
+  border:1px solid var(--day-border);
+  display:inline-block;
+  padding:.2rem .6rem;
+  border-radius:6px;
+  margin-bottom:.6rem;
+}
 h1{
-  font-family:var(--font-display);
-  font-size:clamp(1.3rem,4.5vw,2rem);
-  font-weight:900;
-  margin:.4rem 0 .2rem;
-  color:var(--grey-dark);
-}
-.subtitle{color:var(--blue-dark);font-weight:600;margin:0 0 1.4rem;font-size:1rem;}
-
-/* ===== Path / progress ===== */
-.path{
-  display:flex;
-  gap:.4rem;
-  overflow-x:auto;
-  padding:.4rem .2rem 1rem;
-  margin-bottom:1rem;
-  scrollbar-width:thin;
-}
-.step-btn{
-  flex:1 1 0;
-  min-width:88px;
-  background:var(--surface);
-  border:2px solid var(--grey-light);
-  border-radius:14px;
-  padding:.6rem .4rem;
-  text-align:center;
-  cursor:pointer;
-  font-family:var(--font-body);
-  transition:transform .15s ease, border-color .15s ease, background .15s ease;
-}
-.step-btn:hover{transform:translateY(-2px);}
-.step-btn .icon{font-size:1.3rem;display:block;margin-bottom:.25rem;}
-.step-btn .label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em;color:var(--grey-dark);}
-.step-btn .num{font-family:var(--font-mono);font-size:.62rem;color:var(--blue-dark);display:block;margin-bottom:.15rem;}
-.step-btn.active{border-color:var(--blue);background:#EAF8FB;}
-.step-btn.done{border-color:var(--green);}
-.step-btn.done .label{color:#5c6b0f;}
-
-.progress-track{height:8px;background:var(--grey-light);border-radius:999px;overflow:hidden;margin-bottom:1.6rem;}
-.progress-fill{height:100%;background:var(--blue);border-radius:999px;transition:width .3s ease;width:0%;}
-
-/* ===== Panels ===== */
-.panel{
-  display:none;
-  background:var(--surface);
-  border-radius:var(--radius);
-  border:1px solid var(--grey-light);
-  padding:1.3rem 1.3rem 1.6rem;
-  animation:fadeUp .35s ease;
-}
-.panel.active{display:block;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-
-.panel-stripe{height:6px;border-radius:6px;margin:-1.3rem -1.3rem 1.1rem;background:linear-gradient(90deg,var(--blue),var(--green));}
-.theme-badge{
-  display:inline-block;font-size:.72rem;text-transform:uppercase;font-weight:800;
-  letter-spacing:.04em;color:var(--blue-dark);background:#EAF8FB;border-radius:999px;
-  padding:.25rem .7rem;margin-bottom:.6rem;
-}
-.panel h2{font-family:var(--font-display);font-size:1.4rem;font-weight:900;margin:.1rem 0 .3rem;}
-.panel .instructions{font-size:.9rem;color:var(--grey-dark);margin-bottom:1rem;}
-.instructions strong{color:var(--blue-dark);}
-
-.action-row{display:flex;flex-wrap:wrap;gap:.6rem;margin:.9rem 0;}
-.btn{
-  font-family:var(--font-body);
-  font-size:clamp(.88rem,2.5vw,.97rem);
+  font-size:clamp(1.5rem,6vw,2.1rem);
   font-weight:800;
-  min-height:2.8rem;
-  padding:.5rem 1.1rem;
-  border-radius:12px;
+  margin:0 0 .2rem;
+  color:var(--text);
+}
+.intro p{
+  font-weight:700;
+  font-size:clamp(1rem,3.4vw,1.15rem);
+  color:var(--day-dark);
+  margin:0 0 1rem;
+}
+.leo-fadi-placeholder{
+  background:var(--day-light);
+  border:2px dashed var(--day-border);
+  border-radius:16px;
+  padding:1.6rem 1rem;
+  max-width:360px;
+  margin:0 0 1.1rem;
+  font-weight:700;
+  color:var(--day-dark);
+  font-size:1rem;
+  text-align:center;
+}
+
+/* ===== Buttons ===== */
+.btn{
+  font-family:Arial, sans-serif;
+  font-weight:700;
+  font-size:clamp(.9rem,3vw,1rem);
+  min-height:2.6rem;
+  padding:.6rem 1.3rem;
+  border-radius:10px;
   border:none;
   cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
   transition:transform .12s ease, opacity .12s ease;
 }
 .btn:active{transform:scale(.97);}
-.btn:disabled{opacity:.45;cursor:not-allowed;}
-.btn-primary{background:var(--blue);color:#fff;}
-.btn-secondary{background:var(--grey-light);color:var(--grey-dark);}
-.btn-success{background:var(--green);color:var(--grey-dark);}
-.btn-hint{background:var(--yellow);color:var(--grey-dark);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-primary{background:var(--day-color);color:#fff;}
+.btn-secondary{background:#fff;color:var(--text);border:2px solid var(--grey-border);}
+.btn-success{background:#8dc63f;color:#fff;}
 
-/* Word / picture grid */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:.7rem;margin:1rem 0;}
-.tile{
-  background:var(--grey-light);
-  border:2px solid transparent;
+.btn-big-listen{
+  width:92px;height:92px;border-radius:50%;
+  background:var(--day-color);color:#fff;font-size:2.1rem;
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  margin:0 auto;transition:transform .15s ease, box-shadow .15s ease;
+  box-shadow:0 4px 16px var(--day-glow);
+}
+.btn-big-listen:active{transform:scale(.94);}
+.btn-big-listen.pulse{animation:pulse 1.1s ease-in-out infinite;}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 var(--day-glow);}
+  50%{box-shadow:0 0 0 14px rgba(245,166,35,0);}
+}
+
+/* ===== Sections ===== */
+.section{
+  background:var(--surface);
+  border-radius:16px;
+  border:2px solid var(--grey-border);
+  box-shadow:0 4px 20px rgba(0,0,0,.06);
+  padding:1.3rem 1.2rem;
+  margin-bottom:1.2rem;
+  position:relative;
+  overflow:hidden;
+}
+.section::before{
+  content:"";
+  position:absolute; top:0; left:0; right:0; height:4px;
+  background:linear-gradient(90deg, var(--day-color), #f5c518, #f28b82);
+}
+.section h2{
+  font-size:clamp(1.05rem,4vw,1.3rem);
+  font-weight:800;
+  margin:.3rem 0 .7rem;
+  text-align:left;
+}
+.center{text-align:center;}
+
+/* Video */
+.video-box{
+  background:var(--day-light);
+  border:1px solid var(--day-border);
   border-radius:14px;
-  padding:.7rem .5rem;
+  aspect-ratio:16/9;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--day-dark);
+  font-weight:700;
+  text-align:center;
+  padding:1rem;
+}
+video{width:100%;border-radius:14px;display:block;}
+
+/* Listen section */
+.sound-label{
+  font-family:var(--font-mono);
+  font-weight:700;
+  font-size:1.5rem;
+  color:var(--day-dark);
+  margin-top:.6rem;
+}
+.dev-note{
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  color:var(--muted);
+  margin-top:.5rem;
+}
+
+/* Find the sound cards */
+.instruction-row{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  margin-bottom:1rem;
+  flex-wrap:wrap;
+}
+.instruction-text{
+  font-weight:700;
+  font-size:clamp(1rem,3.4vw,1.1rem);
+}
+.mini-audio-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--day-color);color:#fff;border:none;cursor:pointer;
+  font-size:1rem;display:inline-flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.mini-audio-btn:active{transform:scale(.92);}
+
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:.9rem;
+  margin-bottom:1.1rem;
+}
+.word-card{
+  background:#fff;
+  border:2px solid var(--grey-border);
+  border-radius:14px;
+  padding:.8rem .5rem .7rem;
   text-align:center;
   cursor:pointer;
   user-select:none;
-  transition:border-color .15s ease, background .15s ease;
+  transition:border-color .15s ease, transform .15s ease, background .15s ease;
+  position:relative;
 }
-.tile svg{width:42px;height:42px;display:block;margin:0 auto .35rem;}
-.tile .word{font-weight:700;font-size:.9rem;}
-.tile.selected{border-color:var(--blue);background:#EAF8FB;}
-.tile.correct{border-color:var(--green);background:#F6FAEA;}
-.tile.incorrect{border-color:var(--blue-dark);background:#EAF8FB;}
-
-.feedback{
-  font-size:clamp(.9rem,2.5vw,1rem);
-  border-radius:12px;
-  padding:.7rem 1rem;
-  margin-top:.9rem;
-  display:none;
+.word-card:active{transform:scale(.97);}
+.word-card svg{width:100%;max-width:74px;height:auto;display:block;margin:0 auto .4rem;}
+.word-card .word{
   font-weight:700;
-}
-.feedback.show{display:block;}
-.feedback.success{background:#F6FAEA;color:#4c5a0e;border:1px solid var(--green);}
-.feedback.retry{background:#EAF8FB;color:var(--blue-dark);border:1px solid var(--blue);}
-
-/* Trace canvas */
-.trace-wrap{background:var(--grey-light);border-radius:14px;padding:1rem;text-align:center;}
-canvas{background:#fff;border-radius:10px;touch-action:none;max-width:100%;}
-
-/* Write it */
-.write-row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;}
-input[type=text]{
-  font-family:var(--font-mono);
-  font-size:1.4rem;
-  text-align:center;
-  width:4.5rem;
-  padding:.5rem;
-  border-radius:10px;
-  border:2px solid var(--grey-light);
+  font-size:.78rem;
+  letter-spacing:.02em;
+  color:var(--text);
   text-transform:uppercase;
 }
-input[type=text]:focus{outline:none;border-color:var(--blue);}
-
-/* Checklist (Go further) */
-.checklist{list-style:none;padding:0;margin:1rem 0;display:grid;gap:.5rem;}
-.checklist li{
-  display:flex;align-items:center;gap:.6rem;
-  background:var(--grey-light);border-radius:12px;padding:.6rem .8rem;
-  font-weight:600;font-size:.92rem;cursor:pointer;
+.word-card.selected{border-color:var(--day-color);background:var(--day-light);}
+.word-card.correct{border-color:var(--ok-border);background:var(--ok-bg);}
+.word-card.incorrect{border-color:var(--ko-border);background:var(--ko-bg);}
+.card-audio{
+  position:absolute;
+  top:6px; right:6px;
+  width:28px;height:28px;
+  border-radius:50%;
+  background:#fff;
+  border:1px solid var(--grey-border);
+  cursor:pointer;
+  font-size:.8rem;
+  display:flex;align-items:center;justify-content:center;
 }
-.checklist li input{width:1.2rem;height:1.2rem;accent-color:var(--blue);}
-.checklist li.checked{background:#F6FAEA;}
 
-/* Quiz */
-.quiz-item{border:1px solid var(--grey-light);border-radius:14px;padding:.9rem 1rem;margin-bottom:.8rem;}
-.quiz-item .qtext{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:clamp(1rem,3vw,1.05rem);margin-bottom:.6rem;}
-.quiz-item svg{width:34px;height:34px;}
-.choice-row{display:flex;gap:.6rem;}
-.choice-btn{
-  flex:1;font-family:var(--font-body);font-weight:700;font-size:.9rem;
-  padding:.5rem;border-radius:10px;border:2px solid var(--grey-light);background:#fff;cursor:pointer;min-height:44px;
+/* Feedback */
+.feedback{
+  border-radius:10px;
+  padding:.7rem 1rem;
+  margin-top:.8rem;
+  font-weight:700;
+  font-size:clamp(.9rem,3vw,1rem);
+  display:none;
+  align-items:center;
+  gap:.5rem;
 }
-.choice-btn.picked{border-color:var(--blue);background:#EAF8FB;}
-.choice-btn.right{border-color:var(--green);background:#F6FAEA;}
-.choice-btn.wrong{border-color:var(--blue-dark);}
+.feedback.show{display:flex;}
+.feedback.retry{background:var(--day-light);color:var(--day-dark);border:1.5px solid var(--day-border);}
+.feedback.hint{background:#fffbeb;color:#8a6000;border:1px dashed #f5c518;}
 
-.result-block{display:none;text-align:center;margin-top:1.2rem;}
-.result-block.show{display:block;}
-.score-big{font-size:clamp(2.8rem,10vw,4.5rem);font-family:var(--font-display);font-weight:900;color:var(--blue);}
-.stars{font-size:1.9rem;letter-spacing:.2rem;color:var(--yellow);margin:.3rem 0;}
-.result-msg{font-size:clamp(.88rem,2.5vw,1rem);font-weight:700;color:var(--grey-dark);}
+.action-row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:.9rem;}
+.action-row.center{justify-content:center;}
 
-.nav-row{display:flex;justify-content:space-between;margin-top:1.6rem;}
+/* Success overlay */
+.success-box{
+  display:none;
+  text-align:center;
+  background:var(--ok-bg);
+  border:2px solid var(--ok-border);
+  border-radius:16px;
+  padding:1.6rem 1.2rem;
+  margin-bottom:1.2rem;
+}
+.success-box.show{display:block;}
+.success-box h2{font-weight:800;font-size:1.5rem;margin:.2rem 0 .1rem;color:var(--ok-text);}
+.success-box p{font-weight:700;color:var(--ok-text);margin:0 0 1rem;}
+.star{font-size:2.1rem;display:inline-block;}
 
-.source-tag{font-family:var(--font-mono);font-size:.72rem;color:var(--blue-dark);opacity:.8;margin-top:1rem;}
+.source-tag{
+  font-family:var(--font-mono);
+  font-size:.68rem;
+  color:var(--muted);
+  margin-top:1rem;
+}
 
 @media (max-width:520px){
-  .wrap{padding:.9rem .8rem 2.4rem;}
-  .step-btn{min-width:74px;}
+  .card-grid{grid-template-columns:repeat(2,1fr);}
+  .wrap{padding:1rem .8rem 1.6rem;}
 }
 </style>
 </head>
 <body>
+<div class="bubble bubble1"></div>
+<div class="bubble bubble2"></div>
+<div class="bubble bubble3"></div>
+<div class="bubble bubble4"></div>
+
 <div class="wrap">
 
-  <header class="top">
-    <div class="logo-badge">
-      <span class="logo-dots"><span></span><span></span><span></span></span>
-      <span class="logo-text">Pazapa</span>
-      <span class="logo-sub">Phonics · Level 1</span>
-    </div>
-    <span class="week-label">Week 1 · Lesson 1</span>
-  </header>
-
-  <h1>Let's meet the sound /s/!</h1>
-  <p class="subtitle">Léo &amp; Fadi are waiting for you on the path. Six steps, one sound to discover.</p>
-
-  <div class="path" id="pathNav"></div>
-  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-
-  <!-- STEP 1 — DISCOVER -->
-  <section class="panel" data-step="0">
-    <div class="panel-stripe"></div>
-    <span class="theme-badge">Step 1 · Discover</span>
-    <h2>Meet Léo &amp; Fadi</h2>
-    <p class="instructions">Léo and Fadi have a new sound to show you today: <strong>/s/</strong>. Watch, listen, then go find it hiding in words.</p>
-
-    <div class="grid" style="grid-template-columns:1fr;">
-      <div class="tile" style="cursor:default;text-align:left;display:flex;align-items:center;gap:.8rem;">
-        <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#EAF8FB" stroke="#36BBD6" stroke-width="3"/><path d="M20 34l8 8 16-18" fill="none" stroke="#1B7E92" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <div>
-          <div class="word">Léo &amp; Fadi's video</div>
-          <div style="font-size:.8rem;color:var(--grey-dark);opacity:.75;">(classbook p.10 — character intro)</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="action-row">
-      <button class="btn btn-primary" onclick="markSeen('watch')">Watch the lesson</button>
-      <button class="btn btn-secondary" id="listenBtn" onclick="playHiss(this)">Listen to the sound</button>
-    </div>
-
-    <p class="instructions" style="margin-top:1rem;"><strong>Find the sound</strong> — tap every word where you can hear /s/.</p>
-    <div class="grid" id="findGrid"></div>
-    <div class="action-row">
-      <button class="btn btn-primary" onclick="checkFind()">Check my answer</button>
-      <button class="btn btn-secondary" onclick="resetFind()">Try again</button>
-    </div>
-    <div class="feedback" id="findFeedback"></div>
-    <p class="source-tag">Source : classbook p.10 · activité complémentaire Pazapa (repérage auditif)</p>
-  </section>
-
-  <!-- STEP 2 — LEARN IT -->
-  <section class="panel" data-step="1">
-    <div class="panel-stripe"></div>
-    <span class="theme-badge">Step 2 · Learn it</span>
-    <h2>The letter S</h2>
-    <p class="instructions">/s/ is written with the letter <strong>S</strong>. Say it, trace it, then meet the picture words.</p>
-
-    <div class="action-row">
-      <button class="btn btn-primary" onclick="playHiss(this)">Say it with me</button>
-    </div>
-
-    <div class="trace-wrap">
-      <canvas id="traceCanvas" width="320" height="220"></canvas>
-      <div class="action-row" style="justify-content:center;">
-        <button class="btn btn-secondary" onclick="clearTrace()">Try again</button>
-      </div>
-      <p class="instructions" style="margin:.5rem 0 0;">Trace the letter</p>
-    </div>
-
-    <p class="instructions" style="margin-top:1.1rem;"><strong>Picture words</strong></p>
-    <div class="grid" id="pictureGrid"></div>
-    <p class="source-tag">Source : workbook p.4 (tracé) · vocabulaire imagé Pazapa</p>
-  </section>
-
-  <!-- STEP 3 — BUILD AND BLEND -->
-  <section class="panel" data-step="2">
-    <div class="panel-stripe"></div>
-    <span class="theme-badge">Step 3 · Build and blend</span>
-    <h2>Circle the sound /s/</h2>
-    <p class="instructions">Tap every word that has the /s/ sound in it. Some don't — look carefully!</p>
-
-    <div class="grid" id="blendGrid"></div>
-    <div class="action-row">
-      <button class="btn btn-primary" onclick="checkBlend()">Check my answer</button>
-      <button class="btn btn-secondary" onclick="resetBlend()">Try again</button>
-      <button class="btn btn-hint" onclick="showHint('blendHint')">Give me a clue</button>
-    </div>
-    <div class="feedback" id="blendFeedback"></div>
-    <p class="instructions" id="blendHint" style="display:none;color:var(--blue-dark);">Clue: /s/ often sounds like air hissing out — ssss.</p>
-
-    <p class="instructions" style="margin-top:1.2rem;"><strong>Write it</strong> — trace and type the letter you hear.</p>
-    <div class="write-row">
-      <input type="text" maxlength="1" id="writeInput" placeholder="?">
-      <button class="btn btn-primary" onclick="checkWrite()">Check my answer</button>
-    </div>
-    <div class="feedback" id="writeFeedback"></div>
-    <p class="source-tag">Source : classbook p.11 (mots à décoder) · workbook p.4 (tracé de la lettre)</p>
-  </section>
-
-  <!-- STEP 4 — GAME ROOM -->
-  <section class="panel" data-step="3">
-    <div class="panel-stripe"></div>
-    <span class="theme-badge">Step 4 · Game room</span>
-    <h2>Sound hunt</h2>
-    <p class="instructions">Help Léo &amp; Fadi collect every object that starts with /s/. No new sounds here — just fun practice!</p>
-
-    <div class="grid" id="gameGrid"></div>
-    <div class="action-row">
-      <button class="btn btn-primary" onclick="checkGame()">Check my answer</button>
-      <button class="btn btn-secondary" onclick="resetGame()">Try again</button>
-    </div>
-    <div class="feedback" id="gameFeedback"></div>
-    <p class="source-tag">Activité complémentaire Pazapa — consolidation, aucune notion nouvelle</p>
-  </section>
-
-  <!-- STEP 5 — GO FURTHER -->
-  <section class="panel" data-step="4">
-    <div class="panel-stripe"></div>
-    <span class="theme-badge">Step 5 · Go further</span>
-    <h2>Sound hunt at home</h2>
-    <p class="instructions">Look around your home (or think hard!) and tick every /s/ thing you find. Say it out loud or take a photo to show your teacher.</p>
-
-    <ul class="checklist" id="homeChecklist"></ul>
-
-    <div class="action-row">
-      <button class="btn btn-secondary" onclick="playHiss(this)">Read with Léo &amp; Fadi</button>
-    </div>
-    <p class="source-tag">Chasse au son à la maison — en photo ou à l'oral, sans support numérique obligatoire</p>
-  </section>
-
-  <!-- STEP 6 — TEST YOUR KNOWLEDGE -->
-  <section class="panel" data-step="5">
-    <div class="panel-stripe"></div>
-    <span class="theme-badge">Step 6 · Test your knowledge</span>
-    <h2>Where do you hear /s/?</h2>
-    <p class="instructions">Five pictures. For each one, tell us: do you hear /s/ or not?</p>
-
-    <div id="quizList"></div>
-
-    <div class="action-row">
-      <button class="btn btn-primary" id="quizCheckBtn" onclick="checkQuiz()">Check my answer</button>
-      <button class="btn btn-secondary" onclick="resetQuiz()">Try again</button>
-    </div>
-
-    <div class="result-block" id="resultBlock">
-      <div class="score-big" id="scoreBig">0/5</div>
-      <div class="stars" id="starsRow">☆☆☆☆☆</div>
-      <div class="result-msg" id="resultMsg"></div>
-    </div>
-  </section>
-
-  <div class="nav-row">
-    <button class="btn btn-secondary" id="prevBtn" onclick="goStep(current-1)">Previous</button>
-    <button class="btn btn-primary" id="nextBtn" onclick="goStep(current+1)">Let's start!</button>
+  <!-- ===== INTRO ===== -->
+  <div class="intro">
+    <span class="jour-tag">SEMAINE 1 · JOUR 1</span>
+    <h1>Discover</h1>
+    <p>Listen carefully!</p>
+    <div class="leo-fadi-placeholder">[Leo &amp; Fadi image]</div>
+    <button class="btn-big-listen" id="introListenBtn" aria-label="Listen">🔊</button>
   </div>
 
+  <!-- ===== VIDEO ===== -->
+  <div class="section">
+    <h2>Watch the lesson</h2>
+    <!-- INSERT W1L1 S SOUND VIDEO HERE -->
+    <div class="video-box" id="videoContainer">
+      <span>🎬 Video coming soon</span>
+    </div>
+  </div>
+
+  <!-- ===== LISTEN TO THE SOUND ===== -->
+  <div class="section center">
+    <h2>Listen to the sound</h2>
+    <button class="btn-big-listen" id="soundListenBtn" aria-label="Listen to /s/">🔊</button>
+    <div class="sound-label">/s/</div>
+    <div class="action-row center">
+      <button class="btn btn-secondary" id="playAgainBtn">🔁 Play it again</button>
+    </div>
+    <div class="dev-note" id="soundDevNote"></div>
+  </div>
+
+  <!-- ===== FIND THE SOUND ===== -->
+  <div class="section">
+    <h2>Find the sound</h2>
+    <div class="instruction-row">
+      <button class="mini-audio-btn" id="instructionAudioBtn" aria-label="Play instruction">🔊</button>
+      <span class="instruction-text">Tap the pictures with /s/.</span>
+    </div>
+
+    <div class="card-grid" id="cardGrid"></div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" id="checkBtn">✓ Check my answer</button>
+    </div>
+
+    <div class="feedback retry" id="feedbackRetry"><span>🔔</span><span>Almost — listen again.</span></div>
+    <div class="feedback hint" id="feedbackHint"><span>💡</span><span>Give me a clue — <strong>Listen for ssss.</strong></span></div>
+
+    <div class="action-row" id="retryRow" style="display:none;">
+      <button class="btn btn-secondary" id="listenAgainBtn">🔊 Listen again</button>
+      <button class="btn btn-secondary" id="tryAgainBtn">🔄 Try again</button>
+    </div>
+  </div>
+
+  <!-- ===== SUCCESS ===== -->
+  <div class="success-box" id="successBox">
+    <div class="star">⭐</div>
+    <h2>Well done!</h2>
+    <p>You found /s/!</p>
+    <button class="btn btn-success" id="doneBtn">Done</button>
+  </div>
+
+  <p class="source-tag">Source: Leo &amp; Fadi — Classbook, Sound S · Pazapa Phonics W1L1 · Charte Jour 1</p>
 </div>
 
 <script>
-/* ---------- Icons (no faces, no animals) ---------- */
-const ICONS = {
-  sun: `<circle cx="32" cy="32" r="12" fill="#FCC104"/><g stroke="#FCC104" stroke-width="3" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="14"/><line x1="32" y1="50" x2="32" y2="60"/><line x1="4" y1="32" x2="14" y2="32"/><line x1="50" y1="32" x2="60" y2="32"/><line x1="12" y1="12" x2="19" y2="19"/><line x1="45" y1="45" x2="52" y2="52"/><line x1="52" y1="12" x2="45" y2="19"/><line x1="19" y1="45" x2="12" y2="52"/></g>`,
-  sock: `<path d="M24 6h14v22l10 14a8 8 0 0 1-6 13H26a8 8 0 0 1-8-8V6z" fill="#36BBD6"/><rect x="24" y="6" width="14" height="8" fill="#1B7E92"/>`,
-  star: `<polygon points="32,6 39,25 59,25 43,37 49,57 32,45 15,57 21,37 5,25 25,25" fill="#FCC104"/>`,
-  bus: `<rect x="6" y="18" width="52" height="26" rx="6" fill="#36BBD6"/><rect x="12" y="24" width="12" height="10" fill="#EAF8FB"/><rect x="28" y="24" width="12" height="10" fill="#EAF8FB"/><circle cx="18" cy="48" r="5" fill="#2E2E2D"/><circle cx="46" cy="48" r="5" fill="#2E2E2D"/>`,
-  spoon: `<ellipse cx="32" cy="18" rx="10" ry="14" fill="#8dc63f"/><rect x="29" y="30" width="6" height="28" rx="3" fill="#8dc63f"/>`,
-  moon: `<path d="M40 6a26 26 0 1 0 18 44A22 22 0 0 1 40 6z" fill="#1B7E92"/>`,
-  tree: `<rect x="28" y="38" width="8" height="20" fill="#8a6000"/><circle cx="32" cy="26" r="20" fill="#8dc63f"/>`,
-  cup: `<path d="M16 16h28v22a14 14 0 0 1-28 0z" fill="#E6352B"/><path d="M44 22h6a8 8 0 0 1 0 16h-6" fill="none" stroke="#E6352B" stroke-width="5"/>`,
-  bag: `<path d="M18 24h28l-3 30a6 6 0 0 1-6 6H27a6 6 0 0 1-6-6z" fill="#f28b82"/><path d="M24 24a8 8 0 0 1 16 0" fill="none" stroke="#c0392b" stroke-width="4"/>`,
-  sandwich: `<path d="M6 34h52l-10 18H16z" fill="#FCC104"/><rect x="6" y="28" width="52" height="8" rx="4" fill="#8dc63f"/>`
-};
-function svg(name, extra=''){ return `<svg viewBox="0 0 64 64" ${extra}>${ICONS[name]}</svg>`; }
+/* ============================================================
+   AUDIO — placeholders only. Replace with real recordings.
+   ============================================================ */
+const SOUND_S_AUDIO = "";
+const AUDIO_SNAKE = "";
+const AUDIO_SUN = "";
+const AUDIO_SIT = "";
+const AUDIO_CUP = "";
+const AUDIO_INSTRUCTION = "";
 
-/* ---------- Word banks ---------- */
-const FIND_WORDS = [
-  {w:'SUN', icon:'sun', s:true},
-  {w:'BUS', icon:'bus', s:true},
-  {w:'TREE', icon:'tree', s:false},
-  {w:'SOCK', icon:'sock', s:true},
-  {w:'CUP', icon:'cup', s:false},
-  {w:'STAR', icon:'star', s:true},
-];
-const BLEND_WORDS = [
-  {w:'SUN', icon:'sun', s:true},
-  {w:'MOON', icon:'moon', s:false},
-  {w:'SOCK', icon:'sock', s:true},
-  {w:'TREE', icon:'tree', s:false},
-  {w:'STAR', icon:'star', s:true},
-  {w:'BUS', icon:'bus', s:true},
-];
-const GAME_ITEMS = [
-  {w:'Sun', icon:'sun', s:true},
-  {w:'Sock', icon:'sock', s:true},
-  {w:'Spoon', icon:'spoon', s:true},
-  {w:'Star', icon:'star', s:true},
-  {w:'Tree', icon:'tree', s:false},
-  {w:'Moon', icon:'moon', s:false},
-  {w:'Cup', icon:'cup', s:false},
-  {w:'Sandwich', icon:'sandwich', s:true},
-];
-const PICTURE_WORDS = [
-  {w:'Sun', icon:'sun'},{w:'Sock', icon:'sock'},{w:'Star', icon:'star'},{w:'Bus', icon:'bus'}
-];
-const HOME_ITEMS = ['Sun through the window', 'A sock', 'A spoon', 'Soap', 'A star (drawing or sky)'];
-const QUIZ_ITEMS = [
-  {w:'Sun', icon:'sun', s:true},
-  {w:'Moon', icon:'moon', s:false},
-  {w:'Sock', icon:'sock', s:true},
-  {w:'Tree', icon:'tree', s:false},
-  {w:'Star', icon:'star', s:true},
-];
-
-/* ---------- Step navigation ---------- */
-const STEP_META = [
-  {icon:'①', label:'Discover'},
-  {icon:'②', label:'Learn it'},
-  {icon:'③', label:'Build'},
-  {icon:'④', label:'Game room'},
-  {icon:'⑤', label:'Go further'},
-  {icon:'⑥', label:'Test'}
-];
-let current = 0;
-const completed = new Set();
-const pathNav = document.getElementById('pathNav');
-STEP_META.forEach((m,i)=>{
-  const b = document.createElement('div');
-  b.className = 'step-btn';
-  b.innerHTML = `<span class="num">Step ${i+1}</span><span class="icon">${m.icon}</span><span class="label">${m.label}</span>`;
-  b.onclick = ()=>goStep(i);
-  pathNav.appendChild(b);
-});
-
-function goStep(i){
-  if(i<0 || i>=STEP_META.length) return;
-  if(current>=0) completed.add(current);
-  current = i;
-  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', +p.dataset.step===i));
-  document.querySelectorAll('.step-btn').forEach((b,idx)=>{
-    b.classList.toggle('active', idx===i);
-    b.classList.toggle('done', completed.has(idx) && idx!==i);
-  });
-  document.getElementById('prevBtn').disabled = i===0;
-  const nextBtn = document.getElementById('nextBtn');
-  nextBtn.textContent = i===0 ? "Let's start!" : (i===STEP_META.length-1 ? 'Well done!' : 'Next');
-  nextBtn.disabled = i===STEP_META.length-1;
-  updateProgress();
-}
-function updateProgress(){
-  const pct = Math.round(((completed.size + (completed.has(current)?0:0)) / STEP_META.length) * 100);
-  document.getElementById('progressFill').style.width = Math.min(100, (current/(STEP_META.length-1))*100) + '%';
-}
-function markSeen(){ /* placeholder for video watched state */ }
-
-/* ---------- Audio: simulated /s/ hiss (Web Audio, no external file) ---------- */
-let audioCtx;
-function playHiss(btn){
-  try{
-    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
-    const bufferSize = audioCtx.sampleRate * 0.35;
-    const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1); }
-    const noise = audioCtx.createBufferSource();
-    noise.buffer = buffer;
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = 'highpass';
-    filter.frequency.value = 4000;
-    const gain = audioCtx.createGain();
-    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.35, audioCtx.currentTime + 0.03);
-    gain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 0.35);
-    noise.connect(filter).connect(gain).connect(audioCtx.destination);
-    noise.start();
-    if(btn){ btn.disabled = true; setTimeout(()=>btn.disabled=false, 400); }
-  }catch(e){ /* audio unsupported — silent fallback */ }
-}
-
-/* ---------- Step 1: Find the sound ---------- */
-const findGrid = document.getElementById('findGrid');
-let findChecked = false;
-FIND_WORDS.forEach((item,idx)=>{
-  const t = document.createElement('div');
-  t.className='tile'; t.dataset.idx=idx;
-  t.innerHTML = svg(item.icon) + `<div class="word">${item.w}</div>`;
-  t.onclick = ()=>{ if(findChecked) return; t.classList.toggle('selected'); };
-  findGrid.appendChild(t);
-});
-function checkFind(){
-  if(findChecked) return;
-  findChecked = true;
-  let correct = 0;
-  [...findGrid.children].forEach((t,idx)=>{
-    const isSel = t.classList.contains('selected');
-    const shouldBe = FIND_WORDS[idx].s;
-    t.classList.remove('selected');
-    t.classList.add(isSel===shouldBe ? 'correct' : 'incorrect');
-    if(isSel===shouldBe) correct++;
-  });
-  const fb = document.getElementById('findFeedback');
-  fb.className = 'feedback show ' + (correct===FIND_WORDS.length?'success':'retry');
-  fb.textContent = correct===FIND_WORDS.length ? 'Well done! You found every /s/ sound.' : `You found ${correct} out of ${FIND_WORDS.length}. Listen again and try once more.`;
-}
-function resetFind(){
-  findChecked = false;
-  [...findGrid.children].forEach(t=>t.className='tile');
-  document.getElementById('findFeedback').className='feedback';
-}
-
-/* ---------- Step 2: Picture words + trace ---------- */
-const pictureGrid = document.getElementById('pictureGrid');
-PICTURE_WORDS.forEach(item=>{
-  const t = document.createElement('div');
-  t.className='tile'; t.style.cursor='default';
-  t.innerHTML = svg(item.icon) + `<div class="word">${item.w}</div>`;
-  pictureGrid.appendChild(t);
-});
-const canvas = document.getElementById('traceCanvas');
-const ctx = canvas.getContext('2d');
-function drawGuide(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.font = '900 160px Quicksand, sans-serif';
-  ctx.fillStyle = '#EBEBEB';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('S', canvas.width/2, canvas.height/2+10);
-}
-drawGuide();
-let drawing=false;
-function pos(e){
-  const r = canvas.getBoundingClientRect();
-  const p = e.touches ? e.touches[0] : e;
-  return {x:(p.clientX-r.left)*(canvas.width/r.width), y:(p.clientY-r.top)*(canvas.height/r.height)};
-}
-canvas.addEventListener('pointerdown', e=>{ drawing=true; const p=pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); });
-canvas.addEventListener('pointermove', e=>{ if(!drawing) return; const p=pos(e); ctx.strokeStyle='#36BBD6'; ctx.lineWidth=6; ctx.lineCap='round'; ctx.lineTo(p.x,p.y); ctx.stroke(); });
-window.addEventListener('pointerup', ()=>drawing=false);
-function clearTrace(){ drawGuide(); }
-
-/* ---------- Step 3: Build and blend ---------- */
-const blendGrid = document.getElementById('blendGrid');
-let blendChecked = false;
-BLEND_WORDS.forEach((item,idx)=>{
-  const t = document.createElement('div');
-  t.className='tile'; t.dataset.idx=idx;
-  t.innerHTML = svg(item.icon) + `<div class="word">${item.w}</div>`;
-  t.onclick = ()=>{ if(blendChecked) return; t.classList.toggle('selected'); };
-  blendGrid.appendChild(t);
-});
-function checkBlend(){
-  if(blendChecked) return;
-  blendChecked = true;
-  let correct = 0;
-  [...blendGrid.children].forEach((t,idx)=>{
-    const isSel = t.classList.contains('selected');
-    const shouldBe = BLEND_WORDS[idx].s;
-    t.classList.remove('selected');
-    t.classList.add(isSel===shouldBe ? 'correct' : 'incorrect');
-    if(isSel===shouldBe) correct++;
-  });
-  const fb = document.getElementById('blendFeedback');
-  fb.className = 'feedback show ' + (correct===BLEND_WORDS.length?'success':'retry');
-  fb.textContent = correct===BLEND_WORDS.length ? 'Well done! Every /s/ word is circled.' : `${correct}/${BLEND_WORDS.length} correct. Give it another try.`;
-}
-function resetBlend(){
-  blendChecked=false;
-  [...blendGrid.children].forEach(t=>t.className='tile');
-  document.getElementById('blendFeedback').className='feedback';
-}
-function showHint(id){ document.getElementById(id).style.display='block'; }
-function checkWrite(){
-  const val = document.getElementById('writeInput').value.trim().toUpperCase();
-  const fb = document.getElementById('writeFeedback');
-  fb.className = 'feedback show ' + (val==='S' ? 'success' : 'retry');
-  fb.textContent = val==='S' ? 'Well done! That is the letter S.' : 'Almost — listen again and try once more.';
-}
-
-/* ---------- Step 4: Game room ---------- */
-const gameGrid = document.getElementById('gameGrid');
-let gameChecked = false;
-GAME_ITEMS.forEach((item,idx)=>{
-  const t = document.createElement('div');
-  t.className='tile'; t.dataset.idx=idx;
-  t.innerHTML = svg(item.icon) + `<div class="word">${item.w}</div>`;
-  t.onclick = ()=>{ if(gameChecked) return; t.classList.toggle('selected'); };
-  gameGrid.appendChild(t);
-});
-function checkGame(){
-  if(gameChecked) return;
-  gameChecked = true;
-  let correct = 0;
-  [...gameGrid.children].forEach((t,idx)=>{
-    const isSel = t.classList.contains('selected');
-    const shouldBe = GAME_ITEMS[idx].s;
-    t.classList.remove('selected');
-    t.classList.add(isSel===shouldBe ? 'correct' : 'incorrect');
-    if(isSel===shouldBe) correct++;
-  });
-  const fb = document.getElementById('gameFeedback');
-  fb.className = 'feedback show ' + (correct===GAME_ITEMS.length?'success':'retry');
-  fb.textContent = correct===GAME_ITEMS.length ? 'Well done! You collected every /s/ object.' : `${correct}/${GAME_ITEMS.length} collected. Try the hunt again!`;
-}
-function resetGame(){
-  gameChecked=false;
-  [...gameGrid.children].forEach(t=>t.className='tile');
-  document.getElementById('gameFeedback').className='feedback';
-}
-
-/* ---------- Step 5: Home checklist ---------- */
-const homeList = document.getElementById('homeChecklist');
-HOME_ITEMS.forEach((label,idx)=>{
-  const li = document.createElement('li');
-  li.innerHTML = `<input type="checkbox" id="home${idx}"><label for="home${idx}">${label}</label>`;
-  li.querySelector('input').addEventListener('change', e=>{
-    li.classList.toggle('checked', e.target.checked);
-  });
-  homeList.appendChild(li);
-});
-
-/* ---------- Step 6: Quiz ---------- */
-const quizList = document.getElementById('quizList');
-const answers = new Array(QUIZ_ITEMS.length).fill(null);
-let quizChecked = false;
-QUIZ_ITEMS.forEach((item,idx)=>{
-  const div = document.createElement('div');
-  div.className='quiz-item';
-  div.innerHTML = `
-    <div class="qtext">${svg(item.icon)} <span>${item.w}</span></div>
-    <div class="choice-row">
-      <button class="choice-btn" data-val="yes">I hear /s/</button>
-      <button class="choice-btn" data-val="no">No /s/</button>
-    </div>`;
-  div.querySelectorAll('.choice-btn').forEach(btn=>{
-    btn.onclick = ()=>{
-      if(quizChecked) return;
-      div.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('picked'));
-      btn.classList.add('picked');
-      answers[idx] = btn.dataset.val==='yes';
-    };
-  });
-  quizList.appendChild(div);
-});
-function checkQuiz(){
-  if(quizChecked) return;
-  if(answers.includes(null)){
-    alert('Answer all five pictures first!');
+function playAudio(src, btn){
+  if(!src){
+    if(btn){
+      btn.style.opacity = .55;
+      setTimeout(()=>{ btn.style.opacity = 1; }, 180);
+    }
     return;
   }
-  quizChecked = true;
-  let score = 0;
-  QUIZ_ITEMS.forEach((item,idx)=>{
-    const correct = answers[idx]===item.s;
-    if(correct) score++;
-    const buttons = quizList.children[idx].querySelectorAll('.choice-btn');
-    buttons.forEach(b=>{
-      const isYes = b.dataset.val==='yes';
-      if(isYes===item.s) b.classList.add('right');
-      else if(b.classList.contains('picked')) b.classList.add('wrong');
-    });
-  });
-  document.getElementById('quizCheckBtn').disabled = true;
-  const scoreBig = document.getElementById('scoreBig');
-  const stars = document.getElementById('starsRow');
-  const msg = document.getElementById('resultMsg');
-  scoreBig.textContent = `${score}/${QUIZ_ITEMS.length}`;
-  const starCount = Math.max(1, Math.round((score/QUIZ_ITEMS.length)*5));
-  stars.textContent = '★'.repeat(starCount) + '☆'.repeat(5-starCount);
-  msg.textContent = score===5 ? 'Amazing! You know the sound /s/ very well.' :
-                     score>=3 ? 'Well done! A little more practice and you have it.' :
-                     'Good try! Let\'s listen to /s/ again together.';
-  document.getElementById('resultBlock').classList.add('show');
-  completed.add(5);
-  document.querySelectorAll('.step-btn')[5].classList.add('done');
-}
-function resetQuiz(){
-  quizChecked = false;
-  answers.fill(null);
-  document.getElementById('quizCheckBtn').disabled = false;
-  document.getElementById('resultBlock').classList.remove('show');
-  quizList.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('picked','right','wrong'));
+  const audio = new Audio(src);
+  audio.play().catch(()=>{});
 }
 
-/* ---------- init ---------- */
-goStep(0);
+document.getElementById('soundDevNote').textContent =
+  SOUND_S_AUDIO ? '' : 'dev: audio file pending (SOUND_S_AUDIO)';
+
+/* ============================================================
+   ICONS — simple, faceless, no animals-as-characters
+   ============================================================ */
+const ICONS = {
+  snake: '<path d="M14 50c0-18 8-30 20-30s16 12 16 22-6 16-14 16-10-6-10-12 4-10 10-10" fill="none" stroke="#8dc63f" stroke-width="7" stroke-linecap="round"/>',
+  sun: '<circle cx="32" cy="32" r="13" fill="#f5c518"/><g stroke="#f5c518" stroke-width="4" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="15"/><line x1="32" y1="49" x2="32" y2="60"/><line x1="4" y1="32" x2="15" y2="32"/><line x1="49" y1="32" x2="60" y2="32"/><line x1="12" y1="12" x2="20" y2="20"/><line x1="44" y1="44" x2="52" y2="52"/><line x1="52" y1="12" x2="44" y2="20"/><line x1="20" y1="44" x2="12" y2="52"/></g>',
+  sit: '<rect x="14" y="40" width="30" height="6" rx="2" fill="#c47a10"/><rect x="16" y="46" width="4" height="12" fill="#c47a10"/><rect x="40" y="46" width="4" height="12" fill="#c47a10"/><rect x="30" y="14" width="4" height="20" fill="#c47a10"/><circle cx="29" cy="32" r="11" fill="#f5a623"/><path d="M20 42c1-6 6-10 9-10s8 4 9 10" fill="#f5a623"/>',
+  cup: '<path d="M16 16h26v20a13 13 0 0 1-26 0z" fill="#f28b82"/><path d="M42 22h6a7 7 0 0 1 0 14h-6" fill="none" stroke="#f28b82" stroke-width="4"/><rect x="14" y="46" width="30" height="4" rx="2" fill="#c0392b"/>'
+};
+function svg(name){ return '<svg viewBox="0 0 64 64" aria-hidden="true">' + ICONS[name] + '</svg>'; }
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+const CARDS = [
+  {id:'snake', word:'SNAKE', icon:'snake', hasS:true,  audio:AUDIO_SNAKE},
+  {id:'sun',   word:'SUN',   icon:'sun',   hasS:true,  audio:AUDIO_SUN},
+  {id:'sit',   word:'SIT',   icon:'sit',   hasS:true,  audio:AUDIO_SIT},
+  {id:'cup',   word:'CUP',   icon:'cup',   hasS:false, audio:AUDIO_CUP},
+];
+
+const grid = document.getElementById('cardGrid');
+CARDS.forEach(function(card){
+  const el = document.createElement('div');
+  el.className = 'word-card';
+  el.dataset.id = card.id;
+  el.innerHTML =
+    '<button class="card-audio" aria-label="Listen to ' + card.word + '">🔊</button>' +
+    svg(card.icon) +
+    '<div class="word">' + card.word + '</div>';
+  el.querySelector('.card-audio').addEventListener('click', function(e){
+    e.stopPropagation();
+    playAudio(card.audio, e.currentTarget);
+  });
+  el.addEventListener('click', function(){
+    if(state.locked) return;
+    el.classList.toggle('selected');
+  });
+  grid.appendChild(el);
+});
+
+/* ============================================================
+   STATE + LOGIC
+   ============================================================ */
+const state = { attempts: 0, locked: false, done: false };
+
+document.getElementById('introListenBtn').addEventListener('click', function(e){ playAudio(SOUND_S_AUDIO, e.currentTarget); });
+document.getElementById('soundListenBtn').addEventListener('click', function(e){ playAudio(SOUND_S_AUDIO, e.currentTarget); });
+document.getElementById('playAgainBtn').addEventListener('click', function(e){ playAudio(SOUND_S_AUDIO, e.currentTarget); });
+document.getElementById('instructionAudioBtn').addEventListener('click', function(e){ playAudio(AUDIO_INSTRUCTION, e.currentTarget); });
+
+const checkBtn = document.getElementById('checkBtn');
+const feedbackRetry = document.getElementById('feedbackRetry');
+const feedbackHint = document.getElementById('feedbackHint');
+const retryRow = document.getElementById('retryRow');
+const successBox = document.getElementById('successBox');
+
+checkBtn.addEventListener('click', function(){
+  if(state.locked || state.done) return;
+
+  const selectedEls = grid.querySelectorAll('.word-card.selected');
+  const selected = new Set(Array.prototype.map.call(selectedEls, function(el){ return el.dataset.id; }));
+  const isCorrect = CARDS.every(function(c){ return selected.has(c.id) === c.hasS; });
+
+  if(isCorrect){
+    state.done = true;
+    state.locked = true;
+    CARDS.forEach(function(c){
+      const el = grid.querySelector('[data-id="' + c.id + '"]');
+      el.classList.remove('selected');
+      if(c.hasS) el.classList.add('correct');
+    });
+    checkBtn.style.display = 'none';
+    retryRow.style.display = 'none';
+    feedbackRetry.classList.remove('show');
+    feedbackHint.classList.remove('show');
+    playAudio(SOUND_S_AUDIO);
+    successBox.classList.add('show');
+    activityCompleted();
+    return;
+  }
+
+  state.attempts += 1;
+  retryRow.style.display = 'flex';
+
+  if(state.attempts === 1){
+    feedbackRetry.classList.add('show');
+    feedbackHint.classList.remove('show');
+  } else {
+    feedbackHint.classList.add('show');
+    feedbackRetry.classList.remove('show');
+    const soundBtn = document.getElementById('soundListenBtn');
+    soundBtn.classList.add('pulse');
+    setTimeout(function(){ soundBtn.classList.remove('pulse'); }, 3300);
+  }
+});
+
+document.getElementById('listenAgainBtn').addEventListener('click', function(e){ playAudio(SOUND_S_AUDIO, e.currentTarget); });
+document.getElementById('tryAgainBtn').addEventListener('click', function(){
+  feedbackRetry.classList.remove('show');
+  feedbackHint.classList.remove('show');
+  retryRow.style.display = 'none';
+});
+
+/* ============================================================
+   COMPLETION HOOK — Moodle can bind to this
+   ============================================================ */
+function activityCompleted() {
+    console.log("W1L1 Discover completed");
+}
+
+document.getElementById('doneBtn').addEventListener('click', function(){
+  activityCompleted();
+});
 </script>
 </body>
 </html>
