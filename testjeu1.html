@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pazapa &ndash; Les portes du temple</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Arial Rounded MT Bold",Arial,sans-serif;background:#a9dce8;color:#1d2a2a;display:flex;flex-direction:column;align-items:center;padding:10px;-webkit-tap-highlight-color:transparent}
+#app{width:100%;max-width:900px}
+h1{text-align:center;font-size:1.5rem;margin:6px 0 4px}
+.consignes{background:#fffdf7;border:3px solid #f5c518;border-radius:14px;padding:12px 16px;margin:10px 0;line-height:1.6}
+.consignes h2{text-align:center;margin-bottom:4px}
+.menu{background:#fffdf7;border-radius:14px;padding:14px;margin:10px 0;text-align:center}
+.menu h3{margin:6px 0 8px}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:8px}
+.btn{min-height:44px;min-width:44px;padding:8px 18px;border-radius:12px;border:3px solid #1d2a2a;background:#fff;font:inherit;font-size:1.05rem;cursor:pointer}
+.btn.sel{background:#8dc63f;border-color:#4d7a14}
+.btn.go{background:#f5c518;font-weight:bold}
+.btn:active{transform:scale(.96)}
+.char{font-size:2rem}
+#game{display:none}
+#stage{position:relative;width:100%;border-radius:10px 10px 0 0;overflow:hidden;background:#222}
+.lane{position:relative;height:clamp(92px,19vh,128px);border-bottom:14px solid #b9ae78;cursor:pointer;overflow:hidden}
+.lane:nth-child(1){background:linear-gradient(#6d2338,#c4856a)}
+.lane:nth-child(2){background:linear-gradient(#c8873c,#e8cf86)}
+.lane:nth-child(3){background:linear-gradient(#1f4e4d,#3c8c62)}
+.lane.sel{outline:4px solid #f5c518;outline-offset:-4px}
+.door{position:absolute;left:100%;bottom:0;width:clamp(70px,15vw,108px);height:92%;background:linear-gradient(90deg,#7a5634,#92683f 60%,#7a5634);border-left:14px solid #c9bd8a;border-right:14px solid #c9bd8a;border-top:12px solid #d8cd9c;border-bottom:0;border-radius:4px 4px 0 0;display:flex;align-items:center;justify-content:center;font-size:clamp(1.8rem,7vw,3rem);font-weight:bold;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35);will-change:left}
+.door.open{background:#1a1226;color:#fff}
+.door.bad{animation:shake .4s}
+@keyframes shake{0%,100%{margin-left:0}25%{margin-left:-8px}75%{margin-left:8px}}
+.gem{width:46%;aspect-ratio:1;background:linear-gradient(135deg,#ff8a9a,#c8102e 60%,#7a0018);clip-path:polygon(50% 0,100% 35%,80% 100%,20% 100%,0 35%);animation:pop .5s ease-out}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+#hero{position:absolute;left:3%;top:0;font-size:clamp(2.4rem,8vw,3.6rem);line-height:1;transition:top .25s ease-in-out;z-index:3;pointer-events:none;animation:run .3s infinite alternate}
+@keyframes run{from{transform:translateY(0)}to{transform:translateY(-6px)}}
+#banner{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-size:clamp(1.6rem,7vw,3.4rem);font-weight:bold;color:#000;text-shadow:0 0 6px #fff,0 0 12px #fff;z-index:5;pointer-events:none;transition:opacity .4s;opacity:0}
+#hud{background:#1b2d27;color:#fff;border-radius:0 0 10px 10px;padding:8px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#hud .title{flex:1;font-size:clamp(1.1rem,4vw,1.6rem);min-width:160px}
+#hud .info{font-size:1rem}
+.chrono{background:#fff;color:#1d2a2a;border-radius:10px;padding:2px 10px}
+.ib{min-height:44px;min-width:44px;border-radius:50%;border:3px solid #fff;background:#6cc02d;font-size:1.3rem;cursor:pointer;color:#fff}
+.ib.off{background:#888}
+.ib.stop{background:#c0392b}
+#end{display:none;background:#fffdf7;border:3px solid #f5c518;border-radius:14px;padding:18px;text-align:center;margin-top:12px}
+#end .big{font-size:2.2rem;margin:6px 0}
+.hint{text-align:center;font-size:.9rem;margin-top:6px}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>&#128142; Les portes du temple</h1>
+
+  <div id="menu">
+    <div class="consignes">
+      <h2>Consignes</h2>
+      <div>1. Choisis un niveau et ton personnage.</div>
+      <div>2. &Eacute;coute bien la consigne, ouvre les bonnes portes et r&eacute;colte un maximum de rubis.</div>
+    </div>
+    <div class="menu">
+      <h3>Niveau</h3>
+      <div class="row" id="levels"></div>
+      <h3>Personnage</h3>
+      <div class="row" id="chars"></div>
+      <div class="row"><button class="btn go" id="start">&#9654; Jouer</button></div>
+    </div>
+  </div>
+
+  <div id="game">
+    <div id="stage">
+      <div id="banner"></div>
+      <div id="hero"></div>
+      <div class="lane" data-i="0"></div>
+      <div class="lane" data-i="1"></div>
+      <div class="lane" data-i="2"></div>
+    </div>
+    <div id="hud">
+      <div class="title" id="instr"></div>
+      <span class="info chrono" id="chrono">00:00</span>
+      <span class="info" id="score">&#128142; 0</span>
+      <span class="info" id="errs">&#10006; 0</span>
+      <button class="ib" id="rep" title="R&eacute;&eacute;couter la consigne" aria-label="R&eacute;&eacute;couter la consigne">&#128266;</button>
+      <button class="ib" id="snd" title="Sons" aria-label="Activer ou couper les sons">&#9835;</button>
+      <button class="ib stop" id="fin" title="Terminer" aria-label="Terminer la partie">&#127937;</button>
+      <button class="ib" id="home" title="Menu" aria-label="Retour au menu">&#127968;</button>
+    </div>
+    <div class="hint">Les portes d&eacute;filent sans s&rsquo;arr&ecirc;ter. Touche une porte (ou &#8593; &#8595; puis Entr&eacute;e, ou touches 1, 2, 3). &#127937; pour terminer.</div>
+  </div>
+
+  <div id="end">
+    <div class="big" id="stars"></div>
+    <div id="res"></div>
+    <div class="row" style="margin-top:12px"><button class="btn go" id="again">&#8635; Recommencer</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var WAVES_PER_RULE = 4;
+  var TOTAL_WAVES = 20;
+  var LEVELS = [
+    {id:1, name:"Niveau 1", kinds:["minuscules","majuscules"], size:"letter", speed:.16},
+    {id:2, name:"Niveau 2", kinds:["minuscules","majuscules"], size:"word", speed:.2},
+    {id:3, name:"Niveau 3", kinds:["voyelles","consonnes","minuscules","majuscules"], size:"letter", speed:.24}
+  ];
+  var CHARS = ["\uD83E\uDD8A","\uD83D\uDC3C","\uD83D\uDC38","\uD83E\uDD81"];
+  var LETTERS = "abdefghijlmnoqrstuvz".split("");
+  var WORDS = ["soleil","jardin","rubis","temple","porte","lampe","tigre","sable","nuage","pierre","foret","riviere"];
+  var VOWELS = "aeiou";
+  var INSTR = {
+    minuscules:"Vise les minuscules !",
+    majuscules:"Vise les majuscules !",
+    voyelles:"Vise les voyelles !",
+    consonnes:"Vise les consonnes !"
+  };
+
+  var $ = function(id){return document.getElementById(id);};
+  var lanes = document.querySelectorAll(".lane");
+  var st = {level:LEVELS[0], hero:CHARS[0], rubies:0, errors:0, good:0, possible:0, sel:1, sound:true, kind:"", running:false, doors:[], waves:0, pause:0, last:0, t0:0, raf:0, lastKind:""};
+  var audioCtx = null;
+
+  function rnd(n){return Math.floor(Math.random()*n);}
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=rnd(i+1),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function pick(a){return a[rnd(a.length)];}
+
+  function buildMenu(){
+    var l=$("levels");
+    LEVELS.forEach(function(lv,i){
+      var b=document.createElement("button");
+      b.className="btn"+(i===0?" sel":"");b.textContent=lv.name;
+      b.onclick=function(){st.level=lv;[].forEach.call(l.children,function(x){x.classList.remove("sel");});b.classList.add("sel");};
+      l.appendChild(b);
+    });
+    var c=$("chars");
+    CHARS.forEach(function(ch,i){
+      var b=document.createElement("button");
+      b.className="btn char"+(i===0?" sel":"");b.textContent=ch;
+      b.setAttribute("aria-label","Personnage "+(i+1));
+      b.onclick=function(){st.hero=ch;[].forEach.call(c.children,function(x){x.classList.remove("sel");});b.classList.add("sel");};
+      c.appendChild(b);
+    });
+  }
+
+  function beep(freq,dur,type){
+    if(!st.sound)return;
+    try{
+      audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+      var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+      o.type=type||"sine";o.frequency.value=freq;g.gain.value=.15;
+      o.connect(g);g.connect(audioCtx.destination);o.start();
+      g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
+      o.stop(audioCtx.currentTime+dur);
+    }catch(e){}
+  }
+  function speak(t){
+    if(!st.sound||!window.speechSynthesis)return;
+    try{
+      window.speechSynthesis.cancel();
+      var u=new SpeechSynthesisUtterance(t);u.lang="fr-FR";u.rate=.95;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  function stopSpeech(){if(window.speechSynthesis){try{window.speechSynthesis.cancel();}catch(e){}}}
+
+  function isTarget(kind,label){
+    var ch=label.charAt(0);
+    if(kind==="minuscules")return label===label.toLowerCase();
+    if(kind==="majuscules")return label===label.toUpperCase();
+    if(kind==="voyelles")return VOWELS.indexOf(ch.toLowerCase())>=0;
+    return VOWELS.indexOf(ch.toLowerCase())<0;
+  }
+  function makeItem(kind,wantTarget,used){
+    for(var tries=0;tries<300;tries++){
+      var base=st.level.size==="word"?pick(WORDS):pick(LETTERS);
+      var label=Math.random()<.5?base.toUpperCase():base;
+      if(used.indexOf(label.toLowerCase())>=0)continue;
+      if(isTarget(kind,label)===wantTarget){used.push(label.toLowerCase());return label;}
+    }
+    return "a";
+  }
+
+  function setRule(){
+    var k;
+    do{k=pick(st.level.kinds);}while(st.level.kinds.length>1&&k===st.lastKind);
+    st.kind=k;st.lastKind=k;
+    $("instr").textContent=INSTR[k];
+    showBanner(INSTR[k]);
+    speak(INSTR[k]);
+  }
+  function showBanner(t){
+    var b=$("banner");b.textContent=t;b.style.opacity=1;
+    setTimeout(function(){b.style.opacity=0;},1500);
+  }
+
+  function spawnWave(){
+    var nb=1+rnd(2);
+    var flags=shuffle([true,nb>=2,false,false].slice(0,3).map(function(v,i){return i<nb;}));
+    var used=[];
+    var stageW=$("stage").offsetWidth;
+    flags.forEach(function(f,i){
+      if(f)st.possible++;
+      var el=document.createElement("div");el.className="door";
+      var label=makeItem(st.kind,f,used);
+      el.textContent=label;
+      el.style.left=stageW+"px";
+      lanes[i].appendChild(el);
+      st.doors.push({el:el,x:stageW,lane:i,ok:f,opened:false});
+    });
+    st.waves++;
+  }
+
+  function moveHero(i){
+    var h=$("hero"),ln=lanes[i];
+    st.sel=i;
+    lanes.forEach(function(l,k){l.classList.toggle("sel",k===i);});
+    h.style.top=(ln.offsetTop+ln.offsetHeight-14-h.offsetHeight+4)+"px";
+  }
+
+  function nearestDoor(i){
+    var best=null;
+    st.doors.forEach(function(d){
+      if(d.lane===i&&!d.opened&&d.x>0&&d.x<$("stage").offsetWidth){
+        if(!best||d.x<best.x)best=d;
+      }
+    });
+    return best;
+  }
+  function openDoor(i){
+    if(!st.running)return;
+    moveHero(i);
+    var d=nearestDoor(i);
+    if(!d)return;
+    d.opened=true;
+    d.el.classList.add("open");d.el.textContent="";
+    if(d.ok){
+      var g=document.createElement("div");g.className="gem";d.el.appendChild(g);
+      st.rubies++;st.good++;$("score").textContent="\uD83D\uDC8E "+st.rubies;
+      beep(660,.15);setTimeout(function(){beep(880,.2);},120);
+    }else{
+      d.el.textContent="\u2716";d.el.classList.add("bad");
+      st.errors++;$("errs").textContent="\u2716 "+st.errors;
+      beep(180,.35,"square");
+    }
+  }
+
+  function fmt(ms){
+    var s=Math.floor(ms/1000),m=Math.floor(s/60);s=s%60;
+    return (m<10?"0":"")+m+":"+(s<10?"0":"")+s;
+  }
+
+  function loop(ts){
+    if(!st.running)return;
+    var dt=Math.min(50,ts-st.last);st.last=ts;
+    var stageW=$("stage").offsetWidth;
+    var speed=stageW*st.level.speed*(1+Math.min(.8,st.waves*.02))/1000;
+    var alive=0;
+    st.doors=st.doors.filter(function(d){
+      d.x-=speed*dt;
+      d.el.style.left=d.x+"px";
+      if(d.x<-d.el.offsetWidth-10){d.el.parentNode.removeChild(d.el);return false;}
+      alive++;return true;
+    });
+    $("chrono").textContent=fmt(ts-st.t0);
+    if(st.waves>=TOTAL_WAVES){
+      if(alive===0){finish();return;}
+      st.raf=requestAnimationFrame(loop);return;
+    }
+    if(st.pause>0){st.pause-=dt;}
+    else{
+      var maxX=-1;st.doors.forEach(function(d){if(d.x>maxX)maxX=d.x;});
+      if(st.waves>0&&st.waves%WAVES_PER_RULE===0&&alive===0&&!st.ruleDone){
+        setRule();st.ruleDone=true;st.pause=1600;
+      }else if(maxX<stageW*.42||alive===0){
+        if(st.waves%WAVES_PER_RULE===0&&st.waves>0&&!st.ruleDone){
+          /* attend que l'ecran soit vide avant de changer de consigne */
+        }else{
+          st.ruleDone=false;spawnWave();
+        }
+      }
+    }
+    st.raf=requestAnimationFrame(loop);
+  }
+
+  function start(){
+    stopSpeech();
+    cancelAnimationFrame(st.raf);
+    st.doors=[];lanes.forEach(function(l){l.innerHTML="";});
+    st.rubies=0;st.errors=0;st.good=0;st.possible=0;st.waves=0;st.pause=0;st.ruleDone=false;st.lastKind="";
+    $("menu").style.display="none";$("end").style.display="none";$("game").style.display="block";
+    $("hero").textContent=st.hero;
+    $("score").textContent="\uD83D\uDC8E 0";$("errs").textContent="\u2716 0";$("chrono").textContent="00:00";
+    setRule();
+    moveHero(1);
+    st.pause=1700;
+    st.running=true;
+    st.last=performance.now();st.t0=st.last;
+    st.raf=requestAnimationFrame(loop);
+  }
+  function finish(){
+    st.running=false;cancelAnimationFrame(st.raf);stopSpeech();
+    var t=fmt(performance.now()-st.t0);
+    $("game").style.display="none";$("end").style.display="block";
+    var p=st.possible?st.rubies/st.possible:0;
+    $("stars").textContent=p>=.85?"\u2B50\u2B50\u2B50":p>=.55?"\u2B50\u2B50":"\u2B50";
+    $("res").textContent="Tu as r\u00e9colt\u00e9 "+st.rubies+" rubis sur "+st.possible+" possibles en "+t+" (erreurs : "+st.errors+").";
+    beep(523,.2);setTimeout(function(){beep(659,.2);},180);setTimeout(function(){beep(784,.3);},360);
+  }
+  function toMenu(){
+    st.running=false;cancelAnimationFrame(st.raf);stopSpeech();
+    $("game").style.display="none";$("end").style.display="none";$("menu").style.display="block";
+  }
+
+  lanes.forEach(function(ln,i){ln.addEventListener("click",function(){openDoor(i);});});
+  $("start").onclick=start;
+  $("again").onclick=start;
+  $("home").onclick=toMenu;
+  $("fin").onclick=finish;
+  $("rep").onclick=function(){speak(INSTR[st.kind]);};
+  $("snd").onclick=function(){
+    st.sound=!st.sound;$("snd").classList.toggle("off",!st.sound);
+    if(!st.sound)stopSpeech();
+  };
+  document.addEventListener("keydown",function(e){
+    if($("game").style.display!=="block")return;
+    if(e.key==="ArrowUp"){moveHero(Math.max(0,st.sel-1));e.preventDefault();}
+    else if(e.key==="ArrowDown"){moveHero(Math.min(2,st.sel+1));e.preventDefault();}
+    else if(e.key==="Enter"||e.key===" "){openDoor(st.sel);e.preventDefault();}
+    else if(e.key>="1"&&e.key<="3"){openDoor(parseInt(e.key,10)-1);}
+  });
+  window.addEventListener("resize",function(){if(st.running)moveHero(st.sel);});
+  buildMenu();
+})();
+</script>
+</body>
+</html>
