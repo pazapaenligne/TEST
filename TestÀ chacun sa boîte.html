@@ -30,12 +30,13 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .homeTitle h1{margin:0;font-size:clamp(30px,calc(36px*var(--u)),36px);line-height:1.1}
 .homeTitle p{margin:6px 0 0;font-size:clamp(20px,calc(24px*var(--u)),24px);line-height:1.2}
 .cards{flex:1;min-height:0;display:flex;gap:calc(14px*var(--u));flex-wrap:nowrap;justify-content:center;align-items:center;padding:2px 0}
-.card{flex:1 1 0;min-width:0;max-width:320px;min-height:0;background:#fff;border:3px solid var(--c);border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(40px*var(--u)) calc(14px*var(--u));gap:calc(30px*var(--u))}
+.card{flex:1 1 0;min-width:0;max-width:320px;min-height:0;background:#fff;border:3px solid var(--c);border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(28px*var(--u)) calc(12px*var(--u));gap:calc(18px*var(--u))}
 .card h2{margin:0;font-weight:bold;font-size:clamp(24px,calc(28px*var(--u)),28px)}
-.card .illu{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:calc(130px*var(--u));max-width:100%;overflow:hidden;flex:0 0 auto}
-.card .illu svg{width:calc(78px*var(--u));height:calc(78px*var(--u))}
+.card .illu{display:flex;align-items:flex-end;justify-content:center;gap:calc(6px*var(--u));height:calc(120px*var(--u));width:100%;flex:0 0 auto}
+.card .illu svg{width:min(calc(92px*var(--u)),30%);height:auto;aspect-ratio:1}
+.card .illu span{flex:0 0 auto}
 .card .illu span svg{width:100%;height:100%}
-.cups{font-size:22px;letter-spacing:4px;min-height:28px}
+.cups{font-size:clamp(22px,calc(28px*var(--u)),28px);letter-spacing:4px;min-height:30px;line-height:1.1}
 .cups .off{opacity:.2;filter:grayscale(1)}
 
 /* Boutons */
@@ -60,9 +61,9 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .lvl.cur{background:var(--blue-l);box-shadow:0 0 0 2px var(--blue)}
 .lvl .cup{position:absolute;right:-6px;top:-12px;font-size:18px}
 .remain{font-size:18px}
-.dots{display:flex;gap:5px}
-.dots i{width:11px;height:11px;border-radius:50%;background:var(--grey-l);display:block}
-.dots i.on{background:var(--blue)}
+.dots{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;max-width:40%}
+.dots i{width:13px;height:13px;border-radius:50%;background:var(--grey-l);display:block}
+.dots i.on{background:var(--green);box-shadow:0 0 0 2px var(--dark) inset}
 .msg{display:flex;align-items:center;gap:8px;background:var(--yellow-l);border:2px solid var(--yellow);border-radius:22px;padding:3px 12px;min-height:calc(58px*var(--u));flex:0 0 auto}
 .hv{display:inline-flex;align-items:center;gap:8px;vertical-align:middle;margin-right:10px}
 .hvi{display:inline-block}
@@ -86,8 +87,9 @@ button{font-family:inherit;color:inherit;cursor:pointer}
 .tok svg{width:100%;height:100%}
 .tray{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:2px;background:#fff;border:2px solid rgba(54,187,214,.35);border-radius:22px;padding:calc(6px*var(--u));flex:0 0 auto}
 .cell{width:calc(var(--cs)*1px*var(--u));height:calc(var(--cs)*1px*var(--u));display:flex;align-items:center;justify-content:center}
-.item{width:calc(var(--s)*1px*var(--u));height:calc(var(--s)*1px*var(--u));touch-action:none;cursor:grab;border-radius:18px;transition:transform .25s,box-shadow .15s;user-select:none;-webkit-user-select:none;outline:none}
+.item{position:relative;width:calc(var(--s)*1px*var(--u));height:calc(var(--s)*1px*var(--u));touch-action:none;cursor:grab;border-radius:18px;transition:transform .25s,box-shadow .15s;user-select:none;-webkit-user-select:none;outline:none}
 .item svg{width:100%;height:100%;pointer-events:none;display:block}
+.item::after{content:"";position:absolute;left:50%;top:50%;width:max(100%,48px);height:max(100%,48px);transform:translate(-50%,-50%)}
 .item.sel{box-shadow:0 0 0 4px var(--blue);background:rgba(54,187,214,.12)}
 .item.drag{transition:none;z-index:50;position:relative;cursor:grabbing;filter:drop-shadow(0 6px 5px rgba(46,46,45,.22))}
 .item.hint{animation:pulse 1s ease-in-out infinite}
@@ -270,6 +272,21 @@ function playAfter(key,gap){
   if(a&&!a.ended&&!a.paused){var done=false;var once=function(){if(done)return;done=true;go();};a.addEventListener('ended',once);setTimeout(once,2000);}
   else go();
 }
+// Attend la fin réelle du son en cours (événement 'ended'), puis une courte pause, puis exécute fn.
+// Sécurité : si le son ne se termine pas (fichier illisible, lecture bloquée), on continue après maxWait ms.
+// Annulé par stopAudio() (retour à l'accueil, changement de niveau ou d'activité).
+function afterCurrent(fn,gap,maxWait){
+  var t=++tok,a=cur,done=false;
+  function go(){
+    if(done||t!==tok)return;done=true;
+    if(tmr)clearTimeout(tmr);
+    tmr=setTimeout(function(){tmr=null;if(t===tok)fn();},gap);
+  }
+  if(a&&!a.ended){
+    ['ended','error','abort'].forEach(function(ev){a.addEventListener(ev,go);});
+    setTimeout(go,maxWait);
+  }else go();
+}
 function play(key){
   var src=AUDIO[key];
   if(!src)return;
@@ -281,7 +298,7 @@ function play(key){
     var a=new Audio(src);cur=a;
     a.onended=function(){if(cur===a)cur=null;};
     a.onerror=function(){if(cur===a)cur=null;};
-    var p=a.play();if(p&&p.catch)p.catch(function(){if(cur===a)cur=null;});
+    var p=a.play();if(p&&p.catch)p.catch(function(){if(cur===a)cur=null;try{a.dispatchEvent(new Event('error'));}catch(e){}});
   }catch(e){cur=null;}
 }
 
@@ -304,7 +321,7 @@ function cupsHTML(cat){
 /* ============================================================
    ÉTAT
    ============================================================ */
-var st={cat:null,lvl:0,items:[],selected:null,errors:0,locked:false,firstOk:true,wi:0};
+var st={cat:null,lvl:0,items:[],total:0,selected:null,errors:0,helpStage:0,locked:false,firstOk:true,wi:0};
 
 function scale(){
   var W=window.innerWidth||900,H=window.innerHeight;
@@ -314,7 +331,7 @@ function scale(){
   u=Math.max(0.42,u);
   document.documentElement.style.setProperty('--u',u.toFixed(3));
 }
-window.addEventListener('resize',scale);scale();
+window.addEventListener('resize',scale);window.addEventListener('orientationchange',function(){setTimeout(scale,150);});scale();
 
 function show(id){
   $('#home').classList.toggle('hidden',id!=='home');
@@ -325,11 +342,11 @@ function show(id){
    ACCUEIL
    ============================================================ */
 function illuFor(cat){
-  if(cat==='couleurs')return shapeSVG('cercle','#E6352B')+shapeSVG('cercle','#36BBD6')+shapeSVG('cercle','#FCC104');
-  if(cat==='formes')return shapeSVG('cercle','#fff')+shapeSVG('carre','#fff')+shapeSVG('triangle','#fff');
-  return '<span style="width:calc(44px*var(--u));height:calc(44px*var(--u));display:block">'+shapeSVG('cercle','#C9D646')+'</span>'+
-         '<span style="width:calc(72px*var(--u));height:calc(72px*var(--u));display:block">'+shapeSVG('cercle','#C9D646')+'</span>'+
-         '<span style="width:calc(104px*var(--u));height:calc(104px*var(--u));display:block">'+shapeSVG('cercle','#C9D646')+'</span>';
+  if(cat==='couleurs')return shapeSVG('cercle','#E6352B')+shapeSVG('carre','#36BBD6')+shapeSVG('triangle','#FCC104');
+  if(cat==='formes')return shapeSVG('cercle','#E4F7FB')+shapeSVG('carre','#E4F7FB')+shapeSVG('triangle','#E4F7FB');
+  return '<span style="width:calc(36px*var(--u));height:calc(36px*var(--u));display:block">'+shapeSVG('cercle','#C9D646')+'</span>'+
+         '<span style="width:calc(62px*var(--u));height:calc(62px*var(--u));display:block">'+shapeSVG('cercle','#C9D646')+'</span>'+
+         '<span style="width:calc(92px*var(--u));height:calc(92px*var(--u));display:block">'+shapeSVG('cercle','#C9D646')+'</span>';
 }
 function renderHome(){
   stopAudio();
@@ -338,7 +355,7 @@ function renderHome(){
   CATKEYS.forEach(function(k){
     var c=CATS[k];
     var card=el('div','card');card.style.setProperty('--c',c.c);card.style.setProperty('--tint',c.tint);
-    card.innerHTML='<h2>'+c.title+'</h2>';
+    card.innerHTML='<h2>'+c.title+'</h2><div class="illu" aria-hidden="true">'+illuFor(k)+'</div><div class="cups" role="img" aria-label="Coupes obtenues">'+cupsHTML(k)+'</div>';
     var b=el('button','btn');b.textContent='Jouer';b.setAttribute('aria-label','Jouer : '+c.title);
     b.addEventListener('click',function(){startLevel(k,0);});
     card.appendChild(b);
@@ -366,9 +383,11 @@ function buildItems(cat,lvl){
 }
 
 function startLevel(cat,lvl){
+  abortDrag();
   stopAudio();
   var ov=$('#overlay');if(ov&&ov.parentNode)ov.parentNode.removeChild(ov);
-  st={cat:cat,lvl:lvl,items:buildItems(cat,lvl),selected:null,errors:0,locked:false,firstOk:true,wi:0};
+  var its=buildItems(cat,lvl);
+  st={cat:cat,lvl:lvl,items:its,total:its.length,selected:null,errors:0,helpStage:0,locked:false,firstOk:true,wi:0};
   show('game');
   renderGame();
   setMsg(CATS[cat].text);
@@ -428,11 +447,10 @@ function renderGame(){
 }
 
 function updateStatus(){
-  var n=st.items.length;
-  $('#remain').textContent=n===0?'Tout est rangé !':'Il reste '+n+' figure'+(n>1?'s':'');
+  var tot=st.total,done=tot-st.items.length;
+  $('#remain').textContent=done+' objet'+(done>1?'s':'')+' rangé'+(done>1?'s':'')+' sur '+tot;
   var dots=$('#dots');dots.innerHTML='';
-  var lit=st.errors===0?0:((st.errors-1)%6)+1;
-  for(var i=0;i<6;i++){var d=document.createElement('i');if(i<lit)d.className='on';dots.appendChild(d);}
+  for(var i=0;i<tot;i++){var d=document.createElement('i');if(i<done)d.className='on';dots.appendChild(d);}
 }
 function setMsg(t){$('#msgText').textContent=t;}
 
@@ -467,11 +485,23 @@ function onBoxClick(key){
   if(it)attempt(it,key);
 }
 
+var curAbort=null;   // annulation propre du glisser en cours (un seul à la fois)
+function abortDrag(){if(curAbort){var f=curAbort;curAbort=null;f();}}
 function bindItem(d,it){
-  var sx=0,sy=0,drag=false,pid=null,active=false;
+  var sx=0,sy=0,drag=false,pid=null,active=false,wasSel=false;
+  // Nettoie tout l'état temporaire du geste : capture, classes, déplacement, surbrillance des boîtes
+  function reset(){
+    var p=pid;active=false;drag=false;pid=null;
+    if(curAbort===abortMe)curAbort=null;
+    if(p!==null){try{d.releasePointerCapture(p);}catch(x){}}
+    d.classList.remove('drag');d.style.transform='';
+    [].forEach.call(document.querySelectorAll('.box.over'),function(b){b.classList.remove('over');});
+  }
+  function abortMe(){var was=drag;reset();if(was&&!wasSel)deselect();}
   d.addEventListener('pointerdown',function(e){
     if(st.locked||(e.button!==undefined&&e.button>0))return;
-    active=true;pid=e.pointerId;sx=e.clientX;sy=e.clientY;drag=false;
+    abortDrag();   // un geste précédent resté en suspens est annulé proprement (jamais de blocage)
+    active=true;pid=e.pointerId;sx=e.clientX;sy=e.clientY;drag=false;wasSel=(st.selected===it.id);curAbort=abortMe;
     try{d.setPointerCapture(e.pointerId);}catch(x){}
     if(e.preventDefault)e.preventDefault();
   });
@@ -487,22 +517,22 @@ function bindItem(d,it){
       [].forEach.call(document.querySelectorAll('.box'),function(b){b.classList.toggle('over',b===t);});
     }
   });
+  // Fin du geste (relâché, interrompu ou capture perdue) : traité une seule fois (active/pid remis à zéro)
   function finish(e,cancelled){
     if(!active||e.pointerId!==pid)return;
-    active=false;pid=null;
-    try{d.releasePointerCapture(e.pointerId);}catch(x){}
-    [].forEach.call(document.querySelectorAll('.box'),function(b){b.classList.remove('over');});
-    if(drag){
-      drag=false;
-      var box=cancelled?null:hitBox(d,e.clientX,e.clientY);
-      d.classList.remove('drag');d.style.transform='';
-      if(box)attempt(it,box.dataset.key);
+    var wasDrag=drag;
+    var box=(wasDrag&&!cancelled)?hitBox(d,e.clientX,e.clientY):null;
+    reset();
+    if(wasDrag){
+      if(box)attempt(it,box.dataset.key);          // boîte détectée : vérification (bonne/mauvaise réponse)
+      else if(!wasSel)deselect();                  // annulé ou relâché hors d'une boîte : pas d'erreur, plus de sélection fantôme
     }else if(!cancelled){
-      toggleSelect(it.id);
+      toggleSelect(it.id);                         // simple clic/toucher : sélection
     }
   }
   d.addEventListener('pointerup',function(e){finish(e,false);});
   d.addEventListener('pointercancel',function(e){finish(e,true);});
+  d.addEventListener('lostpointercapture',function(e){finish(e,true);});
   d.addEventListener('keydown',function(e){
     if(st.locked)return;
     if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleSelect(it.id);}
@@ -519,12 +549,13 @@ function hitBox(d,x,y){
    VÉRIFICATION
    ============================================================ */
 function attempt(it,boxKey){
-  if(st.locked)return;
+  if(st.locked||st.items.indexOf(it)<0)return;
   clearHints();
   var boxEl_=document.querySelector('.box[data-key="'+boxKey+'"]');
   if(it.key===boxKey){
     // bonne réponse
     deselect();
+    st.helpStage=0;
     var idx=st.items.indexOf(it);if(idx>=0)st.items.splice(idx,1);
     var cell=document.querySelector('.cell[data-cell="'+it.id+'"]');
     if(cell)cell.innerHTML='';
@@ -536,7 +567,7 @@ function attempt(it,boxKey){
     updateStatus();
     var nameKey=(st.cat==='couleurs')?it.key:(st.cat==='formes')?it.shape:'taille_'+it.key;   // nom de la couleur / de la forme / de la taille réelle de l'objet
     play(nameKey);
-    if(st.items.length===0){st.locked=true;setTimeout(showWin,650);}
+    if(st.items.length===0){st.locked=true;afterCurrent(showWin,500,4500);}   // le dernier nom est dit en entier, puis courte pause, puis félicitations
   }else{
     // mauvaise réponse : la figure revient, message bienveillant
     deselect();
@@ -559,20 +590,26 @@ function helpText(it){
   if(cat==='formes'){var n=SHN[it.key];return 'Pazounet : cette figure est un '+n+'. Elle va dans la boîte du '+n+' !';}
   var z=SZF[it.key];return 'Pazounet : cette figure est '+z[0]+'. Elle va dans la boîte des '+z[1]+' !';
 }
+var CRIT={couleurs:'la couleur',formes:'la forme',tailles:'la taille'};
 function showHelp(auto){
   if(st.locked||st.items.length===0)return;
   var it=st.selected!==null?findItem(st.selected):null;
   if(!it)it=st.items[0];
   clearHints();
+  // Aide progressive : 1) rappel du critère (sans montrer la boîte) ; 2) objet + boîte mises en évidence
+  st.helpStage=Math.min(2,st.helpStage+1);
   var e=itemEl(it.id);if(e)e.classList.add('hint');
-  var b=document.querySelector('.box[data-key="'+it.key+'"]');if(b)b.classList.add('hint');
-  var vis='';
-  if(b){
-    var pic=b.querySelector('.bhead > :first-child');
-    var isz=Math.max(32,Math.min(52,Math.round(it.px*0.5)));
-    vis='<span class="hv"><span class="hvi" style="width:calc('+isz+'px*var(--u));height:calc('+isz+'px*var(--u))">'+shapeSVG(it.shape,it.color)+'</span><span class="hva">➜</span><span class="hvb">'+(pic?pic.outerHTML:'')+'</span></span>';
+  var isz=Math.max(32,Math.min(52,Math.round(it.px*0.5)));
+  var mini='<span class="hvi" style="width:calc('+isz+'px*var(--u));height:calc('+isz+'px*var(--u))">'+shapeSVG(it.shape,it.color)+'</span>';
+  if(st.helpStage===1){
+    $('#msgText').innerHTML='<span class="hv">'+mini+'<span class="hva">👀</span></span>Pazounet : Regarde bien '+CRIT[st.cat]+' !';
+  }else{
+    var b=document.querySelector('.box[data-key="'+it.key+'"]');if(b)b.classList.add('hint');
+    var vis='';
+    if(b){var pic=b.querySelector('.bhead > :first-child');
+      vis='<span class="hv">'+mini+'<span class="hva">➜</span><span class="hvb">'+(pic?pic.outerHTML:'')+'</span></span>';}
+    $('#msgText').innerHTML=vis+helpText(it);
   }
-  $('#msgText').innerHTML=vis+helpText(it);
   play('aide');
 }
 
@@ -614,7 +651,7 @@ function showWin(){
   w.appendChild(btns);
   ov.appendChild(w);document.body.appendChild(ov);
   confetti();
-  playAfter('fin',350);   // laisse finir le nom de la couleur/forme, puis courte pause
+  play('fin');   // le nom a déjà été entièrement prononcé (afterCurrent)
 }
 function renderGameLevelsOnly(){
   var cat=st.cat,lv=$('#lvls');lv.innerHTML='';
@@ -626,6 +663,7 @@ function renderGameLevelsOnly(){
   })(i);}
 }
 function goHome(){
+  abortDrag();
   var ov=$('#overlay');if(ov&&ov.parentNode)ov.parentNode.removeChild(ov);
   st.locked=false;
   renderHome();
@@ -665,6 +703,7 @@ function fsRefresh(){
   scale();
 }
 ['#homeFs','#btnFs'].forEach(function(id){var b=$(id);b.innerHTML=FS_IN;b.addEventListener('click',fsToggle);if(!fsOK())b.classList.add('hidden');});
+document.addEventListener('visibilitychange',function(){if(document.hidden)abortDrag();});
 document.addEventListener('fullscreenchange',fsRefresh);
 document.addEventListener('webkitfullscreenchange',fsRefresh);
 window.__boites={st:function(){return st;},startLevel:startLevel,CATS:CATS};   // pour les tests
