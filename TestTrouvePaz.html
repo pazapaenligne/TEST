@@ -167,7 +167,7 @@ var CFG={
   reducedFactor:0.4,     /* vitesse quand « mouvements reduits » est actif et que l'enfant relance */
   maxTurn:0.9,           /* rad/s : virages toujours progressifs */           /* rad/s : virages toujours doux */
   verticalShare:1,     /* surtout horizontal, derives verticales moderees */
-  easeSec:0.25,          /* arret et reprise progressifs */
+  pauseAfterAudio:400,fallbackMs:1500,easeSec:0.25,          /* arret et reprise progressifs */
   fill:0.42,sizeScale:0.7,             /* part de la zone occupee par les Paz (le reste laisse la place de bouger) */
   maxSize:190,minSize:70
 };
@@ -203,23 +203,27 @@ var PRIO={fin:6,bonne:5,indice:3,ralentir:2,mauvaise:1,consigne:0};
 var Snd=(function(){
   var el=null,gen=0,cur=null,dog=0;
   function ensure(){if(!el){try{el=new Audio();el.preload="auto";}catch(e){el=null;}}return el;}
-  function stop(){gen++;clearTimeout(dog);cur=null;if(el){try{el.pause();}catch(e){}}}
+  function detach(a){a.onended=null;a.onerror=null;a.onpause=null;}
+  function stop(){gen++;clearTimeout(dog);cur=null;if(el){detach(el);try{el.pause();}catch(e){}}}
   /* play(nom,cb) : false si le son n'est pas tente (son moins prioritaire que celui en cours, ou audio indisponible).
-     Sinon cb(ok) est appele UNE fois a la fin reelle (ok=true) ou en cas d'echec/blocage (ok=false),
-     jamais si le son est interrompu par un autre ou par stop(). */
+     Sinon cb(ok,raison) est appele UNE seule fois : a la fin reelle (ok=true), ou en cas d'echec / d'interruption /
+     de lecture qui ne se termine jamais (ok=false). Jamais si le son est remplace par un autre ou arrete par stop(). */
   function play(name,cb){
     var a=ensure(),src=AUD[name];if(!a||!src)return false;
     if(cur&&PRIO[name]<PRIO[cur])return false;
-    stop();var my=gen,done=false;cur=name;
-    function fin(ok){if(done||my!==gen)return;done=true;clearTimeout(dog);cur=null;if(cb)cb(ok);}
-    function arm(ms){dog=setTimeout(function(){if(my!==gen)return;if(!a.paused&&!a.ended&&a.currentTime>0&&isFinite(a.duration))arm((a.duration-a.currentTime)*1000+2000);else fin(false);},ms);}
-    a.onended=function(){fin(true);};a.onerror=function(){fin(false);};
-    try{a.src=src;a.currentTime=0;var pr=a.play();if(pr&&pr.catch)pr.catch(function(){fin(false);});}catch(e){setTimeout(function(){fin(false);},0);}
+    stop();var my=gen,done=false,t0=performance.now();cur=name;
+    function fin(ok,why){if(done||my!==gen)return;done=true;clearTimeout(dog);detach(a);cur=null;if(cb)cb(ok,why);}
+    /* chien de garde : l'evenement "ended" ne vient pas -> on libere le jeu apres la duree reelle de l'audio + 2,5 s */
+    function arm(ms){clearTimeout(dog);dog=setTimeout(function(){if(my!==gen)return;var d=a.duration;if(isFinite(d)&&d>0){var left=d*1000+2500-(performance.now()-t0);if(left>0){arm(left);return;}}fin(false,"timeout");},ms);}
+    a.onended=function(){fin(true);};
+    a.onerror=function(){fin(false,"error");};
+    a.onpause=function(){setTimeout(function(){if(my===gen&&!done&&a.paused&&!a.ended)fin(false,"interrupted");},150);};   /* pause venue du systeme (pas de stop() du jeu) */
+    try{a.src=src;a.currentTime=0;var pr=a.play();if(pr&&pr.catch)pr.catch(function(){fin(false,"blocked");});}catch(e){setTimeout(function(){fin(false,"error");},0);}
     arm(5000);return true;
   }
   return {play:play,stop:stop,current:function(){return cur;}};
 })();
-var st={starting:false,startTok:0,lastBad:-1e9,score:0,scored:false,hinted:false,solved:0,variant:0,adv:0,screen:"HOME",round:1,prevOdd:-1,slow:false,locked:false,chars:[],W:0,H:0,S:150,scale:1,target:1,raf:0,last:0,tgt:1};
+var st={run:0,starting:false,startTok:0,lastBad:-1e9,score:0,scored:false,hinted:false,solved:0,variant:0,adv:0,screen:"HOME",round:1,prevOdd:-1,slow:false,locked:false,chars:[],W:0,H:0,S:150,scale:1,target:1,raf:0,last:0,tgt:1};
 var A_NORM=null,A_DIFFS={},GW=100,GH=Math.round(100*IMG_RATIO);
 
 function rnd(a,b){return a+Math.random()*(b-a);}
@@ -382,10 +386,10 @@ function setMsg(t,cls,extra){var m=$("msg");m.textContent=t;if(extra){var s=docu
    et que l'onglet est visible. « Ralentir » n'y change rien : c'est le temps reel qui compte.
    =================================================================== */
 var tm={elapsed:0,since:0,running:false};
-function timerStart(){tm.elapsed=0;tm.running=false;if(!document.hidden){tm.since=performance.now();tm.running=true;}}
-function timerStop(){if(tm.running){tm.elapsed+=performance.now()-tm.since;tm.running=false;}}
-function timerResume(){if(!tm.running&&!st.locked&&st.screen==="PLAY"&&!document.hidden){tm.since=performance.now();tm.running=true;}}
-function timerMs(){return tm.elapsed+(tm.running?performance.now()-tm.since:0);}
+function timerStart(){tm.elapsed=0;tm.running=false;if(!document.hidden&&!st.slow){tm.since=performance.now();tm.running=true;}}      /* Ralentir actif : le temps ne compte pas */
+function timerStop(){if(tm.running){tm.elapsed+=Math.max(0,performance.now()-tm.since);tm.running=false;}}
+function timerResume(){if(!tm.running&&!st.locked&&!st.slow&&st.screen==="PLAY"&&!document.hidden){tm.since=performance.now();tm.running=true;}}
+function timerMs(){return Math.max(0,tm.elapsed+(tm.running?performance.now()-tm.since:0));}
 function pointsFor(ms){var s=ms/1000;return s<5?100:s<10?80:s<15?60:s<20?40:20;}
 function showScore(){$("score").innerHTML="&#11088; Score : "+st.score.toLocaleString("fr-FR");}
 function syncCtrls(){
@@ -422,9 +426,11 @@ function choose(c){
     setMsg("🌟 Bravo ! Tu as trouvé !","good","⭐ +"+pts+" points");
     $("slow").disabled=true;$("hint").disabled=true;
     clearTimeout(st.adv);
-    var go=function(){clearTimeout(st.adv);if(st.screen==="PLAY"&&st.locked){st.round++;newRound();}};   /* passage automatique, clics bloques pendant ce temps */
-    var late=function(){clearTimeout(st.adv);st.adv=setTimeout(go,1500);};                              /* secours si l'audio est indisponible */
-    if(!Snd.play("bonne",function(ok){if(ok)go();else late();}))late();   /* points deja enregistres ; on attend la fin reelle de l'audio */
+    var run=st.run,rid=st.round;
+    var go=function(){clearTimeout(st.adv);if(run!==st.run||rid!==st.round||st.screen!=="PLAY"||!st.locked)return;st.round++;newRound();};   /* une seule transition, jamais apres Accueil / Terminer / Rejouer */
+    var later=function(ms){clearTimeout(st.adv);st.adv=setTimeout(go,ms);};
+    /* cas normal : fin reelle de l'audio + courte pause ; audio indisponible/en echec/interrompu : delai de secours ; "ended" jamais recu : chien de garde du gestionnaire */
+    if(!Snd.play("bonne",function(ok,why){later(ok||why==="timeout"?CFG.pauseAfterAudio:CFG.fallbackMs);}))later(CFG.fallbackMs);
   }else{
     var nowT=performance.now();
     if(nowT-st.lastBad>=10000&&Snd.play("mauvaise"))st.lastBad=nowT;     /* encouragement oral au plus une fois toutes les 10 s */
@@ -472,6 +478,10 @@ function step(ts){
   st.tgt=speedTarget();
   st.scale+=(st.tgt-st.scale)*(1-Math.exp(-dt/CFG.easeSec));
   if(st.tgt===0&&st.scale<0.03)st.scale=0;
+  if(st.tgt===0&&st.scale===0){                          /* bonne reponse : les Paz sont a l'arret -> dernier dessin puis la boucle est suspendue (reprise par newRound) */
+    for(var z=0;z<st.chars.length;z++)draw(st.chars[z],ts/1000);
+    updateHint();stopLoop();return;
+  }
   var odd0=null,cover={};for(var q=0;q<st.chars.length;q++)if(st.chars[q].odd)odd0=st.chars[q];
   if(odd0){
     var hid=false;
@@ -536,10 +546,10 @@ function stopLoop(){cancelAnimationFrame(st.raf);st.raf=0;}
    ECRANS ET COMMANDES
    =================================================================== */
 function setScreen(n){$("home").hidden=(n!=="home");$("game").hidden=(n!=="game");$("end").hidden=(n!=="end");}
-function goHome(){st.starting=false;st.startTok++;Snd.stop();$("play").disabled=false;$("replay").disabled=false;$("sndHome").disabled=false;clearTimeout(st.adv);stopLoop();timerStop();st.screen="HOME";setScreen("home");try{$("play").focus({preventScroll:true});}catch(e){}}
+function goHome(){st.run++;st.starting=false;st.startTok++;Snd.stop();$("play").disabled=false;$("replay").disabled=false;$("sndHome").disabled=false;clearTimeout(st.adv);stopLoop();timerStop();st.screen="HOME";setScreen("home");try{$("play").focus({preventScroll:true});}catch(e){}}
 function startGame(){
   if(st.starting)return;                                 /* pas de double demarrage */
-  clearTimeout(st.adv);Snd.stop();hideHint();
+  st.run++;clearTimeout(st.adv);Snd.stop();hideHint();
   st.round=1;st.solved=0;st.variant=-1;st.prevOdd=-1;st.score=0;st.lastBad=-1e9;
   st.starting=true;var tok=++st.startTok;
   $("play").disabled=true;$("replay").disabled=true;$("sndHome").disabled=true;
@@ -559,7 +569,7 @@ function celebrate(){
 }
 function finishGame(){
   if(st.screen!=="PLAY")return;
-  clearTimeout(st.adv);hideHint();timerStop();stopLoop();       /* une recherche inachevee n'est pas comptee */
+  st.run++;clearTimeout(st.adv);hideHint();timerStop();stopLoop();       /* une recherche inachevee n'est pas comptee */
   st.screen="END";setScreen("end");
   $("endCount").textContent="🔎 Recherches réussies : "+st.solved;
   $("endScore").textContent="⭐ Ton score : "+st.score.toLocaleString("fr-FR")+" points";
@@ -577,7 +587,10 @@ function toggleFs(){
     else{var e=document.documentElement,f=e.requestFullscreen||e.webkitRequestFullscreen;if(f){var p=f.call(e);if(p&&p.catch)p.catch(function(){});}}
   }catch(err){}
 }
-function toggleSlow(){if(st.locked)return;st.slow=!st.slow;syncCtrls();if(st.slow)Snd.play("ralentir");else if(Snd.current()==="ralentir")Snd.stop();}
+function toggleSlow(){if(st.locked)return;st.slow=!st.slow;syncCtrls();
+  if(st.slow){timerStop();Snd.play("ralentir");}                       /* le temps du score est suspendu tant que Ralentir est actif */
+  else{timerResume();if(Snd.current()==="ralentir")Snd.stop();}       /* ... et reprend a la desactivation */
+}
 
 function init(){
   $("logoHome").src=LOGO;$("logoGame").src=LOGO;
