@@ -422,6 +422,17 @@ table.t,.tbl5{min-width:26em}
 
 .tsol,.tsol .expl{overflow-wrap:anywhere}
 
+
+.tb-vw .vic{font-size:1.05em;letter-spacing:0}
+#vt{display:none;flex:0 0 auto;align-items:center;flex-wrap:wrap;gap:6px 10px;padding:6px 10px;background:var(--paper);color:var(--ink);border-bottom:3px solid var(--bleu);font:14px/1.35 Arial,Helvetica,sans-serif;letter-spacing:0;z-index:45}
+#vt.on{display:flex}
+#vt span{flex:1 1 200px}
+#vt .btn{min-height:40px;font-family:Arial,Helvetica,sans-serif}
+body.simple #vt{border-bottom-width:2px}
+@media print{#vt{display:none!important}}
+@media(max-width:430px){#bar{gap:4px;padding:4px 6px}#bar img{height:22px}.tb{min-width:40px;padding:0 6px}}
+@media(max-height:560px){.tb-vw .lbt{display:none}}
+
 </style>
 </head>
 <body>
@@ -650,7 +661,7 @@ const sfx={ctx:null,
 
 /* ---------- préférences d'affichage (confort de lecture) : stockage séparé de la progression ---------- */
 const PKEY='pazapa-puissances-3e-prefs-v2';
-const PDEF={font:'std',size:100,ls:0,lh:0,simple:false,theme:'auto',cream:false};
+const PDEF={font:'std',size:100,ls:0,lh:0,simple:false,theme:'auto',cream:false,view:'auto'};
 const PF=Object.assign({},PDEF);
 const PLS=['Normal','Aéré','Très aéré'],PLH=['Normal','Confortable','Très confortable'];
 const PLSV=['0','.06em','.14em'],PLHV=['1.5','1.8','2'];
@@ -660,7 +671,7 @@ function cleanPrefs(j){
   o.font=j.font==='dys'?'dys':'std';
   const sz=Math.round(Number(j.size)/10)*10;o.size=(sz>=100&&sz<=200)?sz:100;
   o.ls=[0,1,2].indexOf(j.ls)>=0?j.ls:0;o.lh=[0,1,2].indexOf(j.lh)>=0?j.lh:0;
-  o.simple=j.simple===true;o.theme=['auto','light','dark'].indexOf(j.theme)>=0?j.theme:'auto';o.cream=j.cream===true;
+  o.simple=j.simple===true;o.theme=['auto','light','dark'].indexOf(j.theme)>=0?j.theme:'auto';o.cream=j.cream===true;o.view=['auto','one','two'].indexOf(j.view)>=0?j.view:'auto';
   return o;
 }
 function loadPrefs(){
@@ -685,13 +696,13 @@ function applyPrefs(){
   S.theme=PF.theme;
   if(PF.theme==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',PF.theme);
   r.setAttribute('data-font',PF.font);r.setAttribute('data-ls',String(PF.ls));r.setAttribute('data-lh',String(PF.lh));
-  r.setAttribute('data-cream',PF.cream?'1':'0');
+  r.setAttribute('data-cream',PF.cream?'1':'0');r.setAttribute('data-view',PF.view);
   r.style.setProperty('--sc',String(PF.size/100));r.style.setProperty('--ls',PLSV[PF.ls]);r.style.setProperty('--lh',PLHV[PF.lh]);
   b&&b.classList.toggle('simple',PF.simple);
   ensureFont();
 }
 function setPref(k,v){PF[k]=v;savePrefs();applyPrefs();if(typeof fit==='function'&&document.getElementById('book')){if(S.busy)S.refit=true;else fit()}syncComfort&&syncComfort()}
-let syncComfort=null;
+let syncComfort=null,syncView=null;
 
 /* ---------- compétences, erreurs types ---------- */
 const COMP={c1:'Puissances d’exposant entier (positif, négatif, nul)',c2:'Règles de calcul sur les puissances',c3:'Puissances de 10 et préfixes',c4:'Notation scientifique et problèmes'};
@@ -1746,20 +1757,33 @@ function mount(){
   updateNav();
 }
 function fit(){
-  const st=$('#stage');const W=st.clientWidth-16,H=st.clientHeight-16;
-  const wasSingle=S.single;const sc=PF.size/100;
+  const st=$('#stage'),vt=$('#vt');
   const bar=$('#bar');if(bar)document.documentElement.style.setProperty('--bar-h',(bar.offsetHeight+6)+'px');
+  const wasSingle=S.single;const sc=PF.size/100;
   /* la taille choisie par l'élève n'est jamais réduite pour « faire tenir » : on change plutôt de disposition */
-  const dbw=Math.min(W,H*1.42,S.zoom?2100:1400);
-  const dfs=Math.max(13.5,Math.min(21,dbw/64))*(S.zoom?1.18:1)*sc;
-  S.single=window.innerWidth<980||W<760||dbw<780||(dbw/2)/dfs<29;
-  let bw,bh,fs;
-  if(S.single){bw=Math.min(W,640*Math.max(1,sc)*(S.zoom?1.3:1));bh=H;fs=Math.max(13.5,Math.min(18,Math.min(W,640)/25))*(S.zoom?1.18:1)*sc}
-  else{const R=1.42;bw=dbw;bh=bw/R;fs=dfs}
-  bookEl.style.setProperty('--bw',Math.round(bw)+'px');bookEl.style.setProperty('--bh',Math.round(bh)+'px');bookEl.style.setProperty('--fs',fs.toFixed(2)+'px');
+  function geom(){
+    const W=st.clientWidth-16,H=st.clientHeight-16;
+    const dbw=Math.min(W,H*1.42,S.zoom?2100:1400);
+    const dfs=Math.max(13.5,Math.min(21,dbw/64))*(S.zoom?1.18:1)*sc;
+    const autoSingle=window.innerWidth<980||W<760||dbw<780||(dbw/2)/dfs<29;
+    const single=PF.view==='one'?true:PF.view==='two'?false:autoSingle;
+    let bw,bh,fs,narrow=false;
+    if(single){bw=Math.min(W,640*Math.max(1,sc)*(S.zoom?1.3:1));bh=H;fs=Math.max(13.5,Math.min(18,Math.min(W,640)/25))*(S.zoom?1.18:1)*sc}
+    else if(autoSingle){/* deux pages demandées dans un espace étroit : on occupe toute la largeur et la hauteur disponibles */
+      bw=Math.min(W,S.zoom?2100:1400);bh=Math.min(H,bw/.4);fs=dfs;narrow=(bw/2)/fs<22}
+    else{bw=dbw;bh=bw/1.42;fs=dfs}
+    return{single,bw,bh,fs,narrow};
+  }
+  let g=geom();
+  const want=g.narrow&&!S.vtHide;
+  if(vt&&vt.classList.contains('on')!==want){vt.classList.toggle('on',want);g=geom()}
+  S.single=g.single;
+  {const vm=$('#vt-msg');if(vm)vm.textContent=PF.size>=150?'Avec le texte agrandi, deux pages étroites sont difficiles à lire. Choisis une seule page, ou tourne le téléphone en paysage.':'Les deux pages sont étroites. Tourne le téléphone en paysage, ou choisis une seule page.'}
+  bookEl.style.setProperty('--bw',Math.round(g.bw)+'px');bookEl.style.setProperty('--bh',Math.round(g.bh)+'px');bookEl.style.setProperty('--fs',g.fs.toFixed(2)+'px');
   bookEl.classList.toggle('single',S.single);
   document.body.classList.toggle('flat',S.single);
   if(wasSingle!==S.single){if(S.single)S.page=S.spread*2;else S.spread=S.page>>1;mount()}
+  syncView&&syncView();
 }
 function updateNav(){
   const last=S.single?NSP*2-1:NSP-1,cur=S.single?S.page:S.spread;
@@ -1876,6 +1900,7 @@ function buildComfort(){
     fsx.append(wr);syncs.push(()=>wr.querySelectorAll('input').forEach(i=>{i.checked=String(get())===i.value}));return fsx;
   };
   const fontSt=h('p',{class:'cp-note',role:'status','aria-live':'polite',id:'cp-fontst'});
+  const viewFs=radios('view','Affichage des pages',[['auto','Automatique'],['one','📄 Une page'],['two','📖 Deux pages']],()=>PF.view,v=>{S.vtHide=false;setPref('view',v)});
   const fontFs=radios('font','Police de lecture',[['std','Standard PAZAPA'],['dys','OpenDyslexic']],()=>PF.font,v=>setPref('font',v));
   const oflEl=document.getElementById('ofl-text');
   const lic=h('details',{class:'cp-lic'},h('summary',{},'Licence de la police OpenDyslexic'),h('pre',{},oflEl?oflEl.textContent:'SIL Open Font License 1.1'));
@@ -1890,7 +1915,7 @@ function buildComfort(){
   const cream=chkRow('cp-cream','Fond crème doux','Page plus chaude, moins éblouissante (thème clair).',()=>PF.cream,v=>setPref('cream',v));
   const reset=h('button',{type:'button',class:'btn sm',onclick:()=>{Object.assign(PF,PDEF);savePrefs();applyPrefs();fit();syncComfort()}},'Réinitialiser l’affichage');
   const close=h('button',{type:'button',class:'btn sm',onclick:()=>{openPanel('cp',false);const b=document.querySelector('[aria-controls="cp"]');b&&b.focus()}},'Fermer');
-  cp.append(h('h4',{},'Aa · Confort de lecture'),sizeRow,fontFs,fontSt,h('p',{class:'cp-note'},'OpenDyslexic est une option de confort : elle aide certains élèves, pas tous.'),lsFs,lhFs,simple,themeFs,cream,
+  cp.append(h('h4',{},'Aa · Confort de lecture'),sizeRow,viewFs,fontFs,fontSt,h('p',{class:'cp-note'},'OpenDyslexic est une option de confort : elle aide certains élèves, pas tous.'),lsFs,lhFs,simple,themeFs,cream,
     h('div',{class:'cp-row cp-btns'},reset,close),h('p',{class:'cp-note'},'Ces réglages ne modifient pas tes réponses ni ta progression.'),lic);
   syncs.forEach(f=>f());
   syncComfort=()=>{syncs.forEach(f=>f());const t=document.querySelector('#bar .tb[data-role="theme"] .lbt');if(t)t.textContent=' Thème : '+THN[PF.theme]};
@@ -1904,7 +1929,10 @@ function buildApp(){
   const bTh=h('button',{class:'tb',type:'button','data-role':'theme',title:'Thème : automatique, sombre ou clair',onclick:()=>{setPref('theme',PF.theme==='auto'?'dark':PF.theme==='dark'?'light':'auto')}},h('span',{html:'<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 1.5a6.5 6.5 0 0 0 0 13z" fill="currentColor"/></svg>'}),h('span',{class:'lbt'},' Thème : '+THN[PF.theme]));
   const bAa=h('button',{class:'tb tb-aa',type:'button','aria-expanded':'false','aria-controls':'cp',title:'Aa · Confort de lecture',onclick:()=>{const on=!$('#cp').classList.contains('on');openPanel('cp',on);if(on){const s=$('#cp-size');s&&s.focus()}}},h('span',{class:'aa','aria-hidden':'true'},'Aa'),h('span',{class:'lbt'},' · Confort de lecture'),h('span',{class:'sr'},'Confort de lecture'));
   const bTe=h('button',{class:'tb',type:'button','aria-pressed':'false','aria-controls':'tp',title:'Mode enseignant',onclick:e=>{const on=!$('#tp').classList.contains('on');openPanel('tp',on);e.currentTarget.setAttribute('aria-pressed',String(on))}},'✎ ',h('span',{class:'lbt'},'Mode enseignant'));
-  bar.append(h('img',{src:LOGO,alt:'Pazapa'}),h('span',{class:'ttl'},'Puissances d’un nombre · 3ᵉ'+(TEACHER?' · version enseignant':'')),bToc,bSnd,bTh,bAa,bTe);
+  const bVw=h('button',{class:'tb tb-vw',type:'button',onclick:()=>{S.vtHide=false;setPref('view',S.single?'two':'one')}},h('span',{class:'vic','aria-hidden':'true'}),h('span',{class:'lbt'}),h('span',{class:'sr'}));
+  syncView=()=>{const two=!S.single;bVw.querySelector('.vic').textContent='📖';bVw.querySelector('.lbt').textContent=' Deux pages';bVw.querySelector('.sr').textContent='Affichage deux pages';bVw.title=two?'Deux pages affichées : revenir à une seule page':'Une page affichée : passer à deux pages côte à côte';bVw.setAttribute('aria-pressed',String(two))};
+  const vt=h('div',{id:'vt',role:'status'},h('span',{id:'vt-msg'},'Les deux pages sont étroites. Tourne le téléphone en paysage, ou choisis une seule page.'),h('button',{type:'button',class:'btn sm',onclick:()=>setPref('view','one')},'📄 Une page'),h('button',{type:'button',class:'btn sm','aria-label':'Fermer ce conseil',onclick:()=>{S.vtHide=true;fit()}},'✕'));
+  bar.append(h('img',{src:LOGO,alt:'Pazapa'}),h('span',{class:'ttl'},'Puissances d’un nombre · 3ᵉ'+(TEACHER?' · version enseignant':'')),bToc,bSnd,bTh,bVw,bAa,bTe);
   const stage=h('div',{id:'stage'});
   bookEl=h('div',{id:'book'});
   Lw=h('div',{class:'pgwrap l'},h('div',{class:'under'}));
@@ -1930,7 +1958,7 @@ function buildApp(){
       ...(TEACHER?[h('button',{class:'btn sm',type:'button',onclick:()=>{notes.style.display=notes.style.display==='none'?'block':'none'}},'Notes sur le cahier')]:[]),
       h('button',{class:'btn sm',type:'button',onclick:()=>{$('#tp').classList.remove('on');bTe.setAttribute('aria-pressed','false')}},'Fermer')),
     ...(TEACHER?[h('div',{class:'kd',style:{margin:'.4em 0'}},'Incohérences repérées dans le cahier (pages 86 à 99) :'),notes]:[]));
-  app.append(bar,stage,nav,tp,buildComfort());
+  app.append(bar,vt,stage,nav,tp,buildComfort());
   return app;
 }
 function bindInput(){
