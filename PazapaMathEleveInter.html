@@ -1916,15 +1916,20 @@ function buildApp(){
   return app;
 }
 function bindInput(){
+  const hscroll=el=>{for(let x=el;x&&x!==document.body;x=x.parentElement){if(x.scrollWidth>x.clientWidth+2&&/(auto|scroll)/.test(getComputedStyle(x).overflowX))return true}return false};
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){const op=['cp','tp'].find(x=>document.getElementById(x).classList.contains('on'));if(op){openPanel(op,false);const b=document.querySelector('[aria-controls="'+op+'"]');b&&b.focus();return}}
-    const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA'))return;
-    if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();next()}
-    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev()}
+    const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='SELECT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+    if(e.defaultPrevented||e.isComposing||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)return;
+    const fw=e.key==='ArrowRight'||e.key==='PageDown',bw=e.key==='ArrowLeft'||e.key==='PageUp';
+    if(!fw&&!bw)return;
+    if(t&&t.closest&&t.closest('#cp,#tp'))return;
+    if(t&&t.nodeType===1&&(e.key==='ArrowRight'||e.key==='ArrowLeft')&&hscroll(t))return;
+    if(e.key==='PageDown'||e.key==='PageUp'){const pb=document.querySelector('.pg:not(.clone) .pb');if(pb&&pb.scrollHeight>pb.clientHeight+2){const d=fw?1:-1,atEnd=fw?pb.scrollTop+pb.clientHeight>=pb.scrollHeight-2:pb.scrollTop<=1;if(!atEnd){e.preventDefault();pb.scrollBy({top:d*pb.clientHeight*.9,behavior:reduce()?'auto':'smooth'});return}}}
+    e.preventDefault();if(fw)next();else prev();
   });
   let sx=0,sy=0,st=0,ok=false;
   const stage=$('#stage');
-  const hscroll=el=>{for(let x=el;x&&x!==document.body;x=x.parentElement){if(x.scrollWidth>x.clientWidth+2&&/(auto|scroll)/.test(getComputedStyle(x).overflowX))return true}return false};
   stage.addEventListener('pointerdown',e=>{ok=!e.target.closest('input,button,select,textarea,canvas,a,[data-noswipe],.flap')&&!hscroll(e.target);sx=e.clientX;sy=e.clientY;st=performance.now()});
   stage.addEventListener('pointerup',e=>{
     if(!ok)return;const dx=e.clientX-sx,dy=e.clientY-sy;
