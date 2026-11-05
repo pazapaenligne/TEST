@@ -92,6 +92,7 @@ button{font-family:inherit}
 .burst.bad{border-color:#b9b4a3}
 @keyframes burst{from{transform:scale(.4);opacity:1}to{transform:scale(2.6);opacity:0}}
 @keyframes okp{0%{transform:scale(1)}40%{transform:scale(1.07)}100%{transform:scale(1)}}
+.door.hintI{background:#fff3a0 !important;color:#2d7d1f;border-color:#3f9e2c;box-shadow:0 0 0 4px #fff,0 0 22px 8px rgba(255,214,64,.9);animation:okp .9s ease-in-out 2}
 .door.bad{background:#e9e4d6 !important;border-color:#b3ad9a;color:#8b8573;animation:soft .5s}
 @keyframes soft{0%,100%{transform:translateY(0)}35%{transform:translateY(-4px)}70%{transform:translateY(2px)}}
 .door.passed{opacity:.45;pointer-events:none}
@@ -117,7 +118,7 @@ button{font-family:inherit}
 #hud .title.nudge{background:#FCC104;color:#1d2a2a}
 #hud .info{font-size:1.02rem;white-space:nowrap}
 .prog{background:#fff;color:#1d2a2a;border-radius:10px;padding:2px 10px;font-weight:bold}
-.chrono{opacity:.75;font-size:.9rem!important}
+.chrono{opacity:.75;font-size:.9rem!important;display:none!important}      /* pas de chronometre visible : aucune pression de temps pour les 4-5 ans */
 .ib{min-height:46px;min-width:46px;border-radius:50%;border:3px solid #fff;background:#6cc02d;font-size:1.25rem;cursor:pointer;color:#fff}
 .ib.off{background:#888}
 .hint{display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;font-size:.9rem;margin-top:4px}
@@ -134,7 +135,28 @@ button{font-family:inherit}
 #jumpBtn:active,#jumpBtn.down{transform:scale(.98);background:#ffd84a}
 #end{display:none;position:relative;overflow:hidden;background:#fffdf7;border:4px solid #FCC104;border-radius:18px;padding:12px 12px 16px;text-align:center;margin-top:8px}
 #end h2{font-size:clamp(1.6rem,5vw,2.2rem);margin-bottom:2px}
+#endSub{font-size:clamp(1.25rem,4vw,1.6rem);font-weight:bold;color:#2d7d1f;margin-bottom:2px}
 #lvName{font-size:1rem;color:#4a5a5a;margin-bottom:6px}
+.res3{flex:1 1 360px;max-width:680px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:stretch}
+.rc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 8px;border:3px solid #cfe3c0;border-radius:16px;background:#f4fbea;min-width:0}
+.rc .ico{flex:none;width:34px;height:34px;border-radius:50%;background:#e1f1c8;display:flex;align-items:center;justify-content:center}
+.rc .ico.ok{color:#2d7d1f;font-weight:bold;font-size:1.2rem}
+.rc .gemi{width:22px;height:19px;vertical-align:0}
+.rc .rl{font-size:1rem;color:#4a5a5a;line-height:1.2}
+.rc .rv{font-size:clamp(1.8rem,5.5vw,2.3rem);font-weight:bold;line-height:1.1;color:#1d2a2a}
+.rc-score{background:#fff6cf;border-color:#FCC104}
+.rc-score .rl:empty{display:none}
+.rc-score .rl.rec{color:#2d7d1f;font-weight:bold}
+.rc-score .rs{font-size:clamp(1.15rem,3.6vw,1.45rem);font-weight:bold;line-height:1.25}
+.rc-score .rs b{color:#e8731a;font-size:1.5em}
+@media (max-width:640px){
+  .res3{grid-template-columns:1fr;flex-basis:100%}
+  .rc{flex-direction:row;justify-content:flex-start;text-align:left;gap:12px;padding:8px 14px}
+  .rc .rt{display:flex;flex-direction:column;flex:1;min-width:0}
+  .rc .rv{font-size:1.6rem}
+  .rc-score{justify-content:center;text-align:center}
+}
+#end .btn.go{min-height:60px;font-size:1.35rem;padding:10px 30px}
 .endrow{display:flex;align-items:center;justify-content:center;gap:clamp(12px,4vw,34px);flex-wrap:wrap;margin:4px 0}
 #endPaze{height:clamp(84px,13vw,110px);animation:joy .9s ease-in-out infinite alternate}
 @keyframes joy{from{transform:translateY(0) rotate(-3deg)}to{transform:translateY(-10px) rotate(3deg)}}
@@ -207,22 +229,35 @@ button{font-family:inherit}
   </div>
 
   <div id="end">
-    <h2>Bravo ! Tu as termin&eacute; ce niveau !</h2>
+    <h2>Bravo !</h2>
+    <div id="endSub">Niveau terminé !</div>
     <div id="lvName"></div>
     <div class="endrow">
       <div id="endPaze"></div>
-      <div class="endinfo">
-        <div class="scorebox">
-          <div class="lab" id="scLab">Score total</div>
-          <div class="pts"><b id="endScore">0</b> points</div>
+      <div class="res3">
+        <div class="rc rc-letters">
+          <span class="ico ok" aria-hidden="true">&#10003;</span>
+          <div class="rt">
+            <div class="rl">Lettres I trouvées</div>
+            <div class="rv"><b id="endGood">0</b> / <b id="endTot">6</b></div>
+          </div>
         </div>
-        <div class="stats">
-          <div class="stat"><span class="ico" aria-hidden="true"><span class="gemi"></span></span><span>Rubis collect&eacute;s : <b id="endRub">0</b></span></div>
-          <div class="stat"><span class="ico ok" aria-hidden="true">&#10003;</span><span>Bonnes r&eacute;ponses : <b id="endGood">0</b> / <b id="endTot">6</b></span></div>
+        <div class="rc rc-rub">
+          <span class="ico" aria-hidden="true"><span class="gemi"></span></span>
+          <div class="rt">
+            <div class="rl">Rubis récupérés</div>
+            <div class="rv"><b id="endRub">0</b></div>
+          </div>
         </div>
-        <div id="rec"></div>
+        <div class="rc rc-score">
+          <div class="rt">
+            <div class="rl" id="scLab"></div>
+            <div class="rs">Ton score : <b id="endScore">0</b> points</div>
+          </div>
+        </div>
       </div>
     </div>
+    <div id="rec"></div>
     <div id="msg"></div>
     <div class="row btns">
       <button class="btn go" id="nextLv" style="display:none">Niveau suivant &#9654;</button>
@@ -249,9 +284,12 @@ button{font-family:inherit}
     heroScale:0.56,         /* taille de Paze par rapport a la hauteur d'un couloir */
     jump:{ms:560, heightFrac:0.45, minAir:2, bufferFrac:0.7},   /* duree du saut (ms), hauteur (part du couloir), hauteur minimale en l'air pour compter comme saut (px), fenetre de memorisation d'un appui fait trop tot pendant un saut (part de la duree, fin du saut) */
     contactInsetPx:2,       /* marge (px) retiree de chaque cote de l'arche pour le contact : zone de validation large, contact franc */
-    speedBase:0.15,         /* vitesse de reference (niveau 1 = 100 %) ; niveau 2 = 130 % (0.195), niveau 3 = 160 % (0.24) (voir levels) */
+    speedBase:0.15,         /* vitesse de reference (niveau 1 = 100 %) ; vitesse de reference ; vitesses des niveaux (voir levels) : niveau 1 = 100 % (0.15), niveau 2 = 115 % (0.1725), niveau 3 = 130 % (0.195) */
     approachXFrac:0.66,     /* les 3 arches apparaissent alignees a cette position (part de la largeur) : pas d'attente avant la premiere arche */
-    feedbackMs:800,         /* duree de la correction (jeu immobilise) */
+    feedbackMs:800,         /* duree de la correction apres une bonne reponse (jeu immobilise) */
+    feedbackWrongMs:2000,   /* apres une erreur : on montre brievement la bonne lettre I avec un message encourageant, puis on passe a la serie suivante (aucune nouvelle tentative) */
+    observeMs:0,            /* 0 = pas de pause d'observation : la course est continue (une valeur > 0 immobiliserait les arches pendant ce temps) */
+    seriesGapMs:3000,       /* intervalle reel entre deux series : temps (ms) entre la collecte (ou le passage) du dernier rubis et l'arrivee des arches suivantes au contact de Paze ; la distance de depart des arches est calculee a partir de la vitesse du niveau, de la pause de 300 ms entre series (pauseBetweenWaves) */
     ruleDelayMs:150,        /* delai avant la lecture d'une consigne */
     /* Phase rubis : 2 groupes, chacun dans UN SEUL couloir : d'abord 3 rubis en hauteur (un saut synchronise les prend tous), puis 4 rubis au sol (en courant).
        Les ecarts sont calcules a partir de la vitesse, de la duree du saut et de la taille de Paze (voir startGems). */
@@ -275,9 +313,9 @@ button{font-family:inherit}
     levels:[
       /* pool = lettres autorisees comme mauvaises reponses (parmi L T H F E, aucune nouvelle lettre) ; near = lettres visuellement proches du I (une barre verticale) ;
          nearMin = nombre minimal de mauvaises reponses prises dans near a chaque serie ; place = position de la bonne lettre : "balanced" (autant de fois dans chaque couloir, jamais 2 fois de suite le meme, pas de cycle 1-2-3 repete) ou "free" (tirage libre) ; series = nombre de series du niveau (perRule = series : la consigne n'est lue qu'une fois par niveau) */
-      {key:"I1", cat:"A", num:1, name:"Découverte",   rules:["trouve"], shuffle:false, series:6,  perRule:6,  correct:[1,1], speed:0.15,  pool:["H","E","F"],         near:["L","T","F"], nearMin:0, place:"balanced"},
-      {key:"I2", cat:"A", num:2, name:"Entraînement", rules:["trouve"], shuffle:false, series:12, perRule:12, correct:[1,1], speed:0.195, pool:["L","T","F","E","H"], near:["L","T","F"], nearMin:1, place:"balanced"},
-      {key:"I3", cat:"A", num:3, name:"Défi",         rules:["trouve"], shuffle:false, series:18, perRule:18, correct:[1,1], speed:0.24,  pool:["L","T","F","E"],     near:["L","T"],     nearMin:1, place:"balanced"}
+      {key:"I1", cat:"A", num:1, name:"Découverte",   rules:["trouve"], shuffle:false, series:6,  perRule:6,  correct:[1,1], speed:0.15,  gemPlan:"grouped", pool:["H","E","F"],         near:["L","T","F"], nearMin:0, place:"balanced"},
+      {key:"I2", cat:"A", num:2, name:"Entraînement", rules:["trouve"], shuffle:false, series:12, perRule:12, correct:[1,1], speed:0.1725, gemPlan:"split", groundSpacing:2.1, pool:["L","T","F","E","H"], near:["L","T","F"], nearMin:1, place:"balanced"},
+      {key:"I3", cat:"A", num:3, name:"Défi",         rules:["trouve"], shuffle:false, series:18, perRule:18, correct:[1,1], speed:0.195,  gemPlan:"scatter", groundSpacing:2.0, pool:["L","T","F","E"],     near:["L","T"],     nearMin:1, place:"balanced"}
     ]
   };
   var CHARS = [
@@ -595,7 +633,7 @@ button{font-family:inherit}
     if(lv.place==="balanced"){
       for(t=0;t<4000;t++){
         var left=[Math.floor(n/3),Math.floor(n/3),Math.floor(n/3)],r=n-3*Math.floor(n/3);
-        while(r-->0)left[rnd(3)]++;
+        shuffle([0,1,2]).slice(0,r).forEach(function(x){left[x]++;});      /* le reste est reparti sur des couloirs differents : ecart maximal d'une fois entre couloirs */
         var seq=[],ok=true;
         for(k=0;k<n;k++){
           var prev=seq.length?seq[seq.length-1]:-1,c=[0,1,2].filter(function(x){return x!==prev&&left[x]>0;});
@@ -761,7 +799,7 @@ button{font-family:inherit}
        LEVEL_FINISHED  : ecran de fin
      Chaque etat n'autorise que les interactions necessaires (voir moveHero, jump, step).
      =================================================================== */
-  var S={RULE:"RULE_VOICE",NEXT:"NEXT_WAVE",APPROACH:"LETTER_APPROACH",FEEDBACK:"LETTER_FEEDBACK",GEMS:"GEM_RUN",END:"LEVEL_FINISHED"};
+  var S={RULE:"RULE_VOICE",NEXT:"NEXT_WAVE",OBSERVE:"LETTER_OBSERVE",APPROACH:"LETTER_APPROACH",FEEDBACK:"LETTER_FEEDBACK",GEMS:"GEM_RUN",END:"LEVEL_FINISHED"};
   function setPhase(p){st.phase=p;stage.setAttribute("data-phase",p);}
 
   function setRule(){
@@ -794,10 +832,16 @@ button{font-family:inherit}
     var hx=0.10,T=(CONFIG.approachXFrac-hx)/CONFIG.speedBase;      /* delai de reference = niveau 1 */
     return Math.min(0.9,hx+T*st.level.speed);
   }
-  function startApproach(){
-    var items=makeWave(st.kind,st.level);
+  function startApproach(retryItems){
+    var items=retryItems||makeWave(st.kind,st.level);
     var x0=Math.round(stage.offsetWidth*approachFrac());
-    var w={doors:[]};
+    if(!retryItems&&st.waves>0){
+      /* series suivantes : intervalle confortable apres les rubis, calcule a partir de la vitesse ; les arches arrivent par le bord droit (course continue, aucune immobilisation) */
+      var hx1=hero.offsetLeft+hero.offsetWidth*0.9,vv=stage.offsetWidth*st.level.speed/1000;
+      /* la fin des rubis est detectee au moment de la collecte du dernier rubis (ou de son passage derriere Paze s'il est manque) ; ensuite pauseBetweenWaves (300 ms), puis les arches avancent : intervalle reel = seriesGapMs */
+      x0=Math.round(hx1+vv*Math.max(600,CONFIG.seriesGapMs-CONFIG.pauseBetweenWaves));
+    }
+    var w={doors:[],items:items};
     items.forEach(function(it,i){
       var el=document.createElement("div");
       el.className="door in";
@@ -807,9 +851,16 @@ button{font-family:inherit}
       var d={el:el,x:x0,lane:i,ok:it.ok,opened:false,passed:false,fade:false,rm:0,glow:false};
       w.doors.push(d);st.doors.push(d);
     });
-    st.wave=w;st.waves++;setProg(st.waves);
+    st.wave=w;
+    if(!retryItems){st.waves++;setProg(st.waves);st.retried=false;}      /* une nouvelle tentative ne change ni le compteur ni les lettres */
     later(function(){w.doors.forEach(function(d){d.el.classList.remove("in");});},450);
-    setPhase(S.APPROACH);
+    /* phase d'observation : les arches ne bougent pas pendant 3 s, l'enfant peut choisir son couloir */
+    if(CONFIG.observeMs>0){
+      setPhase(S.OBSERVE);st.timer=CONFIG.observeMs;
+      stage.classList.add("still");
+    }else{
+      setPhase(S.APPROACH);       /* course continue : les arches avancent tout de suite */
+    }
   }
   /* Les arches s'effacent (elles continuent de defiler pendant leur disparition), puis la course aux rubis commence */
   function endLetters(){
@@ -836,7 +887,7 @@ button{font-family:inherit}
   /* LETTER_FEEDBACK : le contact est identifie, tout est immobilise, la correction s'affiche sur l'arche touchee.
      Une seule validation par serie (la phase change tout de suite, plus aucune collision n'est testee). */
   function startFeedback(d){
-    setPhase(S.FEEDBACK);st.timer=CONFIG.feedbackMs;
+    setPhase(S.FEEDBACK);st.timer=d.ok?CONFIG.feedbackMs:CONFIG.feedbackWrongMs;
     d.opened=true;
     var cx=d.x+d.el.offsetWidth/2,mk=document.createElement("i");
     if(d.ok){
@@ -851,6 +902,8 @@ button{font-family:inherit}
     }else{
       d.el.classList.add("bad");
       mk.className="cross";mk.textContent="✕";
+      st.wave.doors.forEach(function(o){if(o.ok)o.el.classList.add("hintI");});      /* la bonne lettre I est mise en valeur */
+      showBanner("Voici le I ! Continue, tu y es presque !");
       burst(cx,d.lane,"bad");
       sfx("pop");
     }
@@ -859,6 +912,8 @@ button{font-family:inherit}
   }
   function endFeedback(){
     stage.classList.remove("still");hero.classList.remove("cheer");
+    $("banner").style.opacity=0;
+    /* une serie n'est presentee qu'une seule fois : bonne ou mauvaise reponse, on passe toujours a la serie suivante (aucune nouvelle tentative) */
     endLetters();
   }
   /* Collision arche / Paze : des que Paze (au sol ou en l'air) touche l'arche de SON couloir, la reponse est evaluee.
@@ -889,20 +944,52 @@ button{font-family:inherit}
      Groupe 1 : 3 rubis en hauteur, serres : un saut bien synchronise les attrape tous les 3 (aucune collecte automatique sans saut).
      Groupe 2 : 4 rubis pres du sol, en courant. Les distances sont calculees (vitesse du defilement, duree du saut, taille de Paze). */
   function gemReach(){return CONFIG.gems.reachPx;}
+  /* Composition des rubis d'une serie (toujours 7 rubis, repartis en groupes) selon le niveau :
+     "grouped" (niveau 1) : 3 rubis hauts groupes puis 4 rubis au sol, faciles a recuperer ;
+     "split"   (niveau 2) : 3 rubis hauts, puis 2 + 2 rubis au sol avec un ou deux changements de couloir voisin ;
+     "scatter" (niveau 3) : 3 petits groupes (3+2+2 dans un ordre variable), alternant hauteur / sol, dans les 3 couloirs, separes par des espaces variables.
+     gapMs = temps (a la vitesse du niveau) entre le dernier rubis du groupe precedent et le premier du groupe : laisse le temps de changer de couloir et d'atterrir. */
+  function gemGroups(plan){
+    var G=[],A,B,C,lanes,sizes,t0,sig,tries=0,i,types,gaps;
+    if(plan==="split"){
+      /* changements de couloir garantis et toujours vers un couloir voisin (une seule touche) : A -> B -> C avec B != A et C != B */
+      A=rnd(3);
+      B=shuffle([0,1,2].filter(function(l){return Math.abs(l-A)===1;}))[0];
+      C=shuffle([0,1,2].filter(function(l){return Math.abs(l-B)===1;}))[0];
+      return [{n:3,hi:true,lane:A,gapMs:0},{n:2,hi:false,lane:B,gapMs:1250,eff:true},{n:2,hi:false,lane:C,gapMs:950,eff:true}];
+    }
+    if(plan==="scatter"){
+      do{
+        sizes=shuffle([3,2,2]);lanes=shuffle([0,1,2]);t0=rnd(2)===0;
+        types=[t0,!t0,t0];
+        sig=sizes.join("")+(t0?"H":"G")+lanes.join("");
+        tries++;
+      }while(sig===st.lastGemSig&&tries<20);
+      st.lastGemSig=sig;
+      for(i=0;i<3;i++){
+        gaps=i===0?0:Math.round((types[i-1]?1300:1100)*(1+Math.random()*0.15));   /* temps reel de passage d'un groupe au suivant : plus long apres un saut ; variation pour eviter la regularite */
+        G.push({n:sizes[i],hi:types[i],lane:lanes[i],gapMs:gaps,eff:true});
+      }
+      return G;
+    }
+    return [{n:3,hi:true,lane:rnd(3),gapMs:0},{n:4,hi:false,lane:rnd(3),gapMs:CONFIG.gems.transitionMs}];
+  }
   function startGems(){
-    var W=stage.offsetWidth,g=CONFIG.gems,nH=g.perGroupHi,nG=g.perGroupGr,k;
+    var W=stage.offsetWidth,g=CONFIG.gems,k,j;
     var v=W*st.level.speed/1000;                          /* px par ms */
     var b=heroBox(false),boxW=b.x1-b.x0;
     var airMs=CONFIG.jump.ms*0.88;                        /* duree pendant laquelle Paze est assez haut pour toucher un rubis haut */
     var span=boxW+2*20+gemReach()+v*airMs;                /* longueur de parcours qu'un seul saut peut balayer */
-    var hiSp=Math.round(Math.max(g.rubyW*1.0,Math.min(g.rubyW*1.8,(span-v*g.slackMs)/(nH-1))));
-    var grSp=Math.round(g.rubyW*g.groundSpacing);
-    var gap=Math.round(v*g.transitionMs+g.rubyW);
-    var laneHi=rnd(3),laneGr=rnd(3);                      /* le couloir du 2e groupe peut etre le meme ou un autre */
-    var x=Math.round(W*Math.min(0.9,g.firstXFrac*st.level.speed/CONFIG.speedBase));
-    for(k=0;k<nH;k++)addRuby(x+k*hiSp,laneHi,true);
-    x+=(nH-1)*hiSp+gap;
-    for(k=0;k<nG;k++)addRuby(x+k*grSp,laneGr,false);
+    var hiSp=Math.round(Math.max(g.rubyW*1.0,Math.min(g.rubyW*1.8,(span-v*g.slackMs)/(g.perGroupHi-1))));
+    var grSp=Math.round(g.rubyW*(st.level.groundSpacing||g.groundSpacing));
+    var groups=gemGroups(st.level.gemPlan||"grouped");
+    var x=Math.round(W*Math.min(0.9,g.firstXFrac*st.level.speed/CONFIG.speedBase)),sp,gr;
+    for(j=0;j<groups.length;j++){
+      gr=groups[j];sp=gr.hi?hiSp:grSp;
+      if(j>0)x+=Math.round(gr.eff?v*gr.gapMs+2*20+boxW+gemReach():v*gr.gapMs+g.rubyW);   /* eff : gapMs = temps reel entre la sortie du dernier rubis du groupe precedent et l'entree du premier de celui-ci */
+      for(k=0;k<gr.n;k++)addRuby(x+k*sp,gr.lane,gr.hi);
+      x+=(gr.n-1)*sp;
+    }
     setPhase(S.GEMS);
   }
   function collectRuby(r){
@@ -940,6 +1027,7 @@ button{font-family:inherit}
     });
     if(ph===S.FEEDBACK){st.timer-=dt;if(st.timer<=0)endFeedback();return;}     /* tout est immobile */
     if(ph===S.NEXT){st.timer-=dt;if(st.timer<=0)startApproach();return;}
+    if(ph===S.OBSERVE){st.timer-=dt;if(st.timer<=0){stage.classList.remove("still");$("banner").style.opacity=0;setPhase(S.APPROACH);}return;}
     if(ph!==S.APPROACH&&ph!==S.GEMS)return;
     var passX=hero.offsetLeft+hero.offsetWidth*0.10;
     st.doors.forEach(function(d){
@@ -990,7 +1078,7 @@ button{font-family:inherit}
     unlockAudio();
     hardStop();clearStage();
     st.level=lv||st.level;
-    st.waves=0;st.wave=null;st.rubies=0;st.good=0;st.score=0;st.elapsed=0;st.phase="";st.sel=1;st.bags={};
+    st.waves=0;st.wave=null;st.rubies=0;st.good=0;st.score=0;st.elapsed=0;st.phase="";st.sel=1;st.bags={};st.lastGemSig="";
     st.ruleList=st.level.rules.slice();
     if(st.level.shuffle&&st.ruleList.length>1)shuffle(st.ruleList);
     st.plan=makePlan(st.level);
@@ -1035,6 +1123,7 @@ button{font-family:inherit}
     if(score>0&&(prev===null||score>prev))setBest(lv.key,score);
     var best=getBest(lv.key);
     showOnly("end");
+    /* trois resultats reels de la partie : lettres I reconnues (st.good), rubis collectes (st.rubies), score (st.score = bonnes reponses x pointsGood + rubis x pointsRuby) */
     $("endScore").textContent=score;$("endRub").textContent=rub;$("endGood").textContent=good;$("endTot").textContent=lv.series||CONFIG.series;
     var pz=$("endPaze");pz.innerHTML="";
     var im=new Image();im.alt=st.ch.name;im.draggable=false;im.src=st.ch.src;im.style.height="100%";im.style.width="auto";pz.appendChild(im);
@@ -1046,14 +1135,16 @@ button{font-family:inherit}
     lab.classList.toggle("rec",isNew);
     if(isNew){lab.textContent="Nouveau record !";rec.textContent="";}
     else{
-      lab.textContent="Score total";
+      lab.textContent="";
       if(prev===null)rec.textContent="Ton premier score est enregistré !";
       else if(best===score)rec.textContent="Tu égales ton meilleur score !";
       else rec.textContent="Meilleur score : "+best+" points";
     }
     var nxt=nextLevelOf(lv),kind=nxt?"niveau":"final";
-    $("end").querySelector("h2").textContent=nxt?"Bravo ! Tu as terminé ce niveau !":"Félicitations ! Tu as terminé la Course aux Lettres !";
-    $("msg").textContent=nxt?"Prêt pour le suivant ?":"Tu peux être fier de toi !";
+    $("end").querySelector("h2").textContent="Bravo !";
+    $("endSub").textContent="Niveau terminé !";
+    $("msg").textContent=nxt?"Prêt pour le suivant ?":"Félicitations ! Tu as terminé la Course aux Lettres ! Tu peux être fier de toi !";
+    $("replay").classList.toggle("go",!nxt);                 /* dernier niveau : « Rejouer » devient le grand bouton */
     $("nextLv").style.display=nxt?"":"none";
     $("endAudio").style.display=AUDIO[kind]?"":"none";
     st.endKind=kind;
